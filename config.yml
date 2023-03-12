@@ -1,0 +1,8 @@
+llff:
+  factor: 8
+  recenter: True
+  bd_factor: .75
+  spherify: True
+  llffhold: 8 # will take every 1/N images as LLFF test set, paper uses 8
+  no_ndc: True # 'do not use normalized device coordinates (set for non-forward facing scenes)
+  lindisp: True # sampling linearly in disparity rather than depth
