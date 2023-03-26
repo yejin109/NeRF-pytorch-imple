@@ -11,9 +11,10 @@ from src.load_llff import load_llff_data
 from src.ray import get_rays_np, get_rays
 from src.model_functional import create_nerf, run_network
 from src.rendering import get_render_kwargs, render, render_path
-from src.utils import init_log, img2mse, mse2psnr, to8b, debug, get_device
+from src.utils import init_log, img2mse, mse2psnr, to8b, debug, get_device, profile
 
 
+@profile
 def load_data(dataset):
     K = None
     if dataset == 'llff':
@@ -53,6 +54,7 @@ def load_data(dataset):
         return
 
 
+@profile
 def cast_intrinsics(poses, hwf, i_test, render_poses, K):
     # Cast intrinsics to right types
     H, W, focal = hwf
@@ -72,6 +74,7 @@ def cast_intrinsics(poses, hwf, i_test, render_poses, K):
     return H, W, hwf, focal, K
 
 
+@profile
 def create_nerf_model(near, far):
     models, embed_fn, embeddirs_fn = create_nerf(
         args_render['multires'],
@@ -126,6 +129,7 @@ def create_nerf_model(near, far):
     return render_kwargs_train, render_kwargs_test, optimizer
 
 
+@profile
 def train(H, W, focal, images, i_train, i_test, i_val, render_kwargs_train, poses, optimizer, global_step=0):
     # Prepare raybatch tensor if batching random rays
     N_rand = args_model['N_rand']
@@ -255,6 +259,7 @@ def train(H, W, focal, images, i_train, i_test, i_val, render_kwargs_train, pose
         ################################
 
 
+@profile
 def render_from_pretrained(images, i_test, basedir, expname, render_poses, hwf, K, render_kwargs_test):
     print('RENDER ONLY')
     with torch.no_grad():
@@ -305,7 +310,7 @@ if __name__ == '__main__':
     render_poses = torch.Tensor(render_poses).to(device)
 
     # NOTE: @nerf-pytorch.run_nerf.py 653
-    # render_from_pretrained(images, i_test, env['log_dir'], env['exp_name'], render_poses, hwf, K, render_kwargs_test)
+    render_from_pretrained(images, i_test, env['log_dir'], env['exp_name'], render_poses, hwf, K, render_kwargs_test)
 
     # NOTE: @nerf-pytorch.run_nerf.py 674
     train(H, W, focal, images, i_train, i_test, i_val, render_kwargs_train, poses, optimizer)

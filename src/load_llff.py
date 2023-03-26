@@ -1,10 +1,12 @@
-import numpy as np
 import os, imageio
+import numpy as np
+from src.utils import profile
 
 
 ########## Slightly modified version of LLFF data loading code
 ##########  see https://github.com/Fyusion/LLFF for original
 
+@profile
 def _minify(basedir, factors=[], resolutions=[]):
     needtoload = False
     for r in factors:
@@ -57,6 +59,7 @@ def _minify(basedir, factors=[], resolutions=[]):
         print('Done')
 
 
+@profile
 def _load_data(basedir, factor=None, width=None, height=None, load_imgs=True):
     poses_arr = np.load(os.path.join(basedir, 'poses_bounds.npy'))
     poses = poses_arr[:, :-2].reshape([-1, 3, 5]).transpose([1, 2, 0])
@@ -103,6 +106,7 @@ def _load_data(basedir, factor=None, width=None, height=None, load_imgs=True):
     if not load_imgs:
         return poses, bds
 
+    @profile
     def imread(f):
         if f.endswith('png'):
             return imageio.imread(f, ignoregamma=True)
@@ -115,11 +119,11 @@ def _load_data(basedir, factor=None, width=None, height=None, load_imgs=True):
     print('Loaded image data', imgs.shape, poses[:, -1, 0])
     return poses, bds, imgs
 
-
+@profile
 def normalize(x):
     return x / np.linalg.norm(x)
 
-
+@profile
 def viewmatrix(z, up, pos):
     vec2 = normalize(z)
     vec1_avg = up
@@ -128,12 +132,12 @@ def viewmatrix(z, up, pos):
     m = np.stack([vec0, vec1, vec2, pos], 1)
     return m
 
-
+@profile
 def ptstocam(pts, c2w):
     tt = np.matmul(c2w[:3, :3].T, (pts - c2w[:3, 3])[..., np.newaxis])[..., 0]
     return tt
 
-
+@profile
 def poses_avg(poses):
     hwf = poses[0, :3, -1:]
 
@@ -144,7 +148,7 @@ def poses_avg(poses):
 
     return c2w
 
-
+@profile
 def render_path_spiral(c2w, up, rads, focal, zdelta, zrate, rots, N):
     render_poses = []
     rads = np.array(list(rads) + [1.])
@@ -156,7 +160,7 @@ def render_path_spiral(c2w, up, rads, focal, zdelta, zrate, rots, N):
         render_poses.append(np.concatenate([viewmatrix(z, up, c), hwf], 1))
     return render_poses
 
-
+@profile
 def recenter_poses(poses):
     poses_ = poses + 0
     bottom = np.reshape([0, 0, 0, 1.], [1, 4])
@@ -173,7 +177,7 @@ def recenter_poses(poses):
 
 #####################
 
-
+@profile
 def spherify_poses(poses, bds):
     p34_to_44 = lambda p: np.concatenate([p, np.tile(np.reshape(np.eye(4)[-1, :], [1, 1, 4]), [p.shape[0], 1, 1])], 1)
 
@@ -231,7 +235,7 @@ def spherify_poses(poses, bds):
 
     return poses_reset, new_poses, bds
 
-
+@profile
 def load_llff_data(basedir, factor=8, recenter=True, bd_factor=.75, spherify=False, path_zflat=False):
     poses, bds, imgs = _load_data(basedir, factor=factor)  # factor=8 downsamples original imgs by 8x
     print('Loaded', basedir, bds.min(), bds.max())

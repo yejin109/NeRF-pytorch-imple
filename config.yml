@@ -1,5 +1,5 @@
 llff:
-  factor: 8
+  factor: 8 # load_diff._minify
   recenter: True
   bd_factor: .75
   spherify: True

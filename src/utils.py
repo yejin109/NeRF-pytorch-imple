@@ -4,6 +4,21 @@ import numpy as np
 import torch.nn.functional as F
 
 
+def _profile_log(message):
+    with open('./logs/profile_log.txt', 'a') as f:
+        f.write(f"{message}\n")
+    f.close()
+
+
+def profile(func):
+    def wrapper(*args, **kwargs):
+        _profile_log(f'Function : {func.__name__} \n\t Argument : {func.__code__.co_varnames}')
+        res = func(*args, **kwargs)
+        return res
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+
 def debug(func):
     def wrapper(*args, **kwargs):
         try:
@@ -16,7 +31,9 @@ def debug(func):
 
 
 def get_device():
-    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+    # 디버깅때문에
+    # device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+    device = 'cpu'
     return device
 
 
@@ -45,7 +62,7 @@ mse2psnr = lambda x : -10. * torch.log(x) / torch.log(torch.Tensor([10.]))
 to8b = lambda x : (255*np.clip(x,0,1)).astype(np.uint8)
 
 
-@debug
+@profile
 def raw2outputs(raw, z_vals, rays_d, raw_noise_std=0, white_bkgd=False, pytest=False):
     """Transforms model's predictions to semantically meaningful values.
     Args:

@@ -1,4 +1,5 @@
 import torch
+from src.utils import profile
 
 
 class Embedder:
@@ -8,6 +9,7 @@ class Embedder:
         self.kwargs = kwargs
         self.create_embedding_fn()
 
+    @profile
     def create_embedding_fn(self):
 
         embed_fns = []
@@ -35,11 +37,13 @@ class Embedder:
         self.embed_fns = embed_fns
         self.out_dim = out_dim
 
+    @profile
     def embed(self, inputs):
         # return tf.concat([fn(inputs) for fn in self.embed_fns], -1)
         return torch.cat([fn(inputs) for fn in self.embed_fns], dim=-1)
 
 
+@profile
 def get_embedder(multires, i=0):
     if i == -1:
         # TODO:  original code used tf so that both var type was tf.Tensor and temporarily using numpy ndarray.
@@ -58,7 +62,11 @@ def get_embedder(multires, i=0):
     if __name__ == '__main__': pprint.pprint(embed_kwargs)
 
     embedder_obj = Embedder(**embed_kwargs)
-    def embed(x, eo=embedder_obj): return eo.embed(x)
+
+    @profile
+    def embed(x, eo=embedder_obj):
+        return eo.embed(x)
+
     return embed, embedder_obj.out_dim
 
 

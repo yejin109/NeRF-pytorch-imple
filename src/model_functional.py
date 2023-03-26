@@ -4,10 +4,11 @@ import numpy as np
 from torch.optim import Adam
 
 from src.positional_encode import get_embedder
-from src.utils import batchify
+from src.utils import batchify, profile
 from src.model import NeRF
 
 
+@profile
 def create_nerf(multires, multires_views, i_embed, add_3d_view, netdepth, netdepth_fine, netwidth, netwidth_fine, N_importance):
     """Instantiate NeRF's MLP model."""
 
@@ -77,6 +78,7 @@ def create_nerf(multires, multires_views, i_embed, add_3d_view, netdepth, netdep
     return models, embed_fn, embeddirs_fn
 
 
+@profile
 def run_network(inputs, viewdirs, fn, embed_fn, embeddirs_fn, netchunk=1024*64):
     """Prepares inputs and applies network 'fn'."""
 

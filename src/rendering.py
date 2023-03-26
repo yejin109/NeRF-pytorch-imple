@@ -8,13 +8,15 @@ import numpy as np
 from src.sampler import sample_pdf
 from src.ray import get_rays, ndc_rays
 from src.model_functional import run_network
-from src.utils import to8b, raw2outputs, debug
+from src.utils import to8b, raw2outputs, debug, profile
 
 
+@profile
 def network_query_fn(inputs, viewdirs, network_fn, embed_fn, embeddirs_fn, netchunk):
     return run_network(inputs, viewdirs, network_fn, embed_fn=embed_fn, embeddirs_fn=embeddirs_fn, netchunk=netchunk)
 
 
+@profile
 def get_render_kwargs(perturb, N_importance, model_fine, N_samples, model, add_3d_view, white_bkgd, raw_noise_std, no_ndc, lindisp, dataset):
     render_kwargs_train = {
         'network_query_fn': network_query_fn,
@@ -42,6 +44,7 @@ def get_render_kwargs(perturb, N_importance, model_fine, N_samples, model, add_3
     return render_kwargs_train, render_kwargs_test
 
 
+@profile
 def batchify_rays(rays_flat, chunk=1024*32, **kwargs):
     """Render rays in smaller minibatches to avoid OOM."""
     all_ret = {}
@@ -56,6 +59,7 @@ def batchify_rays(rays_flat, chunk=1024*32, **kwargs):
     return all_ret
 
 
+# @profile
 def render(H, W, focal,
            chunk=1024*32, rays=None, c2w=None, ndc=True,
            near=0., far=1.,
@@ -134,6 +138,7 @@ def render(H, W, focal,
     return ret_list + [ret_dict]
 
 
+@profile
 def render_path(render_poses, hwf, K, chunk, render_kwargs, gt_imgs=None, savedir=None, render_factor=0):
 
     H, W, focal = hwf
@@ -175,6 +180,7 @@ def render_path(render_poses, hwf, K, chunk, render_kwargs, gt_imgs=None, savedi
     return rgbs, disps
 
 
+@profile
 def render_rays(ray_batch,
                 network_fn,
                 network_query_fn,

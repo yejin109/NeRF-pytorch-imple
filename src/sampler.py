@@ -1,7 +1,9 @@
 import torch
 import numpy as np
+from src.utils import profile
 
 
+@profile
 def sample_pdf(bins, weights, N_samples, det=False, pytest=False):
     # Get pdf
     weights = weights + 1e-5 # prevent nans

@@ -1,10 +1,10 @@
 import os
 import torch
 import numpy as np
-from src.utils import debug
+from src.utils import debug, profile
 
 
-@debug
+@profile
 def get_rays(H, W, K, c2w):
     i, j = torch.meshgrid(torch.linspace(0, W-1, W), torch.linspace(0, H-1, H))  # pytorch's meshgrid has indexing='ij'
     i = i.t()
@@ -18,6 +18,7 @@ def get_rays(H, W, K, c2w):
     return rays_o, rays_d
 
 
+@profile
 def get_rays_np(H, W, focal, c2w):
     """Get ray origins, directions from a pinhole camera."""
     i, j = np.meshgrid(np.arange(W, dtype=np.float32),
@@ -28,6 +29,7 @@ def get_rays_np(H, W, focal, c2w):
     return rays_o, rays_d
 
 
+@profile
 def ndc_rays(H, W, focal, near, rays_o, rays_d):
     """Normalized device coordinate rays.
     Space such that the canvas is a cube with sides [-1, 1] in each axis.
