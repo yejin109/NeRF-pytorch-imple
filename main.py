@@ -275,7 +275,7 @@ def render_from_pretrained(images, i_test, basedir, expname, render_poses, hwf, 
         os.makedirs(testsavedir, exist_ok=True)
         print('test poses shape', render_poses.shape)
 
-        rgbs, _ = render_path(render_poses, hwf, K, args_model['chunck'], render_kwargs_test, gt_imgs=images,
+        rgbs, _ = render_path(render_poses, hwf, K, args_model['chunk'], render_kwargs_test, gt_imgs=images,
                               savedir=testsavedir, render_factor=args_render['render_factor'])
         print('Done rendering', testsavedir)
         imageio.mimwrite(os.path.join(testsavedir, 'video.mp4'), to8b(rgbs), fps=30, quality=8)
@@ -290,6 +290,7 @@ if __name__ == '__main__':
     args = env['args']
     args_render = args['rendering']
     args_model = args['model']
+    print(args_model)
     args_blender = args['blender']
 
     config = yaml.safe_load(open('./config.yml'))[args['dataset']]
@@ -310,7 +311,8 @@ if __name__ == '__main__':
     render_poses = torch.Tensor(render_poses).to(device)
 
     # NOTE: @nerf-pytorch.run_nerf.py 653
-    render_from_pretrained(images, i_test, env['log_dir'], env['exp_name'], render_poses, hwf, K, render_kwargs_test)
+    # render_from_pretrained(images, i_test, env['log_dir'], env['exp_name'], render_poses, hwf, K, render_kwargs_test)
+    # render_from_pretrained(images, i_test, env['log_dir'], env['exp_name'], render_poses, hwf, K, render_kwargs_train)
 
     # NOTE: @nerf-pytorch.run_nerf.py 674
     train(H, W, focal, images, i_train, i_test, i_val, render_kwargs_train, poses, optimizer)

@@ -1,6 +1,6 @@
 import os
 import time
-import tqdm
+from tqdm import tqdm
 import torch
 import imageio
 import numpy as np
@@ -138,7 +138,7 @@ def render(H, W, focal,
     return ret_list + [ret_dict]
 
 
-@profile
+# @profile
 def render_path(render_poses, hwf, K, chunk, render_kwargs, gt_imgs=None, savedir=None, render_factor=0):
 
     H, W, focal = hwf
