@@ -1,0 +1,108 @@
+dataset meta data
+- flower는 34개의 image 사용
+
+Notation
+1. Camera matrix
+- Intrinsic matrix와 Extrinsic matrix의 행렬곱을 말한다.
+- 즉 world point와 camera matrix의 행렬곱은 "camera space"상에서의 좌표가 된다.
+- 그리고 우리는 2d 이미지를 보기에 camera space 상에서의 값을 projection을 하면 되는 것
+
+2. pose matrix
+- camera matrix에서 [w, h, f]가 concatenate가 된 것이 pose matrix에 해당.
+- 이 때 축은 [-y, x, z]값을 나타낸다.
+- 이 때 camera는 -z축 방향을 보고 있다고 생각한다. 이는 camera space상에서 origin은 pinhole이고 카메라방향으로 뻗어나가는 것이 z값이기에 camera가 바라보는 방향은 -z 인 것으로 보인다.
+- 아래의 표현에서 xyz라고 하는 것은 사실 (-y, x, z)를 말한다고 생각하자
+
+Data Pipeline
+
+
+poses_bound.npy
+- (# image, 17)
+- 17 = [poses](x,y,z)*5  + [bounds](bd1, bd2)
+- pose(xyz, # vector) = xyz * (org0, org1, org2, org3, hwf)
+- 여기서 # vector는 내부 연산에서 필요한 벡터로 향후 o벡터와 d벡터와 같은 애들이 포함되어 있음
+- org0~2는 camera의 point of view를 말한다.
+- 그리고 여기에서 xyz는 사실 [down, right, backward]를 말하며 좌표 상에서는 [-y, x, z]를 말하게 된다. 이런 값을 가지게 된 이유로 내 생각에 pinhole 모형에서 도립상이 되기 때문에 이렇게 생기는 것 같다.
+    - 이해를 위해 ./jupyter/assets/eda 02* 를 확인하도록 하자.
+
+
+bds 값 분석
+- focus depth를 알려주는 역할을 하는 것으로 보인다!
+
+poses 값 분석
+- org0
+    - 이 값은 poses_avg에서 up을 계산할 때 사용되었고, 모든 이미지에 대한 합벡터
+    - pose matrix의 측면에서 보자면 -y축 값을 말하고 있는 것이고 이는 도립상이기에 나타나는 것
+- org1
+- org2
+    - 이 값은 poses_avg에서 vec2를 계산할 때 사용되었고, 모든 이미지 대해 합하고 normalized된 값이다.
+    - 이후에 view matrix 상에서 camera spcace 상에서의 z축을 말하는 것 같다.
+    - 왜냐하면 world frame에서도 결국 세번째 축은 focal depth와 연결됨. 그래서 z값과 연결
+- org3
+    - 이 값은 poses_avg에서 center의 값을 모든 이미지에 대해 평균적으로 계산한 값
+    - 이후에 view matrix에서 위치를 나타내는 것 같다.
+    - pose matrix에서 translation에 해당해서 origin(위치)와 연결되는 것이긴 함
+
+
+load_llff_data._load_data
+- 여기에서는 (-1, # image)의 구조로 데이터 사용
+- pose라면 (xyz, # vector, # image)
+
+
+load_llff -> Update rotation matrix
+- 여기에서 전체 poses의 순서와 pose에서 순서를 바꾸게 됨
+- [***] pose 순서 :xyz * (org1, org0, org2, org3, hwf)
+- poses 순서 : - (# image, 3, 5)
+- 여기에서 ori3는 bd_factor가 변경될 때 동일한 스케일로 update가 된다.
+
+recenter 
+- 여기에서 본격적으로 pose값이 사용된다.
+- 우선 center를 정의할 때 poses[:, :3, 3].mean(0)가 된다.
+- [***] 이로 보아 center는 org3를 모든 이미지에 대해 평균낸 값. 즉 모든 poses들에서 org3의 평균적인 위치를 말하는 것으로 보임
+- [***] 그래서 org3가 나중에 위치를 나타내는 vector로 사용되는 것 같다.
+- [***] vec2라는 값은 org2를 모든 이미지에 대한 평균내고 normalize한 벡터
+- [***] up이라는 값은 org0를 모든 이미지에 대해 합한 벡터
+==> z, up, pos = vec2, up, center로 할당되어서 
+    - z는 camera space 상에서의 z축으로의 방향을 말한다.
+    - center는 말 그대로 origin이 얼마나 이동되었는지 말한다.
+    - up은 y축 방향으로의 경향성을 말하는 것 같다.
+
+
+- viewmatrix는 (xyz, vvectors)
+- vvectors = vmat_vec0, vmat_vec1, vmat_vec2, vmat_vec3
+- vmat_vec0
+    - org0의 합벡터와 org2의 normalized 평균 벡터와의 cross product
+    - 의미론적으로 말하자면 focal axis 방향 성분과 y축 방향 성분의 cross product라서 x축 방향 성분이 될 듯
+    - 이 순서로 계산해야 x축 방향이 올바르게 나옴
+- vmat_vec1
+    - org2의 normalized 평균 벡터와 vmat_vec0의 cross product
+    - z축과 x축의 cross product라서 자연스럽게 -y가 나오게 된다.
+- vmat_vec2
+    - org2의 normalized 평균 벡터
+    - z축의 성분
+- vmat_vec3
+    - center에 해당한 것으로 org3를 모든 이미지에 대한 평균 벡터
+    - 이후의 사용을 보아하니 t_{3x1}의 역할을 하는 것 같다. 위치를 알려주니
+==> 간략히 생각해보면 view matrix는 org2와 org0를 이용해서 만든 R3 space인 것으로 보인다.
+
+c2w의 업데이트 기록
+<Recenter 하는 경우>
+- view matrix와 hwf를 합친 것, (3,5)
+    - vmat_vec0, vmat_vec1, vmat_vec2, vmat_vec3, hwf
+- hwf를 제외하고 bottom이란 [0, 0, 0, 1]를 xyz축에 더 붙이게 된다.
+    - 즉 (4,4)가 되고 vmat_vec3에만 1이고 나머진 다 0인 상태가 된다.
+    - 그리고 동일하게 poses 값에도 마지막에 bottom을 붙여주게 된다.
+    - 개인적으로 이러한 작업은 c2w의 inverse를 구하고 싶어서 취해준 작업으로 보인다.()
+- 결과적으로 recenter를 통해 poses에서 크게 바뀐 것은 org0의 z값, org2의 y값 정도.
+- 
+
+render_poses
+- 우선 view의 개수는 hyperparameter로 지정이 가능하다.
+    - 내부에선 120개를 사용한다.
+- 계산과정에서 카메라가 회전한 각을 알려주고 그 각을 view의 개수만큼으로 나누어서 각 view마다의 M_{3x4}를 구해서 만들어 놓은 것.
+- 이 때 hwf를 포함하고 있어서 (120, 3, 5)의 형태를 가지게 된다.
+- 이건 결과적으로 어떻게 보여야할지 알려주는 과정으로 보인다.
+
+reference
+https://keras.io/examples/vision/nerf/
+https://www.mathworks.com/help/vision/ug/camera-calibration.html
