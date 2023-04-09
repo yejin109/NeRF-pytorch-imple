@@ -88,6 +88,7 @@ for i in range(len(poses)):
     if i == case:
         color = 'blue'
     ax.plot3D(x, y, z, color)
+    ax.scatter(ray[0], ray[1], ray[2], color)
     ax.text(tran[0], tran[1], tran[2], str(i))
 plt.show()
 

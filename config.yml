@@ -1,8 +1,25 @@
-llff:
-  factor: 8 # load_diff._minify
-  recenter: True
+#llff:
+#  factor: 8 # load_diff._minify
+#  recenter: True
+#  bd_factor: .75
+#  spherify: True
+#  llffhold: 8 # will take every 1/N images as LLFF test set, paper uses 8
+#  no_ndc: True # 'do not use normalized device coordinates (set for non-forward facing scenes)
+#  lindisp: True # sampling linearly in disparity rather than depth
+#
+
+synthetic:
+  data_type: nerf_synthetic
+  dataset: chair # options : chair, drums, ficus, hotdog, lego, materials, mic, ship
+  run_type: train # options : train, val ,test
+  path_zflat: False # regarding render_poses(poses for test img), choose spiral or path
+  factor: 8
   bd_factor: .75
-  spherify: True
-  llffhold: 8 # will take every 1/N images as LLFF test set, paper uses 8
-  no_ndc: True # 'do not use normalized device coordinates (set for non-forward facing scenes)
-  lindisp: True # sampling linearly in disparity rather than depth
+
+llff:
+  data_type: nerf_llff_data
+  dataset: fern # options : fern, flower, fortress, horns, leaves, orchids, room, trex
+  run_type: train # options : train, val ,test
+  path_zflat: False # regarding render_poses(poses for test img), choose spiral or path
+  factor: 8
+  bd_factor: .75
