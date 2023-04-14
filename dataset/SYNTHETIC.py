@@ -2,7 +2,8 @@ import os
 import json
 import numpy as np
 
-from ._dataset import Dataset, imread
+from ._dataset import Dataset
+from ._utils import imread
 
 
 class SyntheticDataset(Dataset):
@@ -13,8 +14,8 @@ class SyntheticDataset(Dataset):
 
         self.imgs = self.load_imgs()
         self.img_shape = self.imgs[0].shape
-        self.c2ws, self.bds, self.focal_length = self.load_matrices()
-        assert (len(self.imgs) == len(self.c2ws))
+        self._pose_inv, self.bds, self.focal_length = self.load_matrices()
+        assert (len(self.imgs) == len(self._pose_inv))
 
     def __len__(self):
         return len(self.imgs)
@@ -41,7 +42,7 @@ class SyntheticDataset(Dataset):
 
     @Dataset.c2w.getter
     def c2w(self):
-        return self.c2ws
+        return self._pose_inv
 
 
     def load_imgs(self):
@@ -64,5 +65,5 @@ class SyntheticDataset(Dataset):
             c2ws.append(frame['transform_matrix'])
         c2ws = np.array(c2ws)
         c2ws = np.concatenate([c2ws[:, 1:2, :], -c2ws[:, 0:1, :], c2ws[:, 2:, :]], 1)
-        bds = [None] * len(c2ws)
+        bds = [None] * len(frames)
         return c2ws, bds, focal
