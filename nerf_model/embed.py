@@ -5,6 +5,7 @@ class Embedder:
     def __init__(self, **kwargs):
 
         self.kwargs = kwargs
+        self.kwargs['periodic_fns'] = [torch.sin, torch.cos]
 
         embed_fns = []
         d = self.kwargs['input_dims']
@@ -35,7 +36,7 @@ class Embedder:
         return torch.cat([fn(inputs) for fn in self.embed_fns], dim=-1)
 
 
-def get_embed_func(embed_cfg, multires, i=0):
+def get_embedder(embed_cfg, multires, i=0):
     """
     Original Name : get_embedder
     """
@@ -46,13 +47,7 @@ def get_embed_func(embed_cfg, multires, i=0):
 
     embed_kwargs = dict(embed_cfg, **{
         'max_freq_log2': multires-1,
-        'num_freqs': multires,
-        'periodic_fns': [torch.sin, torch.cos],
+        'num_freqs': multires
     })
 
-    embedder_obj = Embedder(**embed_kwargs)
-
-    def embed(x, eo=embedder_obj):
-        return eo.embed(x)
-
-    return embed, embedder_obj.out_dim
+    return Embedder(**embed_kwargs)

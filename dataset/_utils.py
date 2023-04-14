@@ -1,9 +1,11 @@
+import os
 import imageio
 import numpy as np
 
 # Questions
 # TODO: Pose recenter나 recenter pose에서 inv(c2w)와 기존 pose를 matmul하는 것으로 구현한 이유는?
-    
+
+
 ########################################################################################
 # 1.  Poses  Operation functionals
 #   - c2w <-> w2c
@@ -56,9 +58,9 @@ def inverse_rot(z, up, pos):
     m = np.stack([vec0, vec1, vec2, pos], 1)
     return m
 
+
 ########################################################################################
 # 2. render pose functionals
-
 def render_path_spherical(poses, bds):
     p34_to_44 = lambda p: np.concatenate([p, np.tile(np.reshape(np.eye(4)[-1, :], [1, 1, 4]), [p.shape[0], 1, 1])], 1)
 
@@ -102,7 +104,9 @@ def render_path_spherical(poses, bds):
     radcircle = np.sqrt(rad ** 2 - zh ** 2)
     new_poses = []
 
-    for th in np.linspace(0., 2. * np.pi, 120):
+    # NOTE: 현재 10개에 1분 정도 걸림
+    # for th in np.linspace(0., 2. * np.pi, 120):
+    for th in np.linspace(0., 2. * np.pi, 10):
         camorigin = np.array([radcircle * np.cos(th), radcircle * np.sin(th), zh])
         up = np.array([0, 0, -1.])
 
@@ -121,6 +125,7 @@ def render_path_spherical(poses, bds):
         [poses_reset[:, :3, :4], np.broadcast_to(poses[0, :3, -1:], poses_reset[:, :3, -1:].shape)], -1)
 
     return poses_reset, new_poses, bds
+
 
 # def render_path_spiral(poses, bds, c2w, up, rads, focal, zrate, rots, N):
 def render_path_spiral(poses, bds, path_zflat):
@@ -161,6 +166,59 @@ def render_path_spiral(poses, bds, path_zflat):
         render_poses.append(np.concatenate([inverse_rot(z, up, c), hwf], 1))
     return render_poses
 
+
+def _minify(basedir, factors=[], resolutions=[]):
+    needtoload = False
+    for r in factors:
+        imgdir = os.path.join(basedir, 'images_{}'.format(r))
+        if not os.path.exists(imgdir):
+            needtoload = True
+    for r in resolutions:
+        imgdir = os.path.join(basedir, 'images_{}x{}'.format(r[1], r[0]))
+        if not os.path.exists(imgdir):
+            needtoload = True
+    if not needtoload:
+        return
+
+    from shutil import copy
+    from subprocess import check_output
+
+    imgdir = os.path.join(basedir, 'images')
+    imgs = [os.path.join(imgdir, f) for f in sorted(os.listdir(imgdir))]
+    imgs = [f for f in imgs if any([f.endswith(ex) for ex in ['JPG', 'jpg', 'png', 'jpeg', 'PNG']])]
+    imgdir_orig = imgdir
+
+    wd = os.getcwd()
+
+    for r in factors + resolutions:
+        if isinstance(r, int):
+            name = 'images_{}'.format(r)
+            resizearg = '{}%'.format(100. / r)
+        else:
+            name = 'images_{}x{}'.format(r[1], r[0])
+            resizearg = '{}x{}'.format(r[1], r[0])
+        imgdir = os.path.join(basedir, name)
+        if os.path.exists(imgdir):
+            continue
+
+        print('Minifying', r, basedir)
+
+        os.makedirs(imgdir)
+        check_output('cp {}/* {}'.format(imgdir_orig, imgdir), shell=True)
+
+        ext = imgs[0].split('.')[-1]
+        args = ' '.join(['mogrify', '-resize', resizearg, '-format', 'png', '*.{}'.format(ext)])
+        print(args)
+        os.chdir(imgdir)
+        check_output(args, shell=True)
+        os.chdir(wd)
+
+        if ext != 'png':
+            check_output('rm {}/*.{}'.format(imgdir, ext), shell=True)
+            print('Removed duplicates')
+        print('Done')
+
+
 # etc
 def get_boundary(no_ndc, bds):
     if no_ndc:
@@ -193,7 +251,6 @@ def get_val_idx(test_idx):
 def get_train_idx(val_idx, test_idx, img_shape):
     return np.array([i for i in np.arange(int(img_shape[0])) if (i not in test_idx and i not in val_idx)])
     
-
 
 def normalize(x):
     return x / np.linalg.norm(x)

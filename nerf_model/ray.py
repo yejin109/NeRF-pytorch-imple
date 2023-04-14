@@ -6,7 +6,7 @@ import numpy as np
 device = os.environ['DEVICE']
 
 
-def ray_generation(N_rand, use_batching, H, W, focal, K, N_iters, i_train, i_val, i_test, precrop_iters, precrop_frac):
+def ray_generation(poses, images, N_rand, use_batching, H, W, focal, K, N_iters, i_train, i_val, i_test, precrop_iters, precrop_frac, iter_i):
     # Prepare raybatch tensor if batching random rays
     if use_batching:
         # For random ray batching.
@@ -65,7 +65,7 @@ def ray_generation(N_rand, use_batching, H, W, focal, K, N_iters, i_train, i_val
         if N_rand is not None:
             rays_o, rays_d = get_rays(H, W, K, torch.Tensor(pose))  # (H, W, 3), (H, W, 3)
 
-            if i < precrop_iters:
+            if iter_i < precrop_iters:
                 dH = int(H//2 * precrop_frac)
                 dW = int(W//2 * precrop_frac)
                 coords = torch.stack(
@@ -73,8 +73,8 @@ def ray_generation(N_rand, use_batching, H, W, focal, K, N_iters, i_train, i_val
                         torch.linspace(H//2 - dH, H//2 + dH - 1, 2*dH),
                         torch.linspace(W//2 - dW, W//2 + dW - 1, 2*dW)
                     ), -1)
-                if i == 0:
-                    print(f"[Config] Center cropping of size {2*dH} x {2*dW} is enabled until iter {args_model['precrop_iters']}")
+                if iter_i == 0:
+                    print(f"[Config] Center cropping of size {2*dH} x {2*dW} is enabled until iter {precrop_iters}")
             else:
                 coords = torch.stack(torch.meshgrid(torch.linspace(0, H-1, H), torch.linspace(0, W-1, W)), -1)  # (H, W, 2)
 

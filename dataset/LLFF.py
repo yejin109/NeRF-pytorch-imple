@@ -1,18 +1,26 @@
 import os
 import json
+import torch
 import numpy as np
 
 from ._dataset import Dataset
-from ._utils import imread, recenter_poses, render_path_spherical, render_path_spiral, get_test_idx, get_train_idx, get_val_idx, get_boundary, log
+from ._utils import imread, recenter_poses, render_path_spherical, render_path_spiral, get_test_idx, get_train_idx, get_val_idx, get_boundary, log, _minify
+
+
+device = os.environ['DEVICE']
+
 
 class LLFFDataset(Dataset):
-    def __init__(self,data_type, run_type, dataset, path_zflat, llffhold, factor=None, bd_factor=None, **kwargs):
+    def __init__(self, data_type, run_type, dataset, path_zflat, llffhold, factor=None, bd_factor=None, **kwargs):
         super(LLFFDataset, self).__init__(data_type, run_type, dataset, path_zflat, factor, bd_factor)
         # 0. Setup
-        self.img_dir = os.path.join(self.data_dir, 'images')
+        sfx = ""
+        if self.factor is not None:
+            sfx = '_{}'.format(self.factor)
+        self.img_dir = os.path.join(self.data_dir, 'images'+sfx)
         self.img_paths = [os.path.join(self.img_dir, f) for f in sorted(os.listdir(self.img_dir)) if
                           f.endswith('JPG') or f.endswith('jpg') or f.endswith('png')]
-        
+
         # 1. Load Image
         self.imgs = self.load_imgs()
         self.img_shape = self.imgs[0].shape
@@ -20,7 +28,7 @@ class LLFFDataset(Dataset):
         # 2. Load pose matrix and all the attrs to be used
         self._poses, self.bds, self.focal_length = self.load_matrices()
         assert (len(self.imgs) == len(self._poses))
-        self._reder_poses = None
+        self._render_poses = None
         self._test_i = None
         self._val_i = None
         self._train_i = None
@@ -39,9 +47,9 @@ class LLFFDataset(Dataset):
             if int(os.environ['VERBOSE']): 
                 log("Render path \n\tSpherified : _poses, _reder_poses, bds updated\n")
 
-            self._reder_poses = render_path_spiral(self._poses, self.bds, path_zflat)
+            self._render_poses = render_path_spiral(self._poses, self.bds, path_zflat)
         
-        self._reder_poses = np.array(self._reder_poses).astype(np.float32)
+        self._render_poses = np.array(self._render_poses).astype(np.float32)
         self._test_i = get_test_idx(self._poses, llffhold, self.imgs.shape)
         self._val_i = get_val_idx(self._test_i)
         self._train_i = get_train_idx(self._val_i, self._test_i, self.imgs.shape)
@@ -92,7 +100,8 @@ class LLFFDataset(Dataset):
 
         NOTE: llff data에서 Spherify_poses를 사용하거나 기존 루틴을 사용함
         """
-        return
+
+        return torch.Tensor(self._render_poses).to(device)
     
     @Dataset.test_i.getter
     def test_i(self):
@@ -113,7 +122,6 @@ class LLFFDataset(Dataset):
     @Dataset.far.getter
     def far(self):
         return self._far
-    
 
     def load_imgs(self):
         # TODO: Factor 반영하기
@@ -123,10 +131,21 @@ class LLFFDataset(Dataset):
 
     def load_matrices(self):
         poses_arr = np.load(os.path.join(self.data_dir, 'poses_bounds.npy'))
+
+        bds = poses_arr[:, -2:]
         poses = poses_arr[:, :-2].reshape([-1, 3, 5])
+
+        # Boundary scaling : boundary for integral which is along with z-axis
+        sc = 1. if self.bd_factor is None else 1. / (bds.min() * self.bd_factor)
+        poses[:, :3, 3] *= sc
+        bds *= sc
+
+        if self.factor is not None:
+            _minify(self.data_dir, factors=[self.factor])
+            poses[:, 2, 4] = poses[:, 2, 4] * 1./ self.factor
         poses = np.concatenate([poses[:, 1:2, :], -poses[:, 0:1, :], poses[:, 2:, :]], 1)
 
         # NOTE: Focal length는 하나인 것으로 생각하고 있는 것
         focal = poses[0, 2, 4]
-        bds = poses_arr[:, -2:]
+
         return poses, bds, focal

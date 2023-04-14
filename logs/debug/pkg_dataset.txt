@@ -58,3 +58,1771 @@ Attributes :
 	_render_poses : (120, 3, 5)
 	_near : 0.47376305011537784
 	_far : 2.479401875516076
+
+
+====================================================================================================
+	 Started at 2023-04-14 22:49:56.337347
+
+
+====================================================================================================
+	 Started at 2023-04-14 22:50:31.228214
+
+
+====================================================================================================
+	 Started at 2023-04-14 22:50:44.488090
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images
+	img_paths : (20,)
+	imgs : (20, 3024, 4032, 3)
+	img_shape : (3024, 4032, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 3260.5263328805895
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.47376305011537784
+	_far : 2.4794018755160754
+
+
+====================================================================================================
+	 Started at 2023-04-14 22:51:04.768641
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images
+	img_paths : (20,)
+	imgs : (20, 3024, 4032, 3)
+	img_shape : (3024, 4032, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 3260.5263328805895
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.47376305011537784
+	_far : 2.4794018755160754
+
+
+====================================================================================================
+	 Started at 2023-04-14 22:51:18.228058
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images
+	img_paths : (20,)
+	imgs : (20, 3024, 4032, 3)
+	img_shape : (3024, 4032, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 3260.5263328805895
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.47376305011537784
+	_far : 2.4794018755160754
+
+
+====================================================================================================
+	 Started at 2023-04-14 22:54:04.933266
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images
+	img_paths : (20,)
+	imgs : (20, 3024, 4032, 3)
+	img_shape : (3024, 4032, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 3260.5263328805895
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.47376305011537784
+	_far : 2.4794018755160754
+
+
+====================================================================================================
+	 Started at 2023-04-14 22:55:44.482881
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images
+	img_paths : (20,)
+	imgs : (20, 3024, 4032, 3)
+	img_shape : (3024, 4032, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 3260.5263328805895
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.47376305011537784
+	_far : 2.4794018755160754
+
+
+====================================================================================================
+	 Started at 2023-04-14 23:11:22.202454
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images
+	img_paths : (20,)
+	imgs : (20, 3024, 4032, 3)
+	img_shape : (3024, 4032, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 3260.5263328805895
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.47376305011537784
+	_far : 2.4794018755160754
+
+
+====================================================================================================
+	 Started at 2023-04-14 23:13:13.180719
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images
+	img_paths : (20,)
+	imgs : (20, 3024, 4032, 3)
+	img_shape : (3024, 4032, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 3260.5263328805895
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.47376305011537784
+	_far : 2.4794018755160754
+
+
+====================================================================================================
+	 Started at 2023-04-14 23:14:35.274737
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images
+	img_paths : (20,)
+	imgs : (20, 3024, 4032, 3)
+	img_shape : (3024, 4032, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 3260.5263328805895
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.47376305011537784
+	_far : 2.4794018755160754
+
+
+====================================================================================================
+	 Started at 2023-04-14 23:14:57.252615
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images
+	img_paths : (20,)
+	imgs : (20, 3024, 4032, 3)
+	img_shape : (3024, 4032, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 3260.5263328805895
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.47376305011537784
+	_far : 2.4794018755160754
+
+
+====================================================================================================
+	 Started at 2023-04-14 23:15:28.528220
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images
+	img_paths : (20,)
+	imgs : (20, 3024, 4032, 3)
+	img_shape : (3024, 4032, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 3260.5263328805895
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.47376305011537784
+	_far : 2.4794018755160754
+
+
+====================================================================================================
+	 Started at 2023-04-14 23:16:18.351185
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images
+	img_paths : (20,)
+	imgs : (20, 3024, 4032, 3)
+	img_shape : (3024, 4032, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 3260.5263328805895
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.47376305011537784
+	_far : 2.4794018755160754
+
+
+====================================================================================================
+	 Started at 2023-04-15 00:03:19.734540
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images
+	img_paths : (20,)
+	imgs : (20, 3024, 4032, 3)
+	img_shape : (3024, 4032, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 3260.5263328805895
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.47376305011537784
+	_far : 2.4794018755160754
+
+
+====================================================================================================
+	 Started at 2023-04-15 00:05:57.033153
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images
+	img_paths : (20,)
+	imgs : (20, 3024, 4032, 3)
+	img_shape : (3024, 4032, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 3260.5263328805895
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.47376305011537784
+	_far : 2.4794018755160754
+
+
+====================================================================================================
+	 Started at 2023-04-15 00:06:33.338280
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images
+	img_paths : (20,)
+	imgs : (20, 3024, 4032, 3)
+	img_shape : (3024, 4032, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 3260.5263328805895
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.47376305011537784
+	_far : 2.4794018755160754
+
+
+====================================================================================================
+	 Started at 2023-04-15 00:07:51.517876
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images
+	img_paths : (20,)
+	imgs : (20, 3024, 4032, 3)
+	img_shape : (3024, 4032, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 3260.5263328805895
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.47376305011537784
+	_far : 2.4794018755160754
+
+
+====================================================================================================
+	 Started at 2023-04-15 00:08:17.157073
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images
+	img_paths : (20,)
+	imgs : (20, 3024, 4032, 3)
+	img_shape : (3024, 4032, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 3260.5263328805895
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.47376305011537784
+	_far : 2.4794018755160754
+
+
+====================================================================================================
+	 Started at 2023-04-15 00:16:39.282472
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images
+	img_paths : (20,)
+	imgs : (20, 3024, 4032, 3)
+	img_shape : (3024, 4032, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 3260.5263328805895
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.47376305011537784
+	_far : 2.4794018755160754
+
+
+====================================================================================================
+	 Started at 2023-04-15 00:17:32.225621
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images
+	img_paths : (20,)
+	imgs : (20, 3024, 4032, 3)
+	img_shape : (3024, 4032, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 3260.5263328805895
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.47376305011537784
+	_far : 2.4794018755160754
+
+
+====================================================================================================
+	 Started at 2023-04-15 00:30:11.911538
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images
+	img_paths : (20,)
+	imgs : (20, 3024, 4032, 3)
+	img_shape : (3024, 4032, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 00:32:43.483293
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 00:34:11.932946
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 01:26:32.676869
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 01:27:13.225304
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 01:27:38.166618
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 01:28:00.887872
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 01:28:39.805706
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 01:29:35.429631
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 01:35:01.572081
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 01:42:42.366847
+
+
+====================================================================================================
+	 Started at 2023-04-15 01:42:53.735596
+
+
+====================================================================================================
+	 Started at 2023-04-15 01:43:30.975905
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_reder_poses : ()
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_render_poses : (120, 3, 5)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:13:13.145855
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (120, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:14:31.410162
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (120, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:16:58.786063
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (120, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:18:06.957976
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (120, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:21:45.579864
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (120, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:23:21.079145
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (120, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:23:58.789876
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (120, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:25:26.094622
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (120, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:29:14.249389
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (120, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:30:56.338923
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (120, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:31:14.935625
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (120, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:33:11.698999
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:33:21.959193
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (120, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:34:27.098451
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (120, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:34:31.180762
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (120, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:35:55.738327
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (120, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:36:38.583402
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (120, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:37:44.903750
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (120, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:42:12.699428
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (10, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:43:34.121836
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (10, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:44:00.875271
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (10, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:44:24.268562
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (10, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:46:54.409237
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (10, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:49:11.477832
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:49:28.030518
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (10, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:51:12.232163
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (10, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:52:51.825026
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (10, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:54:38.179979
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (10, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:55:02.714619
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (10, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:55:24.216745
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (10, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:56:06.961594
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (10, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 02:58:23.997353
+Recentered : _poses updated
+Render path 
+	Spherified : _poses, _reder_poses, bds updated
+Auto LLFF holdout 8: 
+Attributes :
+	data_type : nerf_llff_data
+	dataset : fern
+	run_type : train
+	data_dir : ./dataset/nerf_llff_data/fern
+	path_zflat : False
+	factor : 8
+	bd_factor : 0.75
+	img_dir : ./dataset/nerf_llff_data/fern\images_8
+	img_paths : (20,)
+	imgs : (20, 378, 504, 3)
+	img_shape : (378, 504, 3)
+	_poses : (20, 3, 5)
+	bds : (20, 2)
+	focal_length : 407.5657916100737
+	_render_poses : (10, 3, 5)
+	_test_i : (3,)
+	_val_i : (3,)
+	_train_i : (17,)
+	_near : 0.4737630501153778
+	_far : 2.479401875516075
+
+
+====================================================================================================
+	 Started at 2023-04-15 03:00:09.583756

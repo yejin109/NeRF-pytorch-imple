@@ -1,47 +1,53 @@
 import os
+import numpy as np
 import torch
 import torch.nn as nn
 
-from .embed import get_embed_func
+from .embed import get_embedder
+from ._utils import log
 
-def get_model(multires, multires_views, i_embed, add_3d_view, netdepth, netdepth_fine, netwidth, netwidth_fine, N_importance, **kwargs):
-    coarse = NeRF()
-    embed_fn, input_ch = get_embed_func(multires, i_embed)
+
+def get_model(multires, multires_views, i_embed, use_viewdirs, layer_num, layer_num_fine, hidden_feature, hidden_feature_fine, N_importance, embed_cfg, **kwargs):
+    embedder_ray = get_embedder(embed_cfg, multires, i_embed)
+    input_ch_ray = embedder_ray.out_dim
 
     input_ch_views = 0
-    embeddirs_fn = None
-    if add_3d_view:
-        embeddirs_fn, input_ch_views = get_embed_func(multires_views, i_embed)
+    embedder_view = None
+    if use_viewdirs:
+        embedder_view = get_embedder(embed_cfg, multires, i_embed)
+        input_ch_views = embedder_view.out_dim
 
     output_ch = 5 if N_importance > 0 else 4
     skips = [4]
     model = NeRF(
-        layer_num=netdepth,
-        in_feature=input_ch,
-        hidden_feature=netwidth,
+        layer_num=layer_num,
+        in_feature=input_ch_ray,
+        hidden_feature=hidden_feature,
         out_feature=output_ch,
         in_feature_view=input_ch_views,
-        use_viewdirs=add_3d_view,
+        use_viewdirs=use_viewdirs,
         skip_connection_layer_list=skips).to(os.environ['device'])
+    model.model_vars('Coarse model')
     models = {'model': model}
 
     model_fine = None
     if N_importance > 0:
         model_fine = NeRF(
-            layer_num=netdepth_fine,
-            in_feature=input_ch,
-            hidden_feature=netwidth_fine,
+            layer_num=layer_num_fine,
+            in_feature=input_ch_ray,
+            hidden_feature=hidden_feature_fine,
             out_feature=output_ch,
             in_feature_view=input_ch_views,
-            use_viewdirs=add_3d_view,
+            use_viewdirs=use_viewdirs,
             skip_connection_layer_list=skips).to(os.environ['device'])
+        model.model_vars('Fine model')
     models['model_fine'] = model_fine
 
     params = []
     for model in models.values():
         if model is not None:
             params += list(model.parameters())
-    return models, params, embed_fn, embeddirs_fn
+    return models, params, embedder_ray, embedder_view
 
 
 class Dense(nn.Module):
@@ -117,3 +123,15 @@ class NeRF(nn.Module):
         else:
             out = self.head(out)
         return out
+
+    def model_vars(self, model_type):
+        if int(os.environ['VERBOSE']):
+            log(model_type)
+            log(f"Attributes :\n")
+            for name, attr in vars(self).items():
+                msg = attr
+                if isinstance(attr, list):
+                    msg = np.array(attr).shape
+                elif isinstance(attr, np.ndarray):
+                    msg = attr.shape
+                log(f"\t{name} : {msg}\n")
