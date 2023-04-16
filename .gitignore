@@ -3,3 +3,4 @@ dataset/nerf_synthetic
 .idea
 src/__pycache__/
 logs/export
+logs/TEST-*

@@ -1,6 +1,10 @@
 import os
+import datetime
 
-os.environ['VERBOSE'] = "1"
+os.environ['EXP_NAME'] = '-'.join(['TEST', 'SYNC', str(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))])
+os.environ['LOG_DIR'] = f'./logs/{os.environ["EXP_NAME"]}'
+os.mkdir(os.environ['LOG_DIR'])
+os.environ['VERBOSE'] = "0"
 os.environ['DEVICE'] = 'cuda:0'
 # os.environ['DEVICE'] = 'cpu'
 
@@ -15,16 +19,17 @@ import dataset
 import nerf_model
 from nerf_model import log as nerf_log
 from nerf_model import img2mse, mse2psnr
+from functionals import TotalGradNorm, log_train, log_cfg
 
 
-def run(rendering_cfg, blender_cfg, dataset_cfg, run_args):
+def run(rendering_cfg, dataset_cfg, run_args):
     # Step 3 : Load Rendering
     render_args_train, render_kwargs_test = nerf_model.get_render_kwargs(
         rendering_cfg['perturb'],
         rendering_cfg['N_importance'],
         rendering_cfg['N_samples'],
         rendering_cfg['use_viewdirs'],
-        blender_cfg['white_bkgd'],
+        rendering_cfg['white_bkgd'],
         rendering_cfg['raw_noise_std'],
         dataset_cfg['no_ndc'],
         dataset_cfg['lindisp'],
@@ -51,8 +56,7 @@ def run(rendering_cfg, blender_cfg, dataset_cfg, run_args):
     test_cfg = {
         'images': run_args["images"],
         'i_test': run_args['i_test'],
-        'basedir': os.path.join(os.getcwd(), 'logs', 'export'),
-        'expname': 'test',
+        'testsavedir': os.environ['LOG_DIR'],
         'render_poses': run_args['render_poses'],
         'hwf': run_args['hwf'].astype(int),
         'K': run_args['K'],
@@ -67,15 +71,18 @@ def run(rendering_cfg, blender_cfg, dataset_cfg, run_args):
 
     }
 
-    epoch_args = dict(run_args, **{'render_args_train': render_args_train, 'ray_cfg':ray_cfg})
+    epoch_args = dict(run_args, **{'render_args_train': render_args_train, 'ray_cfg': ray_cfg})
     for iter_i in tqdm.tqdm(range(model_config['N_iters'])):
-        run_epoch(**dict(epoch_args, **{'iter_i': iter_i}))
-        print(f"Iteration {iter_i+1} / {model_config['N_iters']} DONE")
+        loss_epoch, psnr_epohc = run_epoch(**dict(epoch_args, **{'iter_i': iter_i}))
         nerf_log(f"Iteration {iter_i+1} / {model_config['N_iters']} DONE")
+        if (iter_i+1) % 100 == 0:
+            nerf_model.rendering.render_from_pretrained(**dict(test_cfg, **{'iter_i': iter_i}))
 
-        nerf_model.rendering.render_from_pretrained(**dict(test_cfg, **{'iter_i': iter_i}))
+        grad_norm_epoch = TotalGradNorm(run_args['params'])
+        log_train(iter_i, loss_epoch, psnr_epohc, grad_norm_epoch)
 
 
+@log_cfg
 def run_epoch(models, params, H, W, K, lrate, lrate_decay, chunk, iter_i, render_args_train, ray_cfg, batch_size,
               embedder_ray, embedder_view=None, **kwargs):
     optimizer = Adam(params, lr=lrate, betas=(0.9, 0.999))
@@ -128,23 +135,25 @@ def run_epoch(models, params, H, W, K, lrate, lrate_decay, chunk, iter_i, render
     new_lrate = lrate * (decay_rate ** (iter_i / decay_steps))
     for param_group in optimizer.param_groups:
         param_group['lr'] = new_lrate
-    return loss.item()
+    return loss.item(), psnr.item()
 
 
 if __name__ == '__main__':
     # config = yaml.safe_load(open('./config.yml'))['llff']
     # dset = dataset.SyntheticDataset(**config)
 
+    torch.backends.cudnn.benchmark = True
     setting = yaml.safe_load(open('./config.yml'))
     dataset_config = setting['llff']
+    # dataset_config = setting['synthetic']
     embedding_config = setting['embed']
     rendering_config = setting['rendering']
     model_config = setting['model']
-    blender_config = setting['blender']
 
     # Step 1 : Load Dataset
     dset = dataset.LLFFDataset(**dataset_config)
-
+    # dset = dataset.SyntheticDataset(**dataset_config)
+    #
     # Step 2: Load Model
     model_config = dict(model_config, **rendering_config)
     model_config['embed_cfg'] = embedding_config
@@ -184,7 +193,7 @@ if __name__ == '__main__':
         'hwf': hwf,
 
     }
-    run(rendering_config, blender_config, dataset_config, run_arguments)
+    run(rendering_config, dataset_config, run_arguments)
 
     print(dataset_config)
     print(dset.intrinsic_matrix)

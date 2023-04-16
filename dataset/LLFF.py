@@ -5,7 +5,7 @@ import numpy as np
 
 from ._dataset import Dataset
 from ._utils import imread, recenter_poses, render_path_spherical, render_path_spiral, get_test_idx, get_train_idx, get_val_idx, get_boundary, log, _minify
-
+from functionals import log_cfg
 
 device = os.environ['DEVICE']
 

@@ -106,7 +106,7 @@ def render_path_spherical(poses, bds):
 
     # NOTE: 현재 10개에 1분 정도 걸림
     # for th in np.linspace(0., 2. * np.pi, 120):
-    for th in np.linspace(0., 2. * np.pi, 10):
+    for th in np.linspace(0., 2. * np.pi, 120):
         camorigin = np.array([radcircle * np.cos(th), radcircle * np.sin(th), zh])
         up = np.array([0, 0, -1.])
 

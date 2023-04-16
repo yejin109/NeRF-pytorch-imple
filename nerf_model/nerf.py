@@ -5,8 +5,10 @@ import torch.nn as nn
 
 from .embed import get_embedder
 from ._utils import log
+from functionals import log_cfg
 
 
+@log_cfg
 def get_model(multires, multires_views, i_embed, use_viewdirs, layer_num, layer_num_fine, hidden_feature, hidden_feature_fine, N_importance, embed_cfg, **kwargs):
     embedder_ray = get_embedder(embed_cfg, multires, i_embed)
     input_ch_ray = embedder_ray.out_dim

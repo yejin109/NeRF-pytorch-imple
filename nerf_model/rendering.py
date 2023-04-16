@@ -10,6 +10,7 @@ import torch.nn.functional as F
 from .ray import get_rays, ndc_rays
 from .sampler import sample_pdf
 from ._utils import batchify, log, to8b
+from functionals import log_cfg
 
 
 device = os.environ['DEVICE']
@@ -245,20 +246,24 @@ def raw2outputs(raw, z_vals, rays_d, raw_noise_std=0, white_bkgd=False, pytest=F
 
 
 # Visualization
-
-def render_from_pretrained(images, i_test, basedir, expname, render_poses, hwf, K, render_kwargs_test, batch_size, chunk,
+@log_cfg
+def render_from_pretrained(images, i_test, testsavedir, render_poses, hwf, K, render_kwargs_test, batch_size, chunk,
                            render_factor, models, embedder_ray, embedder_view, iter_i, **kwargs):
-    log('RENDER ONLY')
+    log('RENDER ONLY\n')
     with torch.no_grad():
-        images = images[i_test]
-
-        testsavedir = os.path.join(basedir, expname)
+        image = images[i_test]
         os.makedirs(testsavedir, exist_ok=True)
 
         rgbs, _ = render_path(render_poses, hwf, K, chunk, render_kwargs_test, models, batch_size, embedder_ray, embedder_view,
                               savedir=testsavedir, render_factor=render_factor, **kwargs)
-        log(f'Done rendering : {testsavedir}')
+        log(f'Done rendering : {testsavedir}\n')
         imageio.mimwrite(os.path.join(testsavedir, f'{iter_i}th_video.mp4'), to8b(rgbs), fps=30, quality=8)
+
+    fpath = os.path.join(testsavedir, f'params_{iter_i}th.pt')
+    torch.save({
+        'model_coarse':  models['model'],
+        'model_fine': models['model_fine']
+    }, fpath)
 
 
 def render_path(render_poses, hwf, K, chunk, render_kwargs, models, batch_size,
@@ -309,11 +314,10 @@ def render_path(render_poses, hwf, K, chunk, render_kwargs, models, batch_size,
             p = -10. * np.log10(np.mean(np.square(rgb.cpu().numpy() - gt_imgs[i])))
             print(p)
         """
-
-        if savedir is not None:
-            rgb8 = to8b(rgbs[-1])
-            filename = os.path.join(savedir, '{:03d}.png'.format(i))
-            imageio.imwrite(filename, rgb8)
+        # if savedir is not None:
+        #     rgb8 = to8b(rgbs[-1])
+        #     filename = os.path.join(savedir, f'{i}.png')
+        #     imageio.imwrite(filename, rgb8)
 
     rgbs = np.stack(rgbs, 0)
     disps = np.stack(disps, 0)
@@ -321,6 +325,7 @@ def render_path(render_poses, hwf, K, chunk, render_kwargs, models, batch_size,
     return rgbs, disps
 
 
+@log_cfg
 def get_render_kwargs(perturb, N_importance, N_samples, add_3d_view, white_bkgd, raw_noise_std, no_ndc, lindisp, data_type):
     render_kwargs_train = {
         'perturb': perturb,
