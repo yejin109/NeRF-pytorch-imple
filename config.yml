@@ -22,7 +22,7 @@ synthetic:
 
 llff:
   data_type: nerf_llff_data
-  dataset: trex # options : fern, flower, fortress, horns, leaves, orchids, room, trex
+  dataset: fern # options : fern, flower, fortress, horns, leaves, orchids, room, trex
   run_type: train # options : train, val ,test
   path_zflat: False # regarding render_poses(poses for test img), choose spiral or path
   factor: 8
@@ -53,8 +53,10 @@ rendering:
   render_test: True # render the test set instead of render_poses path
   render_only: False # do not optimize, reload weights and render out render_poses path
   render_factor: 0 #downsampling factor to speed up rendering, set 4 or 8 for fast preview
+  render_pose_num : 1 # default 120
 
   white_bkgd: False # set to render synthetic data on a white bkgd (always use for dvoxels)
+
 
 
 model:
@@ -69,9 +71,9 @@ model:
   lrate_schedule_gamma: 0.1
   N_iters: 2500 # 2500 * 4096(N_rand) = 5GB GRAM usage
 
-  chunk: 32768 # 1024*32, number of rays processed in parallel, decrease if running out of memory. 5GB used
+  chunk: 4096  # 65536, 1024*32, number of rays processed in parallel, decrease if running out of memory. (Rendering Image) 4585 - 1985 = 2600MiB Uses
   netchunk: 65536 # 1024*64, number of pts sent through network in parallel, decrease if running out of memory
-  no_batching: True # only take random rays from 1 image at a time
+  no_batching: True # only take random rays from 1 image at a time -> latency at ray_generation ~10s
   no_reload: True # do not reload weights from saved ckpt
   ft_path: None # specific weights npy file to reload for coarse network
   random_seed: None, # fix random seed for repeatability

@@ -1,18 +1,10 @@
+import _init_env
+
 import os
-import datetime
-
-os.environ['EXP_NAME'] = '-'.join(['TEST', 'SYNC', str(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))])
-os.environ['LOG_DIR'] = f'./logs/{os.environ["EXP_NAME"]}'
-os.mkdir(os.environ['LOG_DIR'])
-os.environ['VERBOSE'] = "0"
-os.environ['DEVICE'] = 'cuda:0'
-# os.environ['DEVICE'] = 'cpu'
-
+import time
 import yaml
 import tqdm
 import torch
-
-torch.set_default_tensor_type('torch.cuda.FloatTensor')
 from torch.optim import Adam
 
 import dataset
@@ -35,12 +27,16 @@ def run(rendering_cfg, dataset_cfg, run_args):
         dataset_cfg['lindisp'],
         dataset_cfg['data_type'],
     )
+    render_args_train['near'] = run_args['near']
+    render_args_train['far'] = run_args['far']
+    render_kwargs_test['near'] = run_args['near']
+    render_kwargs_test['far'] = run_args['far']
 
     ray_cfg = {
         "poses": run_args["poses"],
         "images": run_args["images"],
         "N_rand": model_config['N_rand'],
-        "use_batching": model_config['no_batching'],
+        "use_batching": not model_config['no_batching'],
         "H": hwf[0],
         "W": hwf[1],
         "focal": hwf[2],
@@ -68,21 +64,23 @@ def run(rendering_cfg, dataset_cfg, run_args):
         'embedder_ray': run_args['embedder_ray'],
         'embedder_view': run_args['embedder_view'],
         'N_samples': rendering_config['N_samples'],
-
     }
 
     epoch_args = dict(run_args, **{'render_args_train': render_args_train, 'ray_cfg': ray_cfg})
-    for iter_i in tqdm.tqdm(range(model_config['N_iters'])):
-        loss_epoch, psnr_epohc = run_epoch(**dict(epoch_args, **{'iter_i': iter_i}))
+    start = time.time()
+    for iter_i in range(model_config['N_iters']):
+        loss_epoch, psnr_epoch = run_epoch(**dict(epoch_args, **{'iter_i': iter_i}))
         nerf_log(f"Iteration {iter_i+1} / {model_config['N_iters']} DONE")
         if (iter_i+1) % 100 == 0:
-            nerf_model.rendering.render_from_pretrained(**dict(test_cfg, **{'iter_i': iter_i}))
+            print(f"\n[Iteration Progress] {iter_i+1}/{model_config['N_iters']}\n")
+            # nerf_model.rendering.render_from_pretrained(**dict(test_cfg, **{'iter_i': iter_i}))
+            render_cfg = dict(test_cfg, **{'savedir': os.environ['LOG_DIR'], 'iter_i': iter_i, 'render_kwargs': render_kwargs_test})
+            nerf_model.rendering.render_image(**render_cfg)
 
         grad_norm_epoch = TotalGradNorm(run_args['params'])
-        log_train(iter_i, loss_epoch, psnr_epohc, grad_norm_epoch)
+        log_train(iter_i, loss_epoch, psnr_epoch, grad_norm_epoch)
 
 
-@log_cfg
 def run_epoch(models, params, H, W, K, lrate, lrate_decay, chunk, iter_i, render_args_train, ray_cfg, batch_size,
               embedder_ray, embedder_view=None, **kwargs):
     optimizer = Adam(params, lr=lrate, betas=(0.9, 0.999))
@@ -105,6 +103,7 @@ def run_epoch(models, params, H, W, K, lrate, lrate_decay, chunk, iter_i, render
             if k not in all_ret:
                 all_ret[k] = []
             all_ret[k].append(ret[k])
+        del ret
 
     # - Post process
     sh = (batch_size, 3)
@@ -127,6 +126,7 @@ def run_epoch(models, params, H, W, K, lrate, lrate_decay, chunk, iter_i, render
 
     loss.backward()
     optimizer.step()
+    torch.cuda.empty_cache()
 
     # NOTE: IMPORTANT!
     ###   update learning rate   ###
@@ -151,7 +151,7 @@ if __name__ == '__main__':
     model_config = setting['model']
 
     # Step 1 : Load Dataset
-    dset = dataset.LLFFDataset(**dataset_config)
+    dset = dataset.LLFFDataset(**dict(dataset_config, **{'render_pose_num': rendering_config['render_pose_num']}))
     # dset = dataset.SyntheticDataset(**dataset_config)
     #
     # Step 2: Load Model
@@ -163,6 +163,8 @@ if __name__ == '__main__':
     # - Step 3
     # - Step 4
     # - Step 5
+    near = dset.near
+    far = dset.far
     hwf = dset.hwf
     run_arguments = {
         "poses": dset.w2c,
@@ -175,6 +177,8 @@ if __name__ == '__main__':
         "lrate": model_config['lrate'],
         "lrate_decay": model_config['lrate_decay'],
         "chunk": model_config['chunk'],
+        'near': near,
+        'far': far,
 
         # Ray Generation
         'i_train': dset.train_i,

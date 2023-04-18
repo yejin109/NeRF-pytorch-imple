@@ -3,6 +3,7 @@ import time
 import tqdm
 import imageio
 import numpy as np
+import collections
 
 import torch
 import torch.nn.functional as F
@@ -10,10 +11,7 @@ import torch.nn.functional as F
 from .ray import get_rays, ndc_rays
 from .sampler import sample_pdf
 from ._utils import batchify, log, to8b
-from functionals import log_cfg
-
-
-device = os.environ['DEVICE']
+from functionals import log_cfg, log_time
 
 
 def render_preprocess(H, W, focal, c2w=None, ndc=True, rays=None, near=0., far=1., use_viewdirs=False, c2w_staticcam=None, **kwargs):
@@ -166,7 +164,7 @@ def render_rays(ray_batch,
 
         rgb_map, disp_map, acc_map, weights, depth_map = raw2outputs(raw, z_vals, rays_d, raw_noise_std, white_bkgd, pytest=pytest)
 
-    ret = {'rgb_map' : rgb_map, 'disp_map' : disp_map, 'acc_map' : acc_map}
+    ret = {'rgb_map': rgb_map, 'disp_map': disp_map, 'acc_map': acc_map}
     if retraw:
         ret['raw'] = raw
     if N_importance > 0:
@@ -245,84 +243,39 @@ def raw2outputs(raw, z_vals, rays_d, raw_noise_std=0, white_bkgd=False, pytest=F
     return rgb_map, disp_map, acc_map, weights, depth_map
 
 
-# Visualization
-@log_cfg
-def render_from_pretrained(images, i_test, testsavedir, render_poses, hwf, K, render_kwargs_test, batch_size, chunk,
-                           render_factor, models, embedder_ray, embedder_view, iter_i, **kwargs):
-    log('RENDER ONLY\n')
+def render_image(render_poses, hwf, K, chunk, render_kwargs, models, batch_size,
+                 embedder_ray, embedder_view, savedir=None, render_factor=0, **kwargs):
     with torch.no_grad():
-        image = images[i_test]
-        os.makedirs(testsavedir, exist_ok=True)
+        H, W, focal = hwf
+        if render_factor != 0:
+            # Render downsampled for speed
+            H = H//render_factor
+            W = W//render_factor
 
-        rgbs, _ = render_path(render_poses, hwf, K, chunk, render_kwargs_test, models, batch_size, embedder_ray, embedder_view,
-                              savedir=testsavedir, render_factor=render_factor, **kwargs)
-        log(f'Done rendering : {testsavedir}\n')
-        imageio.mimwrite(os.path.join(testsavedir, f'{iter_i}th_video.mp4'), to8b(rgbs), fps=30, quality=8)
+        rgbs = []
+        for pose_idx, c2w in enumerate(tqdm.tqdm(render_poses, desc="Rendering Image")):
+            rays = render_preprocess(H, W, K, c2w=c2w[:3, :4], **render_kwargs)
+            # - Volumetric Rendering
+            model_coarse = models['model']
+            model_fine = models['model_fine']
 
-    fpath = os.path.join(testsavedir, f'params_{iter_i}th.pt')
-    torch.save({
-        'model_coarse':  models['model'],
-        'model_fine': models['model_fine']
-    }, fpath)
+            rgb = []
 
+            # NOTE: takes 7s
+            # TODO: Optimize rendering latency. Mainly comes from render_rays ~2s * 3 times due to chunk size
+            for i in range(0, rays.shape[0], chunk):
+                ret = render_rays(rays[i:i + chunk], model_coarse=model_coarse, model_fine=model_fine, embedder_ray=embedder_ray, embedder_view=embedder_view, **kwargs)
+                torch.cuda.empty_cache()
+                rgb.extend(ret['rgb_map'].cpu().tolist())
+            rgb = np.array(rgb)
+            rgbs.append(rgb)
 
-def render_path(render_poses, hwf, K, chunk, render_kwargs, models, batch_size,
-                embedder_ray, embedder_view, savedir=None, render_factor=0, **kwargs):
-    H, W, focal = hwf
-    if render_factor!=0:
-        # Render downsampled for speed
-        H = H//render_factor
-        W = W//render_factor
-        focal = focal/render_factor
+            filename = os.path.join(savedir, f'{kwargs["iter_i"]}-{pose_idx}.png')
+            imageio.imwrite(filename, to8b(rgb).reshape((H, W, -1)))
 
-    rgbs = []
-    disps = []
+        rgbs = np.stack(rgbs, 0)
 
-    for i, c2w in enumerate(tqdm.tqdm(render_poses)):
-        rays = render_preprocess(H, W, K, chunk=chunk, c2w=c2w[:3,:4], **render_kwargs)
-        # - Volumetric Rendering
-        model_coarse = models['model']
-        model_fine = models['model_fine']
-        all_ret = {}
-        for i in range(0, rays.shape[0], chunk):
-            ret = render_rays(rays[i:i + chunk], model_coarse=model_coarse, model_fine=model_fine, embedder_ray=embedder_ray, embedder_view=embedder_view, **kwargs)
-            for k in ret:
-                if k not in all_ret:
-                    all_ret[k] = []
-                all_ret[k].append(ret[k])
-
-        # - Post process
-        k_extract = ['rgb_map', 'disp_map', 'acc_map']
-        all_ret = {k: torch.concat(all_ret[k], 0) for k in all_ret}
-        for k in all_ret:
-            # if all_ret[k].shape[0] // 3 == 0:
-            #     sh = (H, W, 3)
-            # else:
-            sh = (H, W, -1)
-            # k_sh = list(sh[:-1]) + list(all_ret[k].shape[1:])
-            # NOTE: Manual
-            all_ret[k] = torch.reshape(all_ret[k], sh)
-        rgb, disp, acc, extras = all_ret['rgb_map'], all_ret['disp_map'], all_ret['acc_map'], {k: all_ret[k] for k in
-                                                                                               all_ret if
-                                                                                               k not in k_extract}
-        rgbs.append(rgb.cpu().numpy())
-        disps.append(disp.cpu().numpy())
-
-
-        """
-        if gt_imgs is not None and render_factor==0:
-            p = -10. * np.log10(np.mean(np.square(rgb.cpu().numpy() - gt_imgs[i])))
-            print(p)
-        """
-        # if savedir is not None:
-        #     rgb8 = to8b(rgbs[-1])
-        #     filename = os.path.join(savedir, f'{i}.png')
-        #     imageio.imwrite(filename, rgb8)
-
-    rgbs = np.stack(rgbs, 0)
-    disps = np.stack(disps, 0)
-
-    return rgbs, disps
+    return rgbs
 
 
 @log_cfg

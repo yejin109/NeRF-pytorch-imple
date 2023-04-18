@@ -1,4 +1,7 @@
 import os
+import copy
+import time
+import torch
 import numpy as np
 
 
@@ -19,6 +22,19 @@ def log_train(iter_i, loss, psnr, grad_norm):
     f.close()
 
 
+def msg_convert(v):
+    msg = v
+    if isinstance(v, list):
+        msg = f"{type(v)}:{len(v)}"
+    if isinstance(v, np.ndarray):
+        msg = f"{type(v)}:{v.shape}"
+    if isinstance(v, np.ndarray):
+        msg = f"{type(v)}:{v.shape}"
+    if isinstance(v, torch.Tensor):
+        msg = f"{str(type(v))}:{v.size()}"
+    return msg
+
+
 def log_cfg(func):
     def wrap(*args, **kwargs):
         with open(f'{os.environ["LOG_DIR"]}/cfg.txt', 'a') as f:
@@ -26,12 +42,11 @@ def log_cfg(func):
             f.write(f"{func.__name__}:\n")
             f.write(f"\tKwargs\n")
             for k, v in kwargs.items():
-                msg = v
-                if isinstance(v, list):
-                    msg = f"{type(v)}:{len(v)}"
-                if isinstance(v, np.ndarray):
-                    msg = f"{type(v)}:{v.shape}"
-
+                msg = msg_convert(v)
+                if isinstance(v, dict):
+                    msg = copy.deepcopy(v)
+                    for key, value in msg.items():
+                        msg[key] = msg_convert(value)
                 f.write(f"\t\t{k}:{msg}\n")
 
             f.write(f"\targs\n")
@@ -43,6 +58,16 @@ def log_cfg(func):
         f.close()
 
         res = func(*args, **kwargs)
+        return res
+    wrap.__name__ = func.__name__
+    return wrap
+
+
+def log_time(func):
+    def wrap(*args, **kwargs):
+        start = time.time()
+        res = func(*args, **kwargs)
+        print(f"{func.__name__}: {time.time()-start: .4f}")
         return res
     wrap.__name__ = func.__name__
     return wrap

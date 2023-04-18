@@ -7,9 +7,6 @@ from ._dataset import Dataset
 from ._utils import imread, recenter_poses, render_path_spherical, render_path_spiral, get_test_idx, get_train_idx, get_val_idx, get_boundary, log, _minify, inverse_w2c
 
 
-device = os.environ['DEVICE']
-
-
 class SyntheticDataset(Dataset):
     def __init__(self, data_type, run_type, dataset, path_zflat, factor=None, bd_factor=None, **kwargs):
         super(SyntheticDataset, self).__init__(data_type, run_type, dataset, path_zflat, factor, bd_factor)
@@ -52,7 +49,7 @@ class SyntheticDataset(Dataset):
         self._test_i = get_test_idx(self._poses, -1, self.imgs.shape)
         self._val_i = get_val_idx(self._test_i)
         self._train_i = get_train_idx(self._val_i, self._test_i, self.imgs.shape)
-        self._near, self._far = get_boundary(kwargs['no_ndc'], self.bds)
+        self._near, self._far = torch.FloatTensor(2.), torch.FloatTensor(6.)
 
     def __len__(self):
         return len(self.imgs)
@@ -74,7 +71,6 @@ class SyntheticDataset(Dataset):
 
     @Dataset.w2c.getter
     def w2c(self):
-        # TODO: 현재 c2w값만 가지고 있는 상태로, camera to world transform을 위한 inverse를 구현해야 함
         return inverse_w2c(self.c2w)
 
     @Dataset.c2w.getter
@@ -88,7 +84,7 @@ class SyntheticDataset(Dataset):
 
         NOTE: llff data에서 Spherify_poses를 사용하거나 기존 루틴을 사용함
         """
-        return torch.Tensor(self._render_poses).to(device)
+        return torch.Tensor(self._render_poses).to(os.environ['DEVICE'])
 
     @Dataset.test_i.getter
     def test_i(self):
@@ -112,7 +108,7 @@ class SyntheticDataset(Dataset):
 
     def load_imgs(self):
         # TODO: Factor 반영하기
-        imgs = [imread(path)[..., :3] / 255. for path in self.img_paths]
+        imgs = [imread(path) / 255. for path in self.img_paths]
         imgs = np.stack(imgs, 0)
         return imgs
 

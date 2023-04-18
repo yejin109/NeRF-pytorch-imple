@@ -7,8 +7,6 @@ from ._dataset import Dataset
 from ._utils import imread, recenter_poses, render_path_spherical, render_path_spiral, get_test_idx, get_train_idx, get_val_idx, get_boundary, log, _minify
 from functionals import log_cfg
 
-device = os.environ['DEVICE']
-
 
 class LLFFDataset(Dataset):
     def __init__(self, data_type, run_type, dataset, path_zflat, llffhold, factor=None, bd_factor=None, **kwargs):
@@ -42,18 +40,20 @@ class LLFFDataset(Dataset):
         if kwargs['spherify']:
             if int(os.environ['VERBOSE']): 
                 log("Render path \n\tSpherified : _poses, _reder_poses, bds updated\n")
-            self._poses, self._render_poses, self.bds = render_path_spherical(self._poses, self.bds)
+            self._poses, self._render_poses, self.bds = render_path_spherical(self._poses, self.bds, kwargs['render_pose_num'])
         else:
             if int(os.environ['VERBOSE']): 
                 log("Render path \n\tSpherified : _poses, _reder_poses, bds updated\n")
 
             self._render_poses = render_path_spiral(self._poses, self.bds, path_zflat)
-        
+
         self._render_poses = np.array(self._render_poses).astype(np.float32)
         self._test_i = get_test_idx(self._poses, llffhold, self.imgs.shape)
         self._val_i = get_val_idx(self._test_i)
         self._train_i = get_train_idx(self._val_i, self._test_i, self.imgs.shape)
         self._near, self._far = get_boundary(kwargs['no_ndc'], self.bds)
+        # 앞에서 numpy로 구현된 연산이 있어서
+        self._poses = torch.Tensor(self._poses).to(os.environ['DEVICE'])
 
         if int(os.environ['VERBOSE']): 
             log(f"Attributes :\n")
@@ -81,7 +81,7 @@ class LLFFDataset(Dataset):
 
     @Dataset.hwf.getter
     def hwf(self):
-        return np.array(list(self.img_shape[:2])+[self.focal_length])
+        return np.array(list(self.img_shape[:2])+[self.focal_length]).astype(int)
 
     @Dataset.w2c.getter
     def w2c(self):
@@ -101,7 +101,7 @@ class LLFFDataset(Dataset):
         NOTE: llff data에서 Spherify_poses를 사용하거나 기존 루틴을 사용함
         """
 
-        return torch.Tensor(self._render_poses).to(device)
+        return torch.Tensor(self._render_poses).to(os.environ['DEVICE'])
     
     @Dataset.test_i.getter
     def test_i(self):
@@ -127,6 +127,7 @@ class LLFFDataset(Dataset):
         # TODO: Factor 반영하기
         imgs = [imread(path)[..., :3] / 255. for path in self.img_paths]
         imgs = np.stack(imgs, 0)
+        imgs = torch.Tensor(imgs).to(os.environ['DEVICE'])
         return imgs
 
     def load_matrices(self):
@@ -147,5 +148,4 @@ class LLFFDataset(Dataset):
 
         # NOTE: Focal length는 하나인 것으로 생각하고 있는 것
         focal = poses[0, 2, 4]
-
         return poses, bds, focal

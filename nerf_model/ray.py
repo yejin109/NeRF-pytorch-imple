@@ -3,6 +3,8 @@ import tqdm
 import torch
 import numpy as np
 
+from functionals import log_time
+
 device = os.environ['DEVICE']
 
 
@@ -33,7 +35,6 @@ def ray_generation(poses, images, N_rand, use_batching, H, W, focal, K, N_iters,
         i_batch = 0
 
         # Move training data to GPU
-        images = torch.Tensor(images).to(device)
         rays_rgb = torch.Tensor(rays_rgb).to(device)
     poses = torch.Tensor(poses).to(device)
 

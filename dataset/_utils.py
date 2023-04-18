@@ -12,7 +12,6 @@ import numpy as np
 def recenter_poses(poses):
     """
     TODO: input poses is c2w or w2c?
-
     """
     poses_ = poses + 0
     bottom = np.reshape([0, 0, 0, 1.], [1, 4])
@@ -61,7 +60,7 @@ def inverse_rot(z, up, pos):
 
 ########################################################################################
 # 2. render pose functionals
-def render_path_spherical(poses, bds):
+def render_path_spherical(poses, bds, render_pose_num=120):
     p34_to_44 = lambda p: np.concatenate([p, np.tile(np.reshape(np.eye(4)[-1, :], [1, 1, 4]), [p.shape[0], 1, 1])], 1)
 
     # z-axis direction 
@@ -106,7 +105,7 @@ def render_path_spherical(poses, bds):
 
     # NOTE: 현재 10개에 1분 정도 걸림
     # for th in np.linspace(0., 2. * np.pi, 120):
-    for th in np.linspace(0., 2. * np.pi, 120):
+    for th in np.linspace(0., 2. * np.pi, render_pose_num):
         camorigin = np.array([radcircle * np.cos(th), radcircle * np.sin(th), zh])
         up = np.array([0, 0, -1.])
 
@@ -128,7 +127,7 @@ def render_path_spherical(poses, bds):
 
 
 # def render_path_spiral(poses, bds, c2w, up, rads, focal, zrate, rots, N):
-def render_path_spiral(poses, bds, path_zflat):
+def render_path_spiral(poses, bds, path_zflat, render_pose_num=120):
     c2w = inverse_w2c(poses)
 
     ## Get spiral
