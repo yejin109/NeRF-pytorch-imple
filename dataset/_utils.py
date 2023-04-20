@@ -126,8 +126,7 @@ def render_path_spherical(poses, bds, render_pose_num=120):
     return poses_reset, new_poses, bds
 
 
-# def render_path_spiral(poses, bds, c2w, up, rads, focal, zrate, rots, N):
-def render_path_spiral(poses, bds, path_zflat, render_pose_num=120):
+def render_path_spiral(poses, bds, path_zflat, N_rots=2, render_pose_num=120, zrate=.5):
     c2w = inverse_w2c(poses)
 
     ## Get spiral
@@ -146,20 +145,20 @@ def render_path_spiral(poses, bds, path_zflat, render_pose_num=120):
     tt = poses[:, :3, 3]  # ptstocam(poses[:3,3,:].T, c2w).T
     rads = np.percentile(np.abs(tt), 90, 0)
     c2w_path = c2w
-    N_views = 120
-    N_rots = 2
     if path_zflat:
         #             zloc = np.percentile(tt, 10, 0)[2]
         zloc = -close_depth * .1
         c2w_path[:3, 3] = c2w_path[:3, 3] + zloc * c2w_path[:3, 2]
         rads[2] = 0.
         N_rots = 1
-        N_views /= 2
+        render_pose_num /= 2
+
+    # NOTE: actual spiral path computation
     render_poses = []
     rads = np.array(list(rads) + [1.])
     hwf = c2w[:, 4:5]
 
-    for theta in np.linspace(0., 2. * np.pi * rots, N + 1)[:-1]:
+    for theta in np.linspace(0., 2. * np.pi * N_rots, render_pose_num + 1)[:-1]:
         c = np.dot(c2w[:3, :4], np.array([np.cos(theta), -np.sin(theta), -np.sin(theta * zrate), 1.]) * rads)
         z = normalize(c - np.dot(c2w[:3, :4], np.array([0, 0, -focal, 1.])))
         render_poses.append(np.concatenate([inverse_rot(z, up, c), hwf], 1))

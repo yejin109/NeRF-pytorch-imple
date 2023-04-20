@@ -11,10 +11,10 @@ import torch.nn.functional as F
 from .ray import get_rays, ndc_rays
 from .sampler import sample_pdf
 from ._utils import batchify, log, to8b
-from functionals import log_cfg, log_time
+from functionals import log_cfg, log_time, log_internal
 
 
-def render_preprocess(H, W, focal, c2w=None, ndc=True, rays=None, near=0., far=1., use_viewdirs=False, c2w_staticcam=None, **kwargs):
+def render_preprocess(H, W, focal, K=None, c2w=None, ndc=True, rays=None, near=0., far=1., use_viewdirs=False, c2w_staticcam=None, **kwargs):
     """
     H: int. Height of image in pixels.
     W: int. Width of image in pixels.
@@ -31,7 +31,7 @@ def render_preprocess(H, W, focal, c2w=None, ndc=True, rays=None, near=0., far=1
     """
     if c2w is not None:
         # special case to render full image
-        rays_o, rays_d = get_rays(H, W, focal, c2w)
+        rays_o, rays_d = get_rays(H, W, K, c2w)
     else:
         # use provided ray batch
         rays_o, rays_d = rays
@@ -41,7 +41,7 @@ def render_preprocess(H, W, focal, c2w=None, ndc=True, rays=None, near=0., far=1
         viewdirs = rays_d
         if c2w_staticcam is not None:
             # special case to visualize effect of viewdirs
-            rays_o, rays_d = get_rays(H, W, focal, c2w_staticcam)
+            rays_o, rays_d = get_rays(H, W, K, c2w_staticcam)
 
         # Make all directions unit magnitude.
         # shape: [batch_size, 3]
@@ -71,14 +71,14 @@ def render_preprocess(H, W, focal, c2w=None, ndc=True, rays=None, near=0., far=1
 
 def render_rays(ray_batch,
                 model_coarse,
-                N_samples,
+                model_fine,
                 embedder_ray,
-                embedder_view=None,
+                embedder_view,
+                N_samples=None,
                 retraw=False,
                 lindisp=False,
                 perturb=0.,
                 N_importance=0,
-                model_fine=None,
                 white_bkgd=False,
                 raw_noise_std=0.,
                 verbose=False,
@@ -145,7 +145,6 @@ def render_rays(ray_batch,
     pts = rays_o[...,None,:] + rays_d[...,None,:] * z_vals[...,:,None] # [N_rays, N_samples, 3]
 
     raw = run_network(pts, viewdirs, model_coarse, embedder_ray, embedder_view)
-    # raw = network_query_fn(pts, viewdirs, model_coarse)
     rgb_map, disp_map, acc_map, weights, depth_map = raw2outputs(raw, z_vals, rays_d, raw_noise_std, white_bkgd, pytest=pytest)
 
     if N_importance > 0:
@@ -160,8 +159,8 @@ def render_rays(ray_batch,
         pts = rays_o[...,None,:] + rays_d[...,None,:] * z_vals[...,:,None] # [N_rays, N_samples + N_importance, 3]
 
         run_fn = model_coarse if model_fine is None else model_fine
+        # NOTE: 여기서 학습시 1.6G 사용
         raw = run_network(pts, viewdirs, run_fn, embedder_ray, embedder_view)
-
         rgb_map, disp_map, acc_map, weights, depth_map = raw2outputs(raw, z_vals, rays_d, raw_noise_std, white_bkgd, pytest=pytest)
 
     ret = {'rgb_map': rgb_map, 'disp_map': disp_map, 'acc_map': acc_map}
@@ -243,37 +242,38 @@ def raw2outputs(raw, z_vals, rays_d, raw_noise_std=0, white_bkgd=False, pytest=F
     return rgb_map, disp_map, acc_map, weights, depth_map
 
 
-def render_image(render_poses, hwf, K, chunk, render_kwargs, models, batch_size,
-                 embedder_ray, embedder_view, savedir=None, render_factor=0, **kwargs):
-    with torch.no_grad():
-        H, W, focal = hwf
-        if render_factor != 0:
-            # Render downsampled for speed
-            H = H//render_factor
-            W = W//render_factor
+def render_image(render_poses, hwf, chunk, render_kwargs, models,
+                 embedder_ray, embedder_view, K, savedir=None, render_factor=0, **kwargs):
+    H, W, focal = hwf
+    if render_factor != 0:
+        # Render downsampled for speed
+        H = H//render_factor
+        W = W//render_factor
 
-        rgbs = []
-        for pose_idx, c2w in enumerate(tqdm.tqdm(render_poses, desc="Rendering Image")):
-            rays = render_preprocess(H, W, K, c2w=c2w[:3, :4], **render_kwargs)
-            # - Volumetric Rendering
-            model_coarse = models['model']
-            model_fine = models['model_fine']
+    rgbs = []
+    for pose_idx, c2w in enumerate(render_poses):
+        log_internal(f"[Rendering Image] {pose_idx+1}/{len(render_poses)} START")
+        rays = render_preprocess(H, W, focal, K=K, c2w=c2w[:3, :4], **render_kwargs)
+        # - Volumetric Rendering
+        model_coarse = models['model']
+        model_fine = models['model_fine']
 
-            rgb = []
+        rgb = []
+        # NOTE: takes 7s, nerf-torch takes 18s/single render pose
+        # TODO: Optimize rendering latency. Mainly comes from render_rays ~2s * 3 times due to chunk size
+        for i in range(0, rays.shape[0], chunk):
+            ret = render_rays(rays[i:i + chunk], model_coarse, model_fine, embedder_ray, embedder_view,
+                              **render_kwargs)
+            # torch.cuda.empty_cache()
+            rgb.extend(ret['rgb_map'].cpu().tolist())
+        rgb = np.array(rgb).reshape((H, W, -1))
+        rgbs.append(rgb)
 
-            # NOTE: takes 7s
-            # TODO: Optimize rendering latency. Mainly comes from render_rays ~2s * 3 times due to chunk size
-            for i in range(0, rays.shape[0], chunk):
-                ret = render_rays(rays[i:i + chunk], model_coarse=model_coarse, model_fine=model_fine, embedder_ray=embedder_ray, embedder_view=embedder_view, **kwargs)
-                torch.cuda.empty_cache()
-                rgb.extend(ret['rgb_map'].cpu().tolist())
-            rgb = np.array(rgb)
-            rgbs.append(rgb)
+        filename = os.path.join(savedir, f'{kwargs["iter_i"]}-{pose_idx}.png')
+        imageio.imwrite(filename, to8b(rgb))
 
-            filename = os.path.join(savedir, f'{kwargs["iter_i"]}-{pose_idx}.png')
-            imageio.imwrite(filename, to8b(rgb).reshape((H, W, -1)))
-
-        rgbs = np.stack(rgbs, 0)
+    log_internal(f"[Rendering Image] DONE")
+    rgbs = np.stack(rgbs, 0)
 
     return rgbs
 

@@ -5,7 +5,7 @@ import numpy as np
 
 from ._dataset import Dataset
 from ._utils import imread, recenter_poses, render_path_spherical, render_path_spiral, get_test_idx, get_train_idx, get_val_idx, get_boundary, log, _minify
-from functionals import log_cfg
+from functionals import log_cfg, log_internal
 
 
 class LLFFDataset(Dataset):
@@ -25,7 +25,7 @@ class LLFFDataset(Dataset):
 
         # 2. Load pose matrix and all the attrs to be used
         self._poses, self.bds, self.focal_length = self.load_matrices()
-        assert (len(self.imgs) == len(self._poses))
+        # assert (len(self.imgs) == len(self._poses))
         self._render_poses = None
         self._test_i = None
         self._val_i = None
@@ -45,7 +45,7 @@ class LLFFDataset(Dataset):
             if int(os.environ['VERBOSE']): 
                 log("Render path \n\tSpherified : _poses, _reder_poses, bds updated\n")
 
-            self._render_poses = render_path_spiral(self._poses, self.bds, path_zflat)
+            self._render_poses = render_path_spiral(self._poses, self.bds, path_zflat, N_rots=kwargs['N_rots'], render_pose_num=kwargs['render_pose_num'], zrate=kwargs['zrate'])
 
         self._render_poses = np.array(self._render_poses).astype(np.float32)
         self._test_i = get_test_idx(self._poses, llffhold, self.imgs.shape)
@@ -64,6 +64,7 @@ class LLFFDataset(Dataset):
                 elif isinstance(attr, np.ndarray):
                     msg = attr.shape
                 log(f"\t{name} : {msg}\n")
+        log_internal(f"[Data] Dataset Loading DONE")
 
     def __len__(self):
         return len(self.imgs)
@@ -133,19 +134,25 @@ class LLFFDataset(Dataset):
     def load_matrices(self):
         poses_arr = np.load(os.path.join(self.data_dir, 'poses_bounds.npy'))
 
-        bds = poses_arr[:, -2:]
         poses = poses_arr[:, :-2].reshape([-1, 3, 5])
+        bds = poses_arr[:, -2:]
+        # NOTE: Focal length는 하나인 것으로 생각하고 있는 것
+
+        sh = poses[0, :2, 4]
 
         # Boundary scaling : boundary for integral which is along with z-axis
         sc = 1. if self.bd_factor is None else 1. / (bds.min() * self.bd_factor)
         poses[:, :3, 3] *= sc
         bds *= sc
 
+        # Pose process: 아직 왜 이렇게 해야하는지 모르겠고 나중에 코드 최적화 해야할 듯
+        poses = poses_arr[:, :-2].reshape([-1, 3, 5]).transpose([1, 2, 0])
+        poses[:2, 4, :] = np.array(sh[:2]).reshape([2, 1])
         if self.factor is not None:
             _minify(self.data_dir, factors=[self.factor])
-            poses[:, 2, 4] = poses[:, 2, 4] * 1./ self.factor
+            poses[2, 4, :] = poses[2, 4, :] * 1. / self.factor
         poses = np.concatenate([poses[:, 1:2, :], -poses[:, 0:1, :], poses[:, 2:, :]], 1)
 
-        # NOTE: Focal length는 하나인 것으로 생각하고 있는 것
+        poses = np.moveaxis(poses, -1, 0).astype(np.float32)
         focal = poses[0, 2, 4]
         return poses, bds, focal

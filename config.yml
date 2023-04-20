@@ -1,3 +1,5 @@
+# Default setting : for fern
+
 #llff:
 #  factor: 8 # load_diff._minify
 #  recenter: True
@@ -22,16 +24,18 @@ synthetic:
 
 llff:
   data_type: nerf_llff_data
-  dataset: fern # options : fern, flower, fortress, horns, leaves, orchids, room, trex
+  dataset: trex # options : fern, flower, fortress, horns, leaves, orchids, room, trex
   run_type: train # options : train, val ,test
-  path_zflat: False # regarding render_poses(poses for test img), choose spiral or path
+
   factor: 8
+  no_ndc: False # 'do not use normalized device coordinates (set for non-forward facing scenes)
+  lindisp: False # sampling linearly in disparity rather than depth
+  spherify : False # Should be synchronized with Image source camera position distribution
+
+  path_zflat: False # regarding render_poses(poses for test img), choose spiral or path
   bd_factor: .75
   recenter : True
-  spherify : True
   llffhold: 8 # will take every 1/N images as LLFF test set, paper uses 8
-  no_ndc: True # 'do not use normalized device coordinates (set for non-forward facing scenes)
-  lindisp: True # sampling linearly in disparity rather than depth
 
 
 embed:
@@ -41,40 +45,49 @@ embed:
 
 
 rendering:
-  multires: 10 # 'log2 of max freq for positional encoding (3D location)'
-  multires_views: 4 # 'log2 of max freq for positional encoding (2D direction)'
-  raw_noise_std: 1e0 # 'std dev of noise added to regularize sigma_a output, 1e0 recommended'
-  use_viewdirs: True # use full 5D input instead of 3D
   N_samples: 64 # number of coarse samples per ray
   N_importance: 64 # number of additional fine samples per ray
   perturb: 1. # set to 0. for no jitter, 1. for jitter
+  use_viewdirs: True # use full 5D input instead of 3D
   i_embed: 0 # set 0 for default positional encoding, -1 for none
 
-  render_test: True # render the test set instead of render_poses path
-  render_only: False # do not optimize, reload weights and render out render_poses path
-  render_factor: 0 #downsampling factor to speed up rendering, set 4 or 8 for fast preview
-  render_pose_num : 1 # default 120
+  multires: 10 # 'log2 of max freq for positional encoding (3D location)'
+  multires_views: 4 # 'log2 of max freq for positional encoding (2D direction)'
+  raw_noise_std: 1 # 'std dev of noise added to regularize sigma_a output, 1e0 recommended'
 
+  render_only: False # do not optimize, reload weights and render out render_poses path
+  render_test: False # render the test set instead of render_poses path
+  render_factor: 0 #downsampling factor to speed up rendering, set 4 or 8 for fast preview
+
+  # Camera Movements
+  render_pose_num : 1 # default 120, newly added for factorization
+  N_rots : 2 # Number of rotation for spiral path
+  zrate: .5 # Moving speed along with z axis for spiral path
+
+  # For blender
   white_bkgd: False # set to render synthetic data on a white bkgd (always use for dvoxels)
+
+  # For deeepvoxel
+  shape: greek # options, armchair/ cube/ greek/ vase
 
 
 
 model:
-  layer_num: 8 # Originalnetdepth: 8 # layers in network
-  hidden_feature : 256 # netwidth: 256 # channels per layer
+  layer_num: 8 # Original netdepth: 8 # layers in network
+  hidden_dim : 256 # netwidth: 256 # channels per layer
   layer_num_fine : 8 # netdepth_fine: 8 # layers in fine network
   hidden_feature_fine : 256 # netwidth_fine: 256 # channels per layer in fine network
-  N_rand: 4096 # 32*32*4, batch size (number of random rays per gradient step)
+  N_rand: 1024 # 32*32*4=4096, batch size (number of random rays per gradient step)
 
   lrate: 5.0E-4 # learning rate
   lrate_decay: 250 # exponential learning rate decay (in 1000s)
   lrate_schedule_gamma: 0.1
-  N_iters: 2500 # 2500 * 4096(N_rand) = 5GB GRAM usage
+  N_iters: 200000 # 2500 * 4096(N_rand) = 5GB GRAM usage
 
-  chunk: 4096  # 65536, 1024*32, number of rays processed in parallel, decrease if running out of memory. (Rendering Image) 4585 - 1985 = 2600MiB Uses
+  chunk: 32768  # 65536, 1024*32, number of rays processed in parallel, decrease if running out of memory. (Rendering Image) 4585 - 1985 = 2600MiB Uses
   netchunk: 65536 # 1024*64, number of pts sent through network in parallel, decrease if running out of memory
-  no_batching: True # only take random rays from 1 image at a time -> latency at ray_generation ~10s
-  no_reload: True # do not reload weights from saved ckpt
+  no_batching: False # only take random rays from 1 image at a time -> latency at ray_generation ~10s
+  no_reload: False # do not reload weights from saved ckpt
   ft_path: None # specific weights npy file to reload for coarse network
   random_seed: None, # fix random seed for repeatability
 
@@ -83,3 +96,11 @@ model:
 
 blender:
   white_bkgd: True # set to render synthetic data on a white bkgd (always use for dvoxels)
+
+
+log:
+  i_print: 100
+  i_img: 500 # frequency of tensorboard image logging
+  i_weights: 10000 # frequency of weight ckpt saving
+  i_testset: 10000 # frequency of testset saving
+  i_video: 50000 # frequency of render_poses video saving

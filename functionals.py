@@ -1,7 +1,9 @@
 import os
+import glob
 import copy
 import time
 import torch
+import datetime
 import numpy as np
 
 
@@ -71,3 +73,11 @@ def log_time(func):
         return res
     wrap.__name__ = func.__name__
     return wrap
+
+
+def log_internal(msg):
+    with open(f'{os.environ["LOG_DIR"]}/internal.txt', 'a') as f:
+        f.write(f'[{datetime.datetime.now().strftime("%H:%M:%S")}]{msg}\n')
+    f.close()
+    if os.environ['VERBOSE'] == "0":
+        print(msg)

@@ -1,4 +1,5 @@
 import _init_env
+import datetime
 
 import os
 import time
@@ -9,9 +10,8 @@ from torch.optim import Adam
 
 import dataset
 import nerf_model
-from nerf_model import log as nerf_log
 from nerf_model import img2mse, mse2psnr
-from functionals import TotalGradNorm, log_train, log_cfg
+from functionals import TotalGradNorm, log_train, log_cfg, log_internal
 
 
 def run(rendering_cfg, dataset_cfg, run_args):
@@ -32,11 +32,12 @@ def run(rendering_cfg, dataset_cfg, run_args):
     render_kwargs_test['near'] = run_args['near']
     render_kwargs_test['far'] = run_args['far']
 
+    use_batch = not model_config['no_batching']
     ray_cfg = {
         "poses": run_args["poses"],
         "images": run_args["images"],
         "N_rand": model_config['N_rand'],
-        "use_batching": not model_config['no_batching'],
+        "use_batching": use_batch,
         "H": hwf[0],
         "W": hwf[1],
         "focal": hwf[2],
@@ -50,55 +51,74 @@ def run(rendering_cfg, dataset_cfg, run_args):
     }
 
     test_cfg = {
-        'images': run_args["images"],
-        'i_test': run_args['i_test'],
-        'testsavedir': os.environ['LOG_DIR'],
-        'render_poses': run_args['render_poses'],
+        'render_poses': run_args['poses'][run_args['i_test']],
         'hwf': run_args['hwf'].astype(int),
-        'K': run_args['K'],
-        'render_kwargs_test': render_kwargs_test,
-        'batch_size': run_args['batch_size'],
         "chunk": model_config['chunk'],
-        'render_factor': rendering_cfg['render_factor'],
+        'render_kwargs': render_kwargs_test,
         'models': run_args['models'],
         'embedder_ray': run_args['embedder_ray'],
         'embedder_view': run_args['embedder_view'],
-        'N_samples': rendering_config['N_samples'],
+        'K': run_args['K'],
+        'savedir': os.environ['LOG_DIR'],
+        'render_factor': rendering_cfg['render_factor'],
+
+        # For reder_rays()
+        # 'N_samples': rendering_config['N_samples'],
+        # 'images': run_args["images"],
+        # 'focal': run_args['focal'],
+        # 'batch_size': run_args['batch_size'],
     }
 
+    if use_batch:
+        batch_cfg = {
+            "H": hwf[0],
+            "W": hwf[1],
+            'K': run_args['K'],
+            # "focal": run_args['focal'],
+            "poses": run_args["poses"],
+            "images": run_args["images"],
+            "i_train": run_args["i_train"],
+        }
+        rays_rgb = nerf_model.ray.prepare_ray_batching(**batch_cfg)
+        i_batch = 0
+
+    optimizer = Adam(run_args["params"], lr=run_args["lrate"], betas=(0.9, 0.999))
     epoch_args = dict(run_args, **{'render_args_train': render_args_train, 'ray_cfg': ray_cfg})
-    start = time.time()
-    for iter_i in range(model_config['N_iters']):
-        loss_epoch, psnr_epoch = run_epoch(**dict(epoch_args, **{'iter_i': iter_i}))
-        nerf_log(f"Iteration {iter_i+1} / {model_config['N_iters']} DONE")
+    for iter_i in tqdm.tqdm(range(model_config['N_iters'])):
+        # Step 4 : Ray Generation
+        if use_batch:
+            rays_rgb, batch_rays, target_s, i_batch = nerf_model.ray.sample_ray_batch(rays_rgb, i_batch, model_config['N_rand'])
+        elif model_config['N_rand'] is not None:
+            target_s, batch_rays = nerf_model.ray_generation(**dict(ray_cfg, **{'iter_i': iter_i}))
+        loss_epoch, psnr_epoch = run_epoch(**dict(epoch_args, **{'iter_i': iter_i, 'batch_rays': batch_rays,
+                                                                 "optimizer": optimizer, "target_s": target_s}))
+
+        # Logging
         if (iter_i+1) % 100 == 0:
-            print(f"\n[Iteration Progress] {iter_i+1}/{model_config['N_iters']}\n")
-            # nerf_model.rendering.render_from_pretrained(**dict(test_cfg, **{'iter_i': iter_i}))
-            render_cfg = dict(test_cfg, **{'savedir': os.environ['LOG_DIR'], 'iter_i': iter_i, 'render_kwargs': render_kwargs_test})
-            nerf_model.rendering.render_image(**render_cfg)
+            log_internal(f"[Train] Iteration {iter_i + 1} / {model_config['N_iters']} DONE, Loss : {loss_epoch:.4f}, PSNR: {psnr_epoch:.4f}")
+
+        # Image Visualization
+        if (iter_i+1) % 300 == 0:
+            render_cfg = dict(test_cfg, **{'iter_i': iter_i})
+            with torch.no_grad():
+                nerf_model.rendering.render_image(**render_cfg)
 
         grad_norm_epoch = TotalGradNorm(run_args['params'])
         log_train(iter_i, loss_epoch, psnr_epoch, grad_norm_epoch)
 
 
-def run_epoch(models, params, H, W, K, lrate, lrate_decay, chunk, iter_i, render_args_train, ray_cfg, batch_size,
-              embedder_ray, embedder_view=None, **kwargs):
-    optimizer = Adam(params, lr=lrate, betas=(0.9, 0.999))
-
-    # Step 4 : Ray Generation
-    target_s, batch_rays = nerf_model.ray_generation(**dict(ray_cfg, **{'iter_i': iter_i}))
-
+def run_epoch(models, H, W, lrate, lrate_decay, chunk, iter_i, render_args_train, ray_cfg, batch_size,
+              embedder_ray, optimizer, batch_rays, target_s, embedder_view=None, **kwargs):
     # Step 5: Ray Colorization
     # - Preprocess : Make rays to be used for model
-    rays = nerf_model.rendering.render_preprocess(H, W, K, rays=batch_rays, **render_args_train)
+    rays = nerf_model.rendering.render_preprocess(H, W, focal=ray_cfg['focal'], rays=batch_rays, **render_args_train)
 
     # - Volumetric Rendering
     model_coarse = models['model']
     model_fine = models['model_fine']
     all_ret = {}
     for i in range(0, rays.shape[0], chunk):
-        ret = nerf_model.rendering.render_rays(rays[i:i+chunk], model_coarse=model_coarse, model_fine=model_fine,
-                                               embedder_ray=embedder_ray, embedder_view=embedder_view, **kwargs)
+        ret = nerf_model.rendering.render_rays(rays[i:i+chunk], model_coarse, model_fine, embedder_ray, embedder_view, **render_args_train)
         for k in ret:
             if k not in all_ret:
                 all_ret[k] = []
@@ -126,7 +146,7 @@ def run_epoch(models, params, H, W, K, lrate, lrate_decay, chunk, iter_i, render
 
     loss.backward()
     optimizer.step()
-    torch.cuda.empty_cache()
+    # torch.cuda.empty_cache()
 
     # NOTE: IMPORTANT!
     ###   update learning rate   ###
@@ -151,7 +171,7 @@ if __name__ == '__main__':
     model_config = setting['model']
 
     # Step 1 : Load Dataset
-    dset = dataset.LLFFDataset(**dict(dataset_config, **{'render_pose_num': rendering_config['render_pose_num']}))
+    dset = dataset.LLFFDataset(**dict(dataset_config, **{'render_pose_num': rendering_config['render_pose_num'], 'N_rots': rendering_config['N_rots'], 'zrate': rendering_config['zrate']}))
     # dset = dataset.SyntheticDataset(**dataset_config)
     #
     # Step 2: Load Model
