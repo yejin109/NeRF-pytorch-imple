@@ -1,3 +1,35 @@
+"""
+TODO
+- data loading : 기존 llff는 한 폴더에 다 있었는데 지금은 train,val,test 다 나눠져 있어서 for loop으로 불러오고 있음. 이것을 적용한 다음에 train val test에 대해서 다 load를 해야하도록 수정하기
+- Support white_bkgd : imgs의 값에서 배경색의 색 조건에 따라서 다르게 적용해야함
+e.g.
+    if args.white_bkgd:
+        images = images[...,:3]*images[...,-1:] + (1.-images[...,-1:])
+    else:
+        images = images[...,:3]
+
+- half_res : 해당 데이터셋은 원본 이미지를 사용하는데 이걸 그대로 사용할지 말지에 따라서 값을 업데이트 해야함
+e.g.
+    if half_res:
+        H = H//2
+        W = W//2
+        focal = focal/2.
+
+        imgs_half_res = np.zeros((imgs.shape[0], H, W, 4))
+        for i, img in enumerate(imgs):
+            imgs_half_res[i] = cv2.resize(img, (W, H), interpolation=cv2.INTER_AREA)
+        imgs = imgs_half_res
+        # imgs = tf.image.resize_area(imgs, [400, 400]).numpy()
+- skip: 만들어진 데이터셋이다 보니 사진이 많아서 학습할 때에는 다 쓰는데 validation이나 test에서는 조정을 하기도 한다.
+e.g.
+    if s=='train' or testskip==0:
+        skip = 1
+    else:
+        skip = testskip
+        
+    for frame in meta['frames'][::skip]:
+"""
+
 import os
 import json
 import torch
@@ -35,17 +67,8 @@ class SyntheticDataset(Dataset):
                 log("Recentered : _poses updated\n")
             self._poses = recenter_poses(self.w2c)
 
-        if kwargs['spherify']:
-            if int(os.environ['VERBOSE']):
-                log("Render path \n\tSpherified : _poses, _reder_poses, bds updated\n")
-            self._poses, self._render_poses, self.bds = render_path_spherical(self._poses, self.bds)
-        else:
-            if int(os.environ['VERBOSE']):
-                log("Render path \n\tSpherified : _poses, _reder_poses, bds updated\n")
+        self._render_poses = torch.stack([pose_spherical(angle, -30.0, 4.0) for angle in np.linspace(-180,180,40+1)[:-1]], 0)
 
-            self._render_poses = render_path_spiral(self._poses, self.bds, path_zflat)
-
-        self._render_poses = np.array(self._render_poses).astype(np.float32)
         self._test_i = get_test_idx(self._poses, -1, self.imgs.shape)
         self._val_i = get_val_idx(self._test_i)
         self._train_i = get_train_idx(self._val_i, self._test_i, self.imgs.shape)
@@ -84,7 +107,7 @@ class SyntheticDataset(Dataset):
 
         NOTE: llff data에서 Spherify_poses를 사용하거나 기존 루틴을 사용함
         """
-        return torch.Tensor(self._render_poses).to(os.environ['DEVICE'])
+        return self._render_poses.to(os.environ['DEVICE'])
 
     @Dataset.test_i.getter
     def test_i(self):
@@ -109,7 +132,7 @@ class SyntheticDataset(Dataset):
     def load_imgs(self):
         # TODO: Factor 반영하기
         imgs = [imread(path) / 255. for path in self.img_paths]
-        imgs = np.stack(imgs, 0)
+        imgs = np.stack(imgs, 0).astype(np.float32)
         return imgs
 
     def load_matrices(self):
@@ -125,6 +148,35 @@ class SyntheticDataset(Dataset):
         for frame in frames:
             c2ws.append(frame['transform_matrix'])
         c2ws = np.array(c2ws)
-        c2ws = np.concatenate([c2ws[:, 1:2, :], -c2ws[:, 0:1, :], c2ws[:, 2:, :]], 1)
+        # 이 데이터 셋은 (x,y,z) 그대로 들어오는 듯
+        # c2ws = np.concatenate([c2ws[:, 1:2, :], -c2ws[:, 0:1, :], c2ws[:, 2:, :]], 1)
+
+        # boundary값을 따로 지정하지 않고 있음
         bds = [None] * len(frames)
         return c2ws, bds, focal
+
+
+def pose_spherical(theta, phi, radius):
+    c2w = trans_t(radius)
+    c2w = rot_phi(phi/180.*np.pi) @ c2w
+    c2w = rot_theta(theta/180.*np.pi) @ c2w
+    c2w = torch.Tensor(np.array([[-1,0,0,0],[0,0,1,0],[0,1,0,0],[0,0,0,1]])) @ c2w
+    return c2w
+
+trans_t = lambda t : torch.Tensor([
+    [1,0,0,0],
+    [0,1,0,0],
+    [0,0,1,t],
+    [0,0,0,1]]).float()
+
+rot_phi = lambda phi : torch.Tensor([
+    [1,0,0,0],
+    [0,np.cos(phi),-np.sin(phi),0],
+    [0,np.sin(phi), np.cos(phi),0],
+    [0,0,0,1]]).float()
+
+rot_theta = lambda th : torch.Tensor([
+    [np.cos(th),0,-np.sin(th),0],
+    [0,1,0,0],
+    [np.sin(th),0, np.cos(th),0],
+    [0,0,0,1]]).float()
