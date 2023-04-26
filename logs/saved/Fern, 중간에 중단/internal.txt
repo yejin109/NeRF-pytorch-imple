@@ -1,0 +1,76 @@
+[23:02:56]====================================================================================================
+Interal Log
+
+[23:02:56][Data] Dataset Loading DONE
+[23:02:57][Model] Init Model DONE
+[23:03:26][Train] Iteration 100 / 200000 DONE, Loss : 0.0593, PSNR: 15.2915
+[23:03:51][Train] Iteration 200 / 200000 DONE, Loss : 0.0421, PSNR: 16.7094
+[23:04:17][Train] Iteration 300 / 200000 DONE, Loss : 0.0323, PSNR: 17.9893
+[23:04:17][Rendering Image] 0/3 START
+[23:04:35][Rendering Image] 1/3 START
+[23:04:53][Rendering Image] 2/3 START
+[23:05:12][Rendering Image] DONE
+[23:05:37][Train] Iteration 400 / 200000 DONE, Loss : 0.0297, PSNR: 18.2372
+[23:06:02][Train] Iteration 500 / 200000 DONE, Loss : 0.0298, PSNR: 18.2363
+[23:06:27][Train] Iteration 600 / 200000 DONE, Loss : 0.0251, PSNR: 19.1290
+[23:06:27][Rendering Image] 0/3 START
+[23:06:45][Rendering Image] 1/3 START
+[23:07:04][Rendering Image] 2/3 START
+[23:07:22][Rendering Image] DONE
+[23:07:47][Train] Iteration 700 / 200000 DONE, Loss : 0.0236, PSNR: 19.2252
+[23:08:12][Train] Iteration 800 / 200000 DONE, Loss : 0.0218, PSNR: 19.7485
+[23:08:37][Train] Iteration 900 / 200000 DONE, Loss : 0.0219, PSNR: 19.5772
+[23:08:37][Rendering Image] 0/3 START
+[23:08:55][Rendering Image] 1/3 START
+[23:09:13][Rendering Image] 2/3 START
+[23:09:31][Rendering Image] DONE
+[23:09:56][Train] Iteration 1000 / 200000 DONE, Loss : 0.0188, PSNR: 20.1361
+[23:10:21][Train] Iteration 1100 / 200000 DONE, Loss : 0.0207, PSNR: 19.8305
+[23:10:46][Train] Iteration 1200 / 200000 DONE, Loss : 0.0206, PSNR: 19.9501
+[23:10:46][Rendering Image] 0/3 START
+[23:11:04][Rendering Image] 1/3 START
+[23:11:23][Rendering Image] 2/3 START
+[23:11:41][Rendering Image] DONE
+[23:12:06][Train] Iteration 1300 / 200000 DONE, Loss : 0.0183, PSNR: 20.3245
+[23:12:31][Train] Iteration 1400 / 200000 DONE, Loss : 0.0169, PSNR: 20.5960
+[23:12:56][Train] Iteration 1500 / 200000 DONE, Loss : 0.0154, PSNR: 21.1109
+[23:12:56][Rendering Image] 0/3 START
+[23:13:14][Rendering Image] 1/3 START
+[23:13:32][Rendering Image] 2/3 START
+[23:13:50][Rendering Image] DONE
+[23:14:15][Train] Iteration 1600 / 200000 DONE, Loss : 0.0167, PSNR: 20.6923
+[23:14:40][Train] Iteration 1700 / 200000 DONE, Loss : 0.0160, PSNR: 21.0138
+[23:15:05][Train] Iteration 1800 / 200000 DONE, Loss : 0.0138, PSNR: 21.5585
+[23:15:05][Rendering Image] 0/3 START
+[23:15:23][Rendering Image] 1/3 START
+[23:15:41][Rendering Image] 2/3 START
+[23:15:59][Rendering Image] DONE
+[23:16:25][Train] Iteration 1900 / 200000 DONE, Loss : 0.0157, PSNR: 21.1960
+[23:16:50][Train] Iteration 2000 / 200000 DONE, Loss : 0.0153, PSNR: 21.1575
+[23:17:15][Train] Iteration 2100 / 200000 DONE, Loss : 0.0154, PSNR: 21.1919
+[23:17:15][Rendering Image] 0/3 START
+[23:17:33][Rendering Image] 1/3 START
+[23:17:51][Rendering Image] 2/3 START
+[23:18:09][Rendering Image] DONE
+[23:18:34][Train] Iteration 2200 / 200000 DONE, Loss : 0.0138, PSNR: 21.6915
+[23:18:59][Train] Iteration 2300 / 200000 DONE, Loss : 0.0134, PSNR: 21.7563
+[23:19:24][Train] Iteration 2400 / 200000 DONE, Loss : 0.0133, PSNR: 21.8133
+[23:19:24][Rendering Image] 0/3 START
+[23:19:42][Rendering Image] 1/3 START
+[23:20:00][Rendering Image] 2/3 START
+[23:20:19][Rendering Image] DONE
+[23:20:44][Train] Iteration 2500 / 200000 DONE, Loss : 0.0127, PSNR: 21.8776
+[23:21:09][Train] Iteration 2600 / 200000 DONE, Loss : 0.0129, PSNR: 22.0731
+[23:21:34][Train] Iteration 2700 / 200000 DONE, Loss : 0.0126, PSNR: 22.1609
+[23:21:34][Rendering Image] 0/3 START
+[23:21:52][Rendering Image] 1/3 START
+[23:22:10][Rendering Image] 2/3 START
+[23:22:28][Rendering Image] DONE
+[23:22:53][Train] Iteration 2800 / 200000 DONE, Loss : 0.0121, PSNR: 22.1670
+[23:23:18][Train] Iteration 2900 / 200000 DONE, Loss : 0.0124, PSNR: 22.2447
+[23:23:43][Train] Iteration 3000 / 200000 DONE, Loss : 0.0128, PSNR: 21.8667
+[23:23:43][Rendering Image] 0/3 START
+[23:24:01][Rendering Image] 1/3 START
+[23:24:19][Rendering Image] 2/3 START
+[23:24:37][Rendering Image] DONE
+[23:25:02][Train] Iteration 3100 / 200000 DONE, Loss : 0.0121, PSNR: 22.4136

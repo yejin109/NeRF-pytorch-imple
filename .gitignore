@@ -4,4 +4,3 @@ dataset/nerf_synthetic
 src/__pycache__/
 logs/export
 logs/TEST-*
-logs/saved

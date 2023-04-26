@@ -15,17 +15,18 @@ from functionals import TotalGradNorm, log_train, log_cfg, log_internal
 
 
 def run(rendering_cfg, dataset_cfg, run_args):
+    hwf = run_args['hwf']
     # Step 3 : Load Rendering
     render_args_train, render_kwargs_test = nerf_model.get_render_kwargs(
         rendering_cfg['perturb'],
         rendering_cfg['N_importance'],
         rendering_cfg['N_samples'],
         rendering_cfg['use_viewdirs'],
-        rendering_cfg['white_bkgd'],
         rendering_cfg['raw_noise_std'],
-        dataset_cfg['no_ndc'],
-        dataset_cfg['lindisp'],
-        dataset_cfg['data_type'],
+        # dataset_cfg['no_ndc'],
+        # dataset_cfg['lindisp'],
+        # dataset_cfg['data_type'],
+        **dataset_cfg,
     )
     render_args_train['near'] = run_args['near']
     render_args_train['far'] = run_args['far']
@@ -51,7 +52,8 @@ def run(rendering_cfg, dataset_cfg, run_args):
     }
 
     test_cfg = {
-        'render_poses': run_args['poses'][run_args['i_test']],
+        # 'render_poses': run_args['poses'][run_args['i_test']],
+        'render_poses': run_args['render_poses'],
         'hwf': run_args['hwf'].astype(int),
         "chunk": model_config['chunk'],
         'render_kwargs': render_kwargs_test,
@@ -164,15 +166,15 @@ if __name__ == '__main__':
 
     torch.backends.cudnn.benchmark = True
     setting = yaml.safe_load(open('./config.yml'))
-    dataset_config = setting['llff']
-    # dataset_config = setting['synthetic']
+    # dataset_config = setting['llff']
+    dataset_config = setting['synthetic']
     embedding_config = setting['embed']
     rendering_config = setting['rendering']
     model_config = setting['model']
 
     # Step 1 : Load Dataset
-    dset = dataset.LLFFDataset(**dict(dataset_config, **{'render_pose_num': rendering_config['render_pose_num'], 'N_rots': rendering_config['N_rots'], 'zrate': rendering_config['zrate']}))
-    # dset = dataset.SyntheticDataset(**dataset_config)
+    # dset = dataset.LLFFDataset(**dict(dataset_config, **{'render_pose_num': rendering_config['render_pose_num'], 'N_rots': rendering_config['N_rots'], 'zrate': rendering_config['zrate']}))
+    dset = dataset.SyntheticDataset(**dict(dataset_config, **{'render_pose_num': rendering_config['render_pose_num']}))
     #
     # Step 2: Load Model
     model_config = dict(model_config, **rendering_config)
@@ -188,6 +190,7 @@ if __name__ == '__main__':
     hwf = dset.hwf
     run_arguments = {
         "poses": dset.w2c,
+        "render_pose": dset.render_pose,
         "images": dset.imgs,
         "params": params,
         "H": hwf[0],
@@ -218,9 +221,9 @@ if __name__ == '__main__':
 
     }
     run(rendering_config, dataset_config, run_arguments)
-
-    print(dataset_config)
-    print(dset.intrinsic_matrix)
-    print(dset.hwf)
-    print(dset.img_shape)
+    #
+    # print(dataset_config)
+    # print(dset.intrinsic_matrix)
+    # print(dset.hwf)
+    # print(dset.img_shape)
 

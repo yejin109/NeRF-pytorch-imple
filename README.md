@@ -29,3 +29,8 @@
 - ray generation, batch size dependent
 - render ray, img size dependent
 
+
+# Progress
+
+- 230426
+![230426](assets/progress_230426.JPG)

@@ -1,0 +1,9 @@
+[23:50:17]====================================================================================================
+Interal Log
+
+[23:50:28][Model] Init Model DONE
+[23:51:13][Train] Iteration 100 / 200000 DONE, Loss : 0.0768, PSNR: 14.2417
+[23:51:38][Train] Iteration 200 / 200000 DONE, Loss : 0.0451, PSNR: 16.5398
+[23:52:03][Train] Iteration 300 / 200000 DONE, Loss : 0.0230, PSNR: 19.5633
+[23:52:03][Rendering Image] 1/1 START
+[23:52:18][Rendering Image] DONE

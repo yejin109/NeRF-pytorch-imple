@@ -264,7 +264,7 @@ def render_image(render_poses, hwf, chunk, render_kwargs, models,
         for i in range(0, rays.shape[0], chunk):
             ret = render_rays(rays[i:i + chunk], model_coarse, model_fine, embedder_ray, embedder_view,
                               **render_kwargs)
-            # torch.cuda.empty_cache()
+            torch.cuda.empty_cache()
             rgb.extend(ret['rgb_map'].cpu().tolist())
         rgb = np.array(rgb).reshape((H, W, -1))
         rgbs.append(rgb)
@@ -279,7 +279,8 @@ def render_image(render_poses, hwf, chunk, render_kwargs, models,
 
 
 @log_cfg
-def get_render_kwargs(perturb, N_importance, N_samples, add_3d_view, white_bkgd, raw_noise_std, no_ndc, lindisp, data_type):
+def get_render_kwargs(perturb, N_importance, N_samples, add_3d_view, raw_noise_std, no_ndc, data_type,
+                      lindisp=None, white_bkgd=None, **kwargs):
     render_kwargs_train = {
         'perturb': perturb,
         'N_importance': N_importance,

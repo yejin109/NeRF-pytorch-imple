@@ -1,12 +1,5 @@
 """
 TODO
-- data loading : 기존 llff는 한 폴더에 다 있었는데 지금은 train,val,test 다 나눠져 있어서 for loop으로 불러오고 있음. 이것을 적용한 다음에 train val test에 대해서 다 load를 해야하도록 수정하기
-- Support white_bkgd : imgs의 값에서 배경색의 색 조건에 따라서 다르게 적용해야함
-e.g.
-    if args.white_bkgd:
-        images = images[...,:3]*images[...,-1:] + (1.-images[...,-1:])
-    else:
-        images = images[...,:3]
 
 - half_res : 해당 데이터셋은 원본 이미지를 사용하는데 이걸 그대로 사용할지 말지에 따라서 값을 업데이트 해야함
 e.g.
@@ -31,48 +24,46 @@ e.g.
 """
 
 import os
+import cv2
 import json
 import torch
 import numpy as np
 
 from ._dataset import Dataset
-from ._utils import imread, recenter_poses, render_path_spherical, render_path_spiral, get_test_idx, get_train_idx, get_val_idx, get_boundary, log, _minify, inverse_w2c
+from ._utils import imread
 
 
 class SyntheticDataset(Dataset):
-    def __init__(self, data_type, run_type, dataset, path_zflat, factor=None, bd_factor=None, **kwargs):
+    def __init__(self, data_type, dataset, path_zflat, run_type=None, factor=None, bd_factor=None, **kwargs):
         super(SyntheticDataset, self).__init__(data_type, run_type, dataset, path_zflat, factor, bd_factor)
-        # 0. Setup
-        sfx = ""
-        if self.factor is not None:
-            sfx = '_{}'.format(self.factor)
-        self.img_dir = os.path.join(self.data_dir, run_type)
-        self.img_paths = [os.path.join(self.img_dir, f) for f in sorted(os.listdir(self.img_dir)) if f.endswith('JPG') or f.endswith('jpg') or f.endswith('png')]
-
-        # 1. Load Image
+        # 1. Load pose matrix and all the attrs to be used
+        self._poses, self.img_paths, field_of_view, idx = self.load_matrices()
         self.imgs = self.load_imgs()
         self.img_shape = self.imgs[0].shape
 
-        # 2. Load pose matrix and all the attrs to be used
-        self._pose_inv, self.bds, self.focal_length = self.load_matrices()
-        assert (len(self.imgs) == len(self._pose_inv))
-        self._render_poses = None
-        self._test_i = None
-        self._val_i = None
-        self._train_i = None
+        # NOTE: focal length는 {1\over 2} {W\over \tan({\theta \over 2})} 로 계산된다.
+        # 참고 : https://velog.io/@gjghks950/NeRF-%EA%B5%AC%ED%98%84-%ED%86%BA%EC%95%84%EB%B3%B4%EA%B8%B0-feat.-Camera-to-World-Transformation
+        self.focal_length = 0.5 * self.img_shape[1] / np.tan(0.5 * field_of_view)
 
-        # 3. Value Update
-        if kwargs['recenter']:
-            if int(os.environ['VERBOSE']):
-                log("Recentered : _poses updated\n")
-            self._poses = recenter_poses(self.w2c)
+        assert (len(self.imgs) == len(self._poses))
 
-        self._render_poses = torch.stack([pose_spherical(angle, -30.0, 4.0) for angle in np.linspace(-180,180,40+1)[:-1]], 0)
+        self._train_i, self._val_i, self._test_i = idx
 
-        self._test_i = get_test_idx(self._poses, -1, self.imgs.shape)
-        self._val_i = get_val_idx(self._test_i)
-        self._train_i = get_train_idx(self._val_i, self._test_i, self.imgs.shape)
-        self._near, self._far = torch.FloatTensor(2.), torch.FloatTensor(6.)
+        self._render_poses = torch.stack([pose_spherical(angle, -30.0, 4.0) for angle in np.linspace(-180, 180, kwargs['render_pose_num']+1)[:-1]], 0)
+
+        self._near, self._far = torch.FloatTensor([2.]), torch.FloatTensor([6.])
+
+        self.bds = None
+
+        # 3. Dataset Specific
+        # NOTE: durl
+        if kwargs['half_res']:
+            self.img_shape, self.focal_length, self.imgs = get_resize(self.img_shape, self.focal_length, self.imgs)
+
+        if kwargs['white_bkgd']:
+            self.imgs = self.imgs[..., :3] * self.imgs[..., -1:] + (1. - self.imgs[..., -1:])
+        else:
+            self.imgs = self.imgs[..., :3]
 
     def __len__(self):
         return len(self.imgs)
@@ -94,11 +85,12 @@ class SyntheticDataset(Dataset):
 
     @Dataset.w2c.getter
     def w2c(self):
-        return inverse_w2c(self.c2w)
+        w2cs = self._poses[:, :3, :4]
+        return w2cs
 
     @Dataset.c2w.getter
     def c2w(self):
-        return self._pose_inv
+        return
 
     @Dataset.render_pose.getter
     def render_pose(self):
@@ -123,51 +115,57 @@ class SyntheticDataset(Dataset):
 
     @Dataset.near.getter
     def near(self):
-        return self._near
+        return self._near.to(os.environ['DEVICE'])
 
     @Dataset.far.getter
     def far(self):
-        return self._far
+        return self._far.to(os.environ['DEVICE'])
 
     def load_imgs(self):
-        # TODO: Factor 반영하기
         imgs = [imread(path) / 255. for path in self.img_paths]
         imgs = np.stack(imgs, 0).astype(np.float32)
         return imgs
 
     def load_matrices(self):
-        with open(f'{self.data_dir}/transforms_{self.run_type}.json') as f:
-            raw = json.load(f)
-        field_of_view = raw['camera_angle_x']
-        # NOTE: focal length는 {1\over 2} {W\over \tan({\theta \over 2})} 로 계산된다.
-        # 참고 : https://velog.io/@gjghks950/NeRF-%EA%B5%AC%ED%98%84-%ED%86%BA%EC%95%84%EB%B3%B4%EA%B8%B0-feat.-Camera-to-World-Transformation
-        focal = 0.5 * self.img_shape[1] / np.tan(0.5*field_of_view)
+        """
+        boundary 값을 따로 지정하지 않고 있음
+        Field of view가 바뀌지 않는다고 가정
+        이 데이터 셋은 (x,y,z) 그대로 들어오는 듯
+        :return:
+        """
+        def enum(s, e):
+            return list(range(s, e))
+        idx = []
+        lens = [0]
+        c2ws, img_dir = [], []
+        for run_type in ['train', 'val', 'test']:
+            with open(f'{self.data_dir}/transforms_{run_type}.json') as f:
+                raw = json.load(f)
+            field_of_view = raw['camera_angle_x']
 
-        frames = raw['frames']
-        c2ws = []
-        for frame in frames:
-            c2ws.append(frame['transform_matrix'])
-        c2ws = np.array(c2ws)
-        # 이 데이터 셋은 (x,y,z) 그대로 들어오는 듯
-        # c2ws = np.concatenate([c2ws[:, 1:2, :], -c2ws[:, 0:1, :], c2ws[:, 2:, :]], 1)
+            frames = raw['frames']
+            for frame in frames:
+                c2ws.append(frame['transform_matrix'])
+                img_dir.append('/'.join([self.data_dir]+frame['file_path'].split('/')[1:])+'.png')
+            idx.append(enum(lens[-1], len(c2ws)))
+            lens.append(len(c2ws))
 
-        # boundary값을 따로 지정하지 않고 있음
-        bds = [None] * len(frames)
-        return c2ws, bds, focal
+        return np.array(c2ws), img_dir, field_of_view, tuple(idx)
 
 
 def pose_spherical(theta, phi, radius):
     c2w = trans_t(radius)
     c2w = rot_phi(phi/180.*np.pi) @ c2w
     c2w = rot_theta(theta/180.*np.pi) @ c2w
-    c2w = torch.Tensor(np.array([[-1,0,0,0],[0,0,1,0],[0,1,0,0],[0,0,0,1]])) @ c2w
+    c2w = torch.Tensor(np.array([[-1, 0, 0, 0], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 1]])) @ c2w
     return c2w
 
-trans_t = lambda t : torch.Tensor([
-    [1,0,0,0],
-    [0,1,0,0],
-    [0,0,1,t],
-    [0,0,0,1]]).float()
+
+trans_t = lambda t: torch.Tensor([
+    [1, 0, 0, 0],
+    [0, 1, 0, 0],
+    [0, 0, 1, t],
+    [0, 0, 0, 1]]).float()
 
 rot_phi = lambda phi : torch.Tensor([
     [1,0,0,0],
@@ -175,8 +173,22 @@ rot_phi = lambda phi : torch.Tensor([
     [0,np.sin(phi), np.cos(phi),0],
     [0,0,0,1]]).float()
 
+
 rot_theta = lambda th : torch.Tensor([
-    [np.cos(th),0,-np.sin(th),0],
-    [0,1,0,0],
-    [np.sin(th),0, np.cos(th),0],
-    [0,0,0,1]]).float()
+    [np.cos(th), 0, -np.sin(th), 0],
+    [0, 1, 0, 0],
+    [np.sin(th), 0, np.cos(th), 0],
+    [0, 0, 0, 1]]).float()
+
+
+def get_resize(shape, focal, imgs):
+    H, W = shape[0], shape[1]
+    H = H // 2
+    W = W // 2
+    focal = focal / 2.
+
+    imgs_half_res = np.zeros((imgs.shape[0], H, W, 4))
+    for i, img in enumerate(imgs):
+        imgs_half_res[i] = cv2.resize(img, (W, H), interpolation=cv2.INTER_AREA)
+    imgs = imgs_half_res
+    return imgs[0].shape, focal, imgs

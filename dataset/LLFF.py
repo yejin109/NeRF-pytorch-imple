@@ -31,7 +31,7 @@ class LLFFDataset(Dataset):
         self._val_i = None
         self._train_i = None
 
-        # 3. Value Update
+        # 3. Dataset Specific
         if kwargs['recenter']:
             if int(os.environ['VERBOSE']):
                 log("Recentered : _poses updated\n")
