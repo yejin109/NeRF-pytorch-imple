@@ -27,6 +27,7 @@ def sample_ray_batch(rays_rgb, i_batch, N_rand):
     # Random over all images
     batch = rays_rgb[i_batch:i_batch + N_rand]  # [B, 2+1, 3*?]
     batch = torch.transpose(batch, 0, 1)
+    # 위의 _images로 np.concatenate된 것에서 보면 알 수 있듯이 만들어낸 ray와 실제 image의 값을 합치게 된다.
     batch_rays, target_s = batch[:2], batch[2]
 
     i_batch += N_rand
@@ -70,6 +71,61 @@ def ray_generation(poses, images, N_rand, use_batching, H, W, focal, K, N_iters,
     batch_rays = torch.stack([rays_o, rays_d], 0)
     target_s = target[select_coords[:, 0], select_coords[:, 1]]  # (N_rand, 3)
     return target_s, batch_rays
+
+
+def ray_post_processing(H, W, focal, K=None, c2w=None, ndc=True, rays=None, near=0., far=1., use_viewdirs=False, c2w_staticcam=None, **kwargs):
+    """
+    H: int. Height of image in pixels.
+    W: int. Width of image in pixels.
+    focal: float. Focal length of pinhole camera.
+    rays: array of shape [2, batch_size, 3]. Ray origin and direction for each example in batch.
+    c2w: array of shape [3, 4]. Camera-to-world transformation matrix.
+    ndc: bool. If True, represent ray origin, direction in NDC coordinates.
+    near: float or array of shape [batch_size]. Nearest distance for a ray.
+    far: float or array of shape [batch_size]. Farthest distance for a ray.
+    use_viewdirs: bool. If True, use viewing direction of a point in space in model.
+    c2w_staticcam: array of shape [3, 4]. If not None, use this transformation matrix for camera while using other c2w argument for viewing directions.
+    :return:
+    ray
+    """
+    if c2w is not None:
+        # special case to render full image
+        rays_o, rays_d = get_rays(H, W, K, c2w)
+    else:
+        # use provided ray batch
+        rays_o, rays_d = rays
+
+    if use_viewdirs:
+        # provide ray directions as input
+        viewdirs = rays_d
+        if c2w_staticcam is not None:
+            # special case to visualize effect of viewdirs
+            rays_o, rays_d = get_rays(H, W, K, c2w_staticcam)
+
+        # Make all directions unit magnitude.
+        # shape: [batch_size, 3]
+        viewdirs = viewdirs / torch.linalg.norm(viewdirs, dim=-1, keepdim=True)
+        # viewdirs = tf.cast(tf.reshape(viewdirs, [-1, 3]), dtype=tf.float32)
+        viewdirs = viewdirs.reshape([-1, 3]).float()
+
+    # sh = rays_d.shape  # [..., 3]
+    if ndc:
+        # for forward facing scenes
+        rays_o, rays_d = ndc_rays(
+            H, W, focal, torch.Tensor([1.0]).float(), rays_o, rays_d)
+
+    # Create ray batch
+    rays_o = torch.reshape(rays_o, [-1, 3]).float()
+    rays_d = torch.reshape(rays_d, [-1, 3]).float()
+    near, far = near * torch.ones_like(rays_d[..., :1]), far * torch.ones_like(rays_d[..., :1])
+
+    # (ray origin, ray direction, min dist, max dist) for each ray
+    rays = torch.concat([rays_o, rays_d, near, far], dim=-1)
+    if use_viewdirs:
+        # (ray origin, ray direction, min dist, max dist, normalized viewing direction)
+        rays = torch.concat([rays, viewdirs], dim=-1)
+
+    return rays
 
 
 def get_rays_np(H, W, K, c2w):

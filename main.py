@@ -1,3 +1,12 @@
+"""
+Search each step
+Step 1 : Load Dataset
+Step 2: Load Model
+Step 3 : Load Rendering
+Step 4 : Ray Generation
+Step 5: Ray Colorization
+"""
+
 import _init_env
 import datetime
 
@@ -15,7 +24,6 @@ from functionals import TotalGradNorm, log_train, log_cfg, log_internal
 
 
 def run(rendering_cfg, dataset_cfg, run_args):
-    hwf = run_args['hwf']
     # Step 3 : Load Rendering
     render_args_train, render_kwargs_test = nerf_model.get_render_kwargs(
         rendering_cfg['perturb'],
@@ -23,9 +31,6 @@ def run(rendering_cfg, dataset_cfg, run_args):
         rendering_cfg['N_samples'],
         rendering_cfg['use_viewdirs'],
         rendering_cfg['raw_noise_std'],
-        # dataset_cfg['no_ndc'],
-        # dataset_cfg['lindisp'],
-        # dataset_cfg['data_type'],
         **dataset_cfg,
     )
     render_args_train['near'] = run_args['near']
@@ -33,15 +38,14 @@ def run(rendering_cfg, dataset_cfg, run_args):
     render_kwargs_test['near'] = run_args['near']
     render_kwargs_test['far'] = run_args['far']
 
-    use_batch = not model_config['no_batching']
     ray_cfg = {
         "poses": run_args["poses"],
         "images": run_args["images"],
         "N_rand": model_config['N_rand'],
-        "use_batching": use_batch,
-        "H": hwf[0],
-        "W": hwf[1],
-        "focal": hwf[2],
+        "use_batching": not model_config['no_batching'],
+        "H": run_args['hwf'][0],
+        "W": run_args['hwf'][1],
+        "focal": run_args['hwf'][2],
         "K": run_args['K'],
         "i_train": run_args["i_train"],
         "i_val": run_args["i_val"],
@@ -52,31 +56,25 @@ def run(rendering_cfg, dataset_cfg, run_args):
     }
 
     test_cfg = {
-        # 'render_poses': run_args['poses'][run_args['i_test']],
-        'render_poses': run_args['render_poses'],
-        'hwf': run_args['hwf'].astype(int),
-        "chunk": model_config['chunk'],
-        'render_kwargs': render_kwargs_test,
         'models': run_args['models'],
         'embedder_ray': run_args['embedder_ray'],
         'embedder_view': run_args['embedder_view'],
-        'K': run_args['K'],
-        'savedir': os.environ['LOG_DIR'],
+
+        'render_poses': run_args['render_poses'],
+        'render_kwargs': render_kwargs_test,
         'render_factor': rendering_cfg['render_factor'],
 
-        # For reder_rays()
-        # 'N_samples': rendering_config['N_samples'],
-        # 'images': run_args["images"],
-        # 'focal': run_args['focal'],
-        # 'batch_size': run_args['batch_size'],
+        'K': run_args['K'],
+        'hwf': run_args['hwf'].astype(int),
+        "chunk": model_config['chunk'],
+        'savedir': os.environ['LOG_DIR'],
     }
 
-    if use_batch:
+    if not model_config['no_batching']:
         batch_cfg = {
-            "H": hwf[0],
-            "W": hwf[1],
+            "H": run_args['hwf'][0],
+            "W": run_args['hwf'][1],
             'K': run_args['K'],
-            # "focal": run_args['focal'],
             "poses": run_args["poses"],
             "images": run_args["images"],
             "i_train": run_args["i_train"],
@@ -85,15 +83,21 @@ def run(rendering_cfg, dataset_cfg, run_args):
         i_batch = 0
 
     optimizer = Adam(run_args["params"], lr=run_args["lrate"], betas=(0.9, 0.999))
-    epoch_args = dict(run_args, **{'render_args_train': render_args_train, 'ray_cfg': ray_cfg})
+    epoch_args = dict(run_args, **{'render_args_train': render_args_train})
     for iter_i in tqdm.tqdm(range(model_config['N_iters'])):
         # Step 4 : Ray Generation
-        if use_batch:
+        # - Pre process : Batch sampling or Random sampling
+        if not model_config['no_batching']:
             rays_rgb, batch_rays, target_s, i_batch = nerf_model.ray.sample_ray_batch(rays_rgb, i_batch, model_config['N_rand'])
-        elif model_config['N_rand'] is not None:
+        else:
             target_s, batch_rays = nerf_model.ray_generation(**dict(ray_cfg, **{'iter_i': iter_i}))
-        loss_epoch, psnr_epoch = run_epoch(**dict(epoch_args, **{'iter_i': iter_i, 'batch_rays': batch_rays,
-                                                                 "optimizer": optimizer, "target_s": target_s}))
+        # - Post process : Update rays w.r.t ndc, use_viewdirs and etc.
+        rays = nerf_model.ray.ray_post_processing(ray_cfg['H'], ray_cfg['W'], focal=ray_cfg['focal'], rays=batch_rays,
+                                                  **render_args_train)
+
+        # Forward
+        loss_epoch, psnr_epoch = run_epoch(**dict(epoch_args, **{'iter_i': iter_i, 'rays': rays, "optimizer": optimizer,
+                                                                 "target_s": target_s}))
 
         # Logging
         if (iter_i+1) % 100 == 0:
@@ -109,18 +113,19 @@ def run(rendering_cfg, dataset_cfg, run_args):
         log_train(iter_i, loss_epoch, psnr_epoch, grad_norm_epoch)
 
 
-def run_epoch(models, H, W, lrate, lrate_decay, chunk, iter_i, render_args_train, ray_cfg, batch_size,
-              embedder_ray, optimizer, batch_rays, target_s, embedder_view=None, **kwargs):
+def run_epoch(models, lrate, lrate_decay, chunk, iter_i, render_args_train, batch_size,
+              embedder_ray, optimizer, rays, target_s, embedder_view=None, **kwargs):
     # Step 5: Ray Colorization
-    # - Preprocess : Make rays to be used for model
-    rays = nerf_model.rendering.render_preprocess(H, W, focal=ray_cfg['focal'], rays=batch_rays, **render_args_train)
-
-    # - Volumetric Rendering
     model_coarse = models['model']
     model_fine = models['model_fine']
     all_ret = {}
     for i in range(0, rays.shape[0], chunk):
-        ret = nerf_model.rendering.render_rays(rays[i:i+chunk], model_coarse, model_fine, embedder_ray, embedder_view, **render_args_train)
+        # - Preprocess : Make rays to be used for model
+        rays_o, rays_d, z_vals, viewdirs = nerf_model.rendering.render_preprocess(rays[i:i+chunk], **render_args_train)
+
+        # - Volumetric Rendering : Run network and then rendering(raw2output). Hierarchical sampling implemented.
+        ret = nerf_model.rendering.render_rays(rays_o, rays_d, z_vals, viewdirs, model_coarse, model_fine, embedder_ray,
+                                               embedder_view, **render_args_train)
         for k in ret:
             if k not in all_ret:
                 all_ret[k] = []
@@ -148,7 +153,6 @@ def run_epoch(models, H, W, lrate, lrate_decay, chunk, iter_i, render_args_train
 
     loss.backward()
     optimizer.step()
-    # torch.cuda.empty_cache()
 
     # NOTE: IMPORTANT!
     ###   update learning rate   ###
@@ -161,9 +165,6 @@ def run_epoch(models, H, W, lrate, lrate_decay, chunk, iter_i, render_args_train
 
 
 if __name__ == '__main__':
-    # config = yaml.safe_load(open('./config.yml'))['llff']
-    # dset = dataset.SyntheticDataset(**config)
-
     torch.backends.cudnn.benchmark = True
     setting = yaml.safe_load(open('./config.yml'))
     # dataset_config = setting['llff']
@@ -175,7 +176,7 @@ if __name__ == '__main__':
     # Step 1 : Load Dataset
     # dset = dataset.LLFFDataset(**dict(dataset_config, **{'render_pose_num': rendering_config['render_pose_num'], 'N_rots': rendering_config['N_rots'], 'zrate': rendering_config['zrate']}))
     dset = dataset.SyntheticDataset(**dict(dataset_config, **{'render_pose_num': rendering_config['render_pose_num']}))
-    #
+
     # Step 2: Load Model
     model_config = dict(model_config, **rendering_config)
     model_config['embed_cfg'] = embedding_config
@@ -185,23 +186,20 @@ if __name__ == '__main__':
     # - Step 3
     # - Step 4
     # - Step 5
-    near = dset.near
-    far = dset.far
-    hwf = dset.hwf
     run_arguments = {
         "poses": dset.w2c,
         "render_pose": dset.render_pose,
         "images": dset.imgs,
         "params": params,
-        "H": hwf[0],
-        "W": hwf[1],
+        "H": dset.hwf[0],
+        "W": dset.hwf[1],
         "K": dset.intrinsic_matrix,
-        "focal": hwf[2],
+        "focal": dset.hwf[2],
         "lrate": model_config['lrate'],
         "lrate_decay": model_config['lrate_decay'],
         "chunk": model_config['chunk'],
-        'near': near,
-        'far': far,
+        'near': dset.near,
+        'far': dset.far,
 
         # Ray Generation
         'i_train': dset.train_i,
@@ -217,13 +215,7 @@ if __name__ == '__main__':
 
         # Export
         'render_poses': dset.render_pose,
-        'hwf': hwf,
-
+        'hwf': dset.hwf,
     }
     run(rendering_config, dataset_config, run_arguments)
-    #
-    # print(dataset_config)
-    # print(dset.intrinsic_matrix)
-    # print(dset.hwf)
-    # print(dset.img_shape)
 

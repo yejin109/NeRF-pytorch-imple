@@ -4,6 +4,27 @@
 3. Camera calibration [link](https://www.mathworks.com/help/vision/ug/camera-calibration.html)
 
 
+# Process
+
+## Iteration
+1. Batch : H*W개의 ray에서 indexing으로 N_rand개의 ray를 iteration마다 학습에 사용.
+   - 이 때 batch랑 실제 이미지에서 pixel에 해당하는 값이 matching을 해야해서 prpare_ray_batching과 sample_ray_batch에서 보면 indexing으로 가져가게 한다.
+2. Chunk :  한 batch에서 chunk만큼 한번에 nerf 모델에 입력하여 예측하도록 하는 단위
+3. Netchunk : Chunk를 가지고 forward할 때 1024*64의 크기만큼 forward를 진행. 이는 GRAM의 사용과 관련있을 것으로 보임
+
+## Overall
+1. Load Dataset
+2. Load Model
+3. Load Rendering
+4. Ray Generation
+    - Pre process : Batch sampling or Random sampling
+    - Post process : Update rays w.r.t ndc, use_viewdirs and etc
+5. Ray Colorization
+    - Preprocess : Make rays to be used for model
+    - Volumetric Rendering : Run network and then rendering(raw2output). Hierarchical sampling implemented.
+    - Post process : aggregate chunk into and batch and backpropagation
+
+
 # Log
 ## Performance, Error 
 - [230420, ray] : ray.get_rays_np()에서 기존 구현에서 문제가 있었던 것 수정
