@@ -2,7 +2,7 @@ import abc
 
 
 class Dataset:
-    def __init__(self, data_type, run_type, dataset, path_zflat, factor, bd_factor):
+    def __init__(self, data_type, dataset, run_type=None, path_zflat=None, factor=None, bd_factor=None):
         self.data_type = data_type
         self.dataset = dataset
         self.run_type = run_type

@@ -10,7 +10,7 @@ from functionals import log_cfg, log_internal
 
 class LLFFDataset(Dataset):
     def __init__(self, data_type, run_type, dataset, path_zflat, llffhold, factor=None, bd_factor=None, **kwargs):
-        super(LLFFDataset, self).__init__(data_type, run_type, dataset, path_zflat, factor, bd_factor)
+        super(LLFFDataset, self).__init__(data_type, dataset, run_type, path_zflat, factor, bd_factor)
         # 0. Setup
         sfx = ""
         if self.factor is not None:

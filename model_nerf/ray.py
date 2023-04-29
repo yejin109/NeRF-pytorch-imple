@@ -39,7 +39,7 @@ def sample_ray_batch(rays_rgb, i_batch, N_rand):
     return rays_rgb, batch_rays, target_s, i_batch
 
 
-def ray_generation(poses, images, N_rand, use_batching, H, W, focal, K, N_iters, i_train, i_val, i_test, precrop_iters, precrop_frac, iter_i):
+def ray_generation(poses, images, N_rand, H, W, K, i_train, precrop_iters, precrop_frac, iter_i):
     # Random from one image
     img_i = np.random.choice(i_train)
     target = images[img_i]
@@ -73,7 +73,7 @@ def ray_generation(poses, images, N_rand, use_batching, H, W, focal, K, N_iters,
     return target_s, batch_rays
 
 
-def ray_post_processing(H, W, focal, K=None, c2w=None, ndc=True, rays=None, near=0., far=1., use_viewdirs=False, c2w_staticcam=None, **kwargs):
+def ray_post_processing(H, W, focal, rays, K=None, c2w=None, ndc=True, near=0., far=1., use_viewdirs=False, c2w_staticcam=None, **kwargs):
     """
     H: int. Height of image in pixels.
     W: int. Width of image in pixels.

@@ -1,18 +1,6 @@
 """
 TODO
 
-- half_res : 해당 데이터셋은 원본 이미지를 사용하는데 이걸 그대로 사용할지 말지에 따라서 값을 업데이트 해야함
-e.g.
-    if half_res:
-        H = H//2
-        W = W//2
-        focal = focal/2.
-
-        imgs_half_res = np.zeros((imgs.shape[0], H, W, 4))
-        for i, img in enumerate(imgs):
-            imgs_half_res[i] = cv2.resize(img, (W, H), interpolation=cv2.INTER_AREA)
-        imgs = imgs_half_res
-        # imgs = tf.image.resize_area(imgs, [400, 400]).numpy()
 - skip: 만들어진 데이터셋이다 보니 사진이 많아서 학습할 때에는 다 쓰는데 validation이나 test에서는 조정을 하기도 한다.
 e.g.
     if s=='train' or testskip==0:
@@ -35,7 +23,7 @@ from ._utils import imread
 
 class SyntheticDataset(Dataset):
     def __init__(self, data_type, dataset, path_zflat, run_type=None, factor=None, bd_factor=None, **kwargs):
-        super(SyntheticDataset, self).__init__(data_type, run_type, dataset, path_zflat, factor, bd_factor)
+        super(SyntheticDataset, self).__init__(data_type, dataset, run_type, path_zflat, factor, bd_factor)
         # 1. Load pose matrix and all the attrs to be used
         self._poses, self.img_paths, field_of_view, idx = self.load_matrices()
         self.imgs = self.load_imgs()

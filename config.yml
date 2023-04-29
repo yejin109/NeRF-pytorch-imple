@@ -1,35 +1,45 @@
-synthetic:
-  data_type: nerf_synthetic
-  dataset: chair # options : chair, drums, ficus, hotdog, lego, materials, mic, ship
-  run_type: train # options : train, val ,test
+data:
+  synthetic:
+    data_type: nerf_synthetic
+    dataset: chair # options : chair, drums, ficus, hotdog, lego, materials, mic, ship
+    run_type: train # options : train, val ,test
 
-  factor: 8
-  no_ndc: True # 'do not use normalized device coordinates (set for non-forward facing scenes)
-  spherify : True
+    factor: 8
+    no_ndc: True # 'do not use normalized device coordinates (set for non-forward facing scenes)
+    spherify : True
 
-  path_zflat: False # regarding render_poses(poses for test img), choose spiral or path
-  bd_factor: .75
-  recenter : True
-  llffhold: 8 # will take every 1/N images as LLFF test set, paper uses 8
+    path_zflat: False # regarding render_poses(poses for test img), choose spiral or path
+    bd_factor: .75
+    recenter : True
+    llffhold: 8 # will take every 1/N images as LLFF test set, paper uses 8
 
-  half_res : True
-  white_bkgd: False # set to render synthetic data on a white bkgd (always use for dvoxels)
+    half_res : True
+    white_bkgd: False # set to render synthetic data on a white bkgd (always use for dvoxels)
 
-llff:
-  data_type: nerf_llff_data
-  dataset: trex # options : fern, flower, fortress, horns, leaves, orchids, room, trex
-  run_type: train # options : train, val ,test
+  llff:
+    data_type: nerf_llff_data
+    dataset: trex # options : fern, flower, fortress, horns, leaves, orchids, room, trex
+    run_type: train # options : train, val ,test
 
-  factor: 8
-  no_ndc: False # 'do not use normalized device coordinates (set for non-forward facing scenes)
-  lindisp: False # sampling linearly in disparity rather than depth
-  spherify : False # Should be synchronized with Image source camera position distribution
+    factor: 8
+    no_ndc: False # 'do not use normalized device coordinates (set for non-forward facing scenes)
+    lindisp: False # sampling linearly in disparity rather than depth
+    spherify : False # Should be synchronized with Image source camera position distribution
 
-  path_zflat: False # regarding render_poses(poses for test img), choose spiral or path
-  bd_factor: .75
-  recenter : True
-  llffhold: 8 # will take every 1/N images as LLFF test set, paper uses 8
+    path_zflat: False # regarding render_poses(poses for test img), choose spiral or path
+    bd_factor: .75
+    recenter : True
+    llffhold: 8 # will take every 1/N images as LLFF test set, paper uses 8
 
+
+  thin_structure:
+    data_type: neus_thin_structure
+    dataset: thin_catbus
+
+    camera_outside_sphere: True
+    scale_mat_scale : 1.1
+
+    white_bkgd: False
 
 embed:
   include_input: True
@@ -38,55 +48,121 @@ embed:
 
 
 rendering:
-  N_samples: 64 # number of coarse samples per ray
-  N_importance: 64 # number of additional fine samples per ray
-  perturb: 1. # set to 0. for no jitter, 1. for jitter
-  use_viewdirs: True # use full 5D input instead of 3D
-  i_embed: 0 # set 0 for default positional encoding, -1 for none
+  nerf:
+    N_samples: 64 # number of coarse samples per ray
+    N_importance: 64 # number of additional fine samples per ray
+    perturb: 1. # set to 0. for no jitter, 1. for jitter
+    use_viewdirs: True # use full 5D input instead of 3D
+    i_embed: 0 # set 0 for default positional encoding, -1 for none
 
-  multires: 10 # 'log2 of max freq for positional encoding (3D location)'
-  multires_views: 4 # 'log2 of max freq for positional encoding (2D direction)'
-  raw_noise_std: 1 # 'std dev of noise added to regularize sigma_a output, 1e0 recommended'
+    multires: 10 # 'log2 of max freq for positional encoding (3D location)'
+    multires_views: 4 # 'log2 of max freq for positional encoding (2D direction)'
+    raw_noise_std: 1 # 'std dev of noise added to regularize sigma_a output, 1e0 recommended'
 
-  render_only: False # do not optimize, reload weights and render out render_poses path
-  render_test: False # render the test set instead of render_poses path
-  render_factor: 0 #downsampling factor to speed up rendering, set 4 or 8 for fast preview
+    render_only: False # do not optimize, reload weights and render out render_poses path
+    render_test: False # render the test set instead of render_poses path
+    render_factor: 0 #downsampling factor to speed up rendering, set 4 or 8 for fast preview
 
-  # Camera Movements
-  render_pose_num : 1 # default 120, newly added for factorization
-  N_rots : 2 # Number of rotation for spiral path
-  zrate: .5 # Moving speed along with z axis for spiral path
+    # Camera Movements
+    render_pose_num : 1 # default 120, newly added for factorization
+    N_rots : 2 # Number of rotation for spiral path
+    zrate: .5 # Moving speed along with z axis for spiral path
 
-  # For deeepvoxel
-  shape: greek # options, armchair/ cube/ greek/ vase
+    # For deeepvoxel
+    shape: greek # options, armchair/ cube/ greek/ vase
+
+  neus:
+    n_samples: 64
+    n_importance: 64
+    n_outside: 0
+    up_sample_steps: 4     # 1 for simple coarse-to-fine sampling
+    perturb:  1.0
+
+    render_pose_num: 1
 
 
 
 model:
-  layer_num: 8 # Original netdepth: 8 # layers in network
-  hidden_dim : 256 # netwidth: 256 # channels per layer
-  layer_num_fine : 8 # netdepth_fine: 8 # layers in fine network
-  hidden_feature_fine : 256 # netwidth_fine: 256 # channels per layer in fine network
-  N_rand: 1024 # 32*32*4=4096, batch size (number of random rays per gradient step)
+  nerf:
+    layer_num: 8 # Original netdepth: 8 # layers in network
+    hidden_dim : 256 # netwidth: 256 # channels per layer
+    layer_num_fine : 8 # netdepth_fine: 8 # layers in fine network
+    hidden_feature_fine : 256 # netwidth_fine: 256 # channels per layer in fine network
+    batch_size: 1024 # 32*32*4=4096, batch size (number of random rays per gradient step)
 
-  lrate: 5.0E-4 # learning rate
-  lrate_decay: 250 # exponential learning rate decay (in 1000s)
-  lrate_schedule_gamma: 0.1
-  N_iters: 200000 # 2500 * 4096(N_rand) = 5GB GRAM usage
+    lrate: 5.0E-4 # learning rate
+    lrate_decay: 250 # exponential learning rate decay (in 1000s)
+    lrate_schedule_gamma: 0.1
+    N_iters: 200000 # 2500 * 4096(N_rand) = 5GB GRAM usage
 
-  chunk: 32768  # 65536, 1024*32, number of rays processed in parallel, decrease if running out of memory. (Rendering Image) 4585 - 1985 = 2600MiB Uses
-  netchunk: 65536 # 1024*64, number of pts sent through network in parallel, decrease if running out of memory
-  no_batching: False # only take random rays from 1 image at a time -> latency at ray_generation ~10s
-  no_reload: False # do not reload weights from saved ckpt
-  ft_path: None # specific weights npy file to reload for coarse network
-  random_seed: None, # fix random seed for repeatability
+    chunk: 32768  # 65536, 1024*32, number of rays processed in parallel, decrease if running out of memory. (Rendering Image) 4585 - 1985 = 2600MiB Uses
+    netchunk: 65536 # 1024*64, number of pts sent through network in parallel, decrease if running out of memory
+    no_batching: False # only take random rays from 1 image at a time -> latency at ray_generation ~10s
+    no_reload: False # do not reload weights from saved ckpt
+    ft_path: None # specific weights npy file to reload for coarse network
+    random_seed: None, # fix random seed for repeatability
 
-  precrop_iters: 0 # 'number of steps to train on central crops'
-  precrop_frac: .5 # fraction of img taken for central crops
+    precrop_iters: 0 # 'number of steps to train on central crops'
+    precrop_frac: .5 # fraction of img taken for central crops
 
-blender:
-  white_bkgd: True # set to render synthetic data on a white bkgd (always use for dvoxels)
+  neus:
+    learning_rate: 5.0E-4
+    learning_rate_alpha: 0.05
+    N_iters: 300000
 
+    batch_size: 256
+    validate_resolution_level: 4
+    warm_up_end: 5000
+    anneal_end: 50000
+
+    igr_weight: 0.1
+    mask_weight: 0.0
+
+    layer_num_fine: 8 # netdepth_fine: 8 # layers in fine network
+    hidden_feature_fine: 256 # netwidth_fine: 256 # channels per layer in fine network
+
+    layer_num: 8
+    hidden_dim: 256
+
+    backbone:
+      D: 8
+      d_in: 4
+      d_in_view: 3
+      W: 256
+      multires: 10
+      multires_view: 4
+      output_ch: 4
+      skips:
+        - 4
+      use_viewdirs: True
+
+
+    sdf_network:
+      d_out: 257
+      d_in: 3
+      d_hidden: 256
+      n_layers:  8
+      skip_in:
+        - 4
+      multires: 6
+      bias: 0.5
+      scale: 3.0
+      geometric_init: True
+      weight_norm: True
+
+    variance_network:
+      init_val: 0.3
+
+    rendering_network:
+      d_feature : 256
+      mode: idr
+      d_in: 9
+      d_out: 3
+      d_hidden: 256
+      n_layers:  4
+      weight_norm: True
+      multires_view: 4
+      squeeze_out: True
 
 log:
   i_print: 100

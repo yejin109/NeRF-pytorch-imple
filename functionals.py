@@ -7,7 +7,7 @@ import datetime
 import numpy as np
 
 
-def TotalGradNorm(parameters, norm_type=2):
+def total_grad_norm(parameters, norm_type=2):
     total_norm = 0
     for p in parameters:
         if p.grad is None:
@@ -18,9 +18,11 @@ def TotalGradNorm(parameters, norm_type=2):
     return total_norm
 
 
-def log_train(iter_i, loss, psnr, grad_norm):
+def log_train(*args):
+    # iter_i, loss, psnr, grad_norm
+    log = [str(i.item()) if type(i)==torch.Tensor else str(i) for i in args ]
     with open(f'{os.environ["LOG_DIR"]}/loss.txt', 'a') as f:
-        f.write(f'{iter_i},{loss},{grad_norm},{psnr}\n')
+        f.write(f'{",".join(log)}\n')
     f.close()
 
 

@@ -8,7 +8,7 @@ import torch.nn.functional as F
 from .sampler import sample_pdf
 from ._utils import batchify, log, to8b
 from functionals import log_cfg, log_time, log_internal
-from nerf_model.ray import ray_post_processing
+from model_nerf.ray import ray_post_processing
 
 
 def render_preprocess(rays_chunk, N_samples=None, lindisp=False, perturb=0., pytest=False, **kwargs):
@@ -190,7 +190,7 @@ def render_image(render_poses, hwf, chunk, render_kwargs, models,
     rgbs = []
     for pose_idx, c2w in enumerate(render_poses):
         log_internal(f"[Rendering Image] {pose_idx+1}/{len(render_poses)} START")
-        rays = ray_post_processing(H, W, focal, K=K, c2w=c2w[:3, :4], **render_kwargs)
+        rays = ray_post_processing(H, W, focal, rays=None, K=K, c2w=c2w[:3, :4], **render_kwargs)
 
         rgb = []
         model_coarse = models['model']

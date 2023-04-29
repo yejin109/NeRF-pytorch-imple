@@ -1,0 +1,5 @@
+====================================================================================================
+get_model:
+	Kwargs
+	args
+		{'learning_rate': 0.0005, 'learning_rate_alpha': 0.05, 'N_iters': 300000, 'batch_size': 256, 'validate_resolution_level': 4, 'warm_up_end': 5000, 'anneal_end': 50000, 'igr_weight': 0.1, 'mask_weight': 0.0, 'layer_num_fine': 8, 'hidden_feature_fine': 256, 'layer_num': 8, 'hidden_dim': 256, 'backbone': {'D': 8, 'd_in': 4, 'd_in_view': 3, 'W': 256, 'multires': 10, 'multires_view': 4, 'output_ch': 4, 'skips': [4], 'use_viewdirs': True}, 'sdf_network': {'d_out': 257, 'd_in': 3, 'd_hidden': 256, 'n_layers': 8, 'skip_in': [4], 'multires': 6, 'bias': 0.5, 'scale': 3.0, 'geometric_init': True, 'weight_norm': True}, 'variance_network': {'init_val': 0.3}, 'rendering_network': {'d_feature': 256, 'mode': 'idr', 'd_in': 9, 'd_out': 3, 'd_hidden': 256, 'n_layers': 4, 'weight_norm': True, 'multires_view': 4, 'squeeze_out': True}}

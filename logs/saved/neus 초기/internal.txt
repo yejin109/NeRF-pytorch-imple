@@ -1,0 +1,42 @@
+[14:22:43]====================================================================================================
+Interal Log
+
+[14:22:48][Data] Data loaded
+[14:22:49][Model] Model loaded
+[14:23:11][Train] 
+[14:23:11][Train] Iteration 100 / 300000 DONE, Loss : 0.4845, PSNR: 14.2472
+[14:23:32][Train] 
+[14:23:32][Train] Iteration 200 / 300000 DONE, Loss : 0.5032, PSNR: 13.9871
+[14:23:54][Train] 
+[14:23:54][Train] Iteration 300 / 300000 DONE, Loss : 0.5183, PSNR: 13.7625
+[14:24:15][Train] 
+[14:24:15][Train] Iteration 400 / 300000 DONE, Loss : 0.5034, PSNR: 13.7775
+[14:24:36][Train] 
+[14:24:36][Train] Iteration 500 / 300000 DONE, Loss : 0.4966, PSNR: 13.7737
+[14:24:36][Validate]: 499, camera at 6
+[14:25:35][Validate]: 499, Rendering done
+[14:25:35][Validate]: 499, Image saved
+[14:25:55][Train] 
+[14:25:55][Train] Iteration 600 / 300000 DONE, Loss : 0.3987, PSNR: 15.4057
+[14:26:15][Train] 
+[14:26:15][Train] Iteration 700 / 300000 DONE, Loss : 0.4294, PSNR: 14.9629
+[14:26:35][Train] 
+[14:26:35][Train] Iteration 800 / 300000 DONE, Loss : 0.4512, PSNR: 14.6574
+[14:26:55][Train] 
+[14:26:55][Train] Iteration 900 / 300000 DONE, Loss : 0.4145, PSNR: 14.9707
+[14:27:16][Train] 
+[14:27:16][Train] Iteration 1000 / 300000 DONE, Loss : 0.4512, PSNR: 14.6620
+[14:27:16][Validate]: 999, camera at 22
+[14:28:14][Validate]: 999, Rendering done
+[14:28:14][Validate]: 999, Image saved
+[14:28:34][Train] 
+[14:28:34][Train] Iteration 1100 / 300000 DONE, Loss : 0.4591, PSNR: 14.0214
+[14:28:54][Train] 
+[14:28:54][Train] Iteration 1200 / 300000 DONE, Loss : 0.4360, PSNR: 14.8165
+[14:29:14][Train] 
+[14:29:14][Train] Iteration 1300 / 300000 DONE, Loss : 0.4404, PSNR: 14.8518
+[14:29:33][Train] 
+[14:29:33][Train] Iteration 1400 / 300000 DONE, Loss : 0.3859, PSNR: 15.4442
+[14:29:53][Train] 
+[14:29:53][Train] Iteration 1500 / 300000 DONE, Loss : 0.4387, PSNR: 14.8030
+[14:29:53][Validate]: 1499, camera at 17

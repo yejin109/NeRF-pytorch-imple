@@ -1,6 +1,6 @@
 dataset/nerf_llff_data
 dataset/nerf_synthetic
-.idea
+dataset/neus*
 src/__pycache__/
 logs/export
 logs/TEST-*
