@@ -269,10 +269,10 @@ class SingleVarianceNetwork(nn.Module):
 @log_cfg
 def get_model(conf):
     params_to_train = []
-    nerf_outside = NeRF(**conf['backbone']).to(os.environ['device'])
-    sdf_network = SDFNetwork(**conf['sdf_network']).to(os.environ['device'])
-    deviation_network = SingleVarianceNetwork(**conf['variance_network']).to(os.environ['device'])
-    color_network = RenderingNetwork(**conf['rendering_network']).to(os.environ['device'])
+    nerf_outside = NeRF(**conf['backbone']).to(os.environ['DEVICE'])
+    sdf_network = SDFNetwork(**conf['sdf_network']).to(os.environ['DEVICE'])
+    deviation_network = SingleVarianceNetwork(**conf['variance_network']).to(os.environ['DEVICE'])
+    color_network = RenderingNetwork(**conf['rendering_network']).to(os.environ['DEVICE'])
     params_to_train += list(nerf_outside.parameters())
     params_to_train += list(sdf_network.parameters())
     params_to_train += list(deviation_network.parameters())

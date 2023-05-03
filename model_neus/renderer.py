@@ -5,10 +5,17 @@ import mcubes
 
 
 def extract_fields(bound_min, bound_max, resolution, query_func):
-    N = 64
-    X = torch.linspace(bound_min[0], bound_max[0], resolution).split(N)
-    Y = torch.linspace(bound_min[1], bound_max[1], resolution).split(N)
-    Z = torch.linspace(bound_min[2], bound_max[2], resolution).split(N)
+    def cast_int(val):
+        if isinstance(val, torch.Tensor):
+            return val.item()
+        return val
+    N = 64    
+
+    X = torch.linspace(cast_int(bound_min[0]), cast_int(bound_max[0]), resolution).split(N)
+    Y = torch.linspace(cast_int(bound_min[1]), cast_int(bound_max[1]), resolution).split(N)
+    Z = torch.linspace(cast_int(bound_min[2]), cast_int(bound_max[2]), resolution).split(N)
+    # Y = torch.linspace(bound_min[1], bound_max[1], resolution).split(N)
+    # Z = torch.linspace(bound_min[2], bound_max[2], resolution).split(N)
 
     u = np.zeros([resolution, resolution, resolution], dtype=np.float32)
     with torch.no_grad():

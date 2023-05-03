@@ -6,7 +6,7 @@ import numpy as np
 from tqdm import tqdm
 import torch.nn.functional as F
 
-from functionals import log_train, log_internal
+from functionals import log_train, log_internal, total_grad_norm
 
 
 def train(params_to_train, learning_rate, N_iters, dataset, white_bkgd, batch_size, mask_weight, renderer,
@@ -60,7 +60,7 @@ def train(params_to_train, learning_rate, N_iters, dataset, white_bkgd, batch_si
         # Logging
         cdf = (cdf_fine[:, :1] * mask).sum() / mask_sum
         weight_max = (weight_max * mask).sum() / mask_sum
-        log_train(loss, color_fine_loss, eikonal_loss, s_val.mean(), cdf, weight_max, psnr)
+        log_train(loss, color_fine_loss, eikonal_loss, s_val.mean(), cdf, weight_max, psnr, total_grad_norm(params_to_train))
 
         if (iter_step+1) % i_print == 0:
             log_internal('[Train] ')

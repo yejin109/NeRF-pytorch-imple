@@ -26,7 +26,7 @@ def train(rendering_cfg, dataset_cfg, run_args, model_config):
     ray_cfg = {
         "poses": run_args["poses"],
         "images": run_args["images"],
-        "N_rand": model_config['N_rand'],
+        "N_rand": model_config['batch_size'],
         "use_batching": not model_config['no_batching'],
         "H": run_args['hwf'][0],
         "W": run_args['hwf'][1],
@@ -73,7 +73,7 @@ def train(rendering_cfg, dataset_cfg, run_args, model_config):
         # Step 4 : Ray Generation
         # - Pre process : Batch sampling or Random sampling
         if not model_config['no_batching']:
-            rays_rgb, batch_rays, target_s, i_batch = model_nerf.ray.sample_ray_batch(rays_rgb, i_batch, model_config['N_rand'])
+            rays_rgb, batch_rays, target_s, i_batch = model_nerf.ray.sample_ray_batch(rays_rgb, i_batch, model_config['batch_size'])
         else:
             target_s, batch_rays = model_nerf.ray_generation(**dict(ray_cfg, **{'iter_i': iter_i}))
         # - Post process : Update rays w.r.t ndc, use_viewdirs and etc.
@@ -92,6 +92,14 @@ def train(rendering_cfg, dataset_cfg, run_args, model_config):
             render_cfg = dict(test_cfg, **{'iter_i': iter_i})
             with torch.no_grad():
                 model_nerf.rendering.render_image(**render_cfg)
+        
+        if (iter_i + 1) % 2000 == 0:
+            path = os.path.join(os.environ['LOG_DIR'], f'params_{iter_i}.pt')
+            torch.save({
+                'model_coarse' : run_args['models']['model'],
+                'model_fine' : run_args['models']['model_fine'],
+                'optimizer_state_dict': optimizer.state_dict(),
+            }, path)
 
         grad_norm_epoch = total_grad_norm(run_args['params'])
         log_train(iter_i, loss_epoch, psnr_epoch, grad_norm_epoch)
@@ -117,7 +125,7 @@ def run_epoch(models, lrate, lrate_decay, chunk, iter_i, render_args_train, batc
         del ret
 
     # - Post process
-    sh = (batch_size, 3)
+    sh = (len(rays), 3)
     k_extract = ['rgb_map', 'disp_map', 'acc_map']
     all_ret = {k: torch.concat(all_ret[k], 0) for k in all_ret}
     for k in all_ret:
@@ -175,7 +183,7 @@ def run(model_config, rendering_config, dataset_config, dset, params, models, em
 
         # Ray Colorization
         'N_samples': rendering_config['N_samples'],
-        'batch_size': model_config['N_rand'],
+        'batch_size': model_config['batch_size'],
         'models': models,
         'embedder_ray': embedder_ray,
         'embedder_view': embedder_view,

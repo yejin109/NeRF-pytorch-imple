@@ -4,3 +4,7 @@ dataset/neus*
 src/__pycache__/
 logs/export
 logs/TEST-*
+__pycache__/
+dataset/__pycache__
+model_nerf/__pycache__
+model_neus/__pycache__

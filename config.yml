@@ -1,7 +1,7 @@
 data:
   synthetic:
     data_type: nerf_synthetic
-    dataset: chair # options : chair, drums, ficus, hotdog, lego, materials, mic, ship
+    dataset: lego # options : chair, drums, ficus, hotdog, lego, materials, mic, ship
     run_type: train # options : train, val ,test
 
     factor: 8
@@ -18,7 +18,7 @@ data:
 
   llff:
     data_type: nerf_llff_data
-    dataset: trex # options : fern, flower, fortress, horns, leaves, orchids, room, trex
+    dataset: fern # options : fern, flower, fortress, horns, leaves, orchids, room, trex
     run_type: train # options : train, val ,test
 
     factor: 8
@@ -74,7 +74,7 @@ rendering:
   neus:
     n_samples: 64
     n_importance: 64
-    n_outside: 0
+    n_outside: 0 # default with mask. without mask, use 32
     up_sample_steps: 4     # 1 for simple coarse-to-fine sampling
     perturb:  1.0
 
@@ -110,10 +110,10 @@ model:
     learning_rate_alpha: 0.05
     N_iters: 300000
 
-    batch_size: 256
+    batch_size: 512
     validate_resolution_level: 4
     warm_up_end: 5000
-    anneal_end: 50000
+    anneal_end: 50000 # default for with maks. without mask, 50000, thin structure : 50000
 
     igr_weight: 0.1
     mask_weight: 0.0
@@ -165,8 +165,8 @@ model:
       squeeze_out: True
 
 log:
-  i_print: 100
-  i_img: 500 # frequency of tensorboard image logging
+  i_print: 200
+  i_img: 5000 # frequency of tensorboard image logging
   i_weights: 10000 # frequency of weight ckpt saving
-  i_testset: 10000 # frequency of testset saving
-  i_video: 50000 # frequency of render_poses video saving
+  i_testset: 5000 # frequency of testset saving
+  i_video: 20000 # frequency of render_poses video saving

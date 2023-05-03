@@ -1,0 +1,432 @@
+[12:38:37]====================================================================================================
+Interal Log
+
+[12:38:38][Data] Dataset Loading DONE
+[12:38:38][Model] Init Model DONE
+[12:38:54][Train] Iteration 100 / 200000 DONE, Loss : 0.0516, PSNR: 15.8345
+[12:39:09][Train] Iteration 200 / 200000 DONE, Loss : 0.0398, PSNR: 17.0081
+[12:39:24][Train] Iteration 300 / 200000 DONE, Loss : 0.0361, PSNR: 17.4455
+[12:39:24][Rendering Image] 1/1 START
+[12:39:36][Rendering Image] DONE
+[12:39:51][Train] Iteration 400 / 200000 DONE, Loss : 0.0298, PSNR: 18.2541
+[12:40:05][Train] Iteration 500 / 200000 DONE, Loss : 0.0299, PSNR: 18.2614
+[12:40:19][Train] Iteration 600 / 200000 DONE, Loss : 0.0269, PSNR: 18.7298
+[12:40:19][Rendering Image] 1/1 START
+[12:40:30][Rendering Image] DONE
+[12:40:45][Train] Iteration 700 / 200000 DONE, Loss : 0.0239, PSNR: 19.3207
+[12:41:00][Train] Iteration 800 / 200000 DONE, Loss : 0.0232, PSNR: 19.4788
+[12:41:14][Train] Iteration 900 / 200000 DONE, Loss : 0.0240, PSNR: 19.3534
+[12:41:14][Rendering Image] 1/1 START
+[12:41:25][Rendering Image] DONE
+[12:41:39][Train] Iteration 1000 / 200000 DONE, Loss : 0.0228, PSNR: 19.5602
+[12:41:54][Train] Iteration 1100 / 200000 DONE, Loss : 0.0182, PSNR: 20.5789
+[12:42:10][Train] Iteration 1200 / 200000 DONE, Loss : 0.0178, PSNR: 20.7797
+[12:42:10][Rendering Image] 1/1 START
+[12:42:21][Rendering Image] DONE
+[12:42:36][Train] Iteration 1300 / 200000 DONE, Loss : 0.0173, PSNR: 20.7137
+[12:42:50][Train] Iteration 1400 / 200000 DONE, Loss : 0.0166, PSNR: 21.0793
+[12:43:04][Train] Iteration 1500 / 200000 DONE, Loss : 0.0180, PSNR: 20.6513
+[12:43:04][Rendering Image] 1/1 START
+[12:43:15][Rendering Image] DONE
+[12:43:30][Train] Iteration 1600 / 200000 DONE, Loss : 0.0143, PSNR: 21.6562
+[12:43:44][Train] Iteration 1700 / 200000 DONE, Loss : 0.0142, PSNR: 21.5937
+[12:43:58][Train] Iteration 1800 / 200000 DONE, Loss : 0.0158, PSNR: 21.2184
+[12:43:58][Rendering Image] 1/1 START
+[12:44:09][Rendering Image] DONE
+[12:44:24][Train] Iteration 1900 / 200000 DONE, Loss : 0.0157, PSNR: 21.2496
+[12:44:38][Train] Iteration 2000 / 200000 DONE, Loss : 0.0141, PSNR: 21.7197
+[12:44:53][Train] Iteration 2100 / 200000 DONE, Loss : 0.0158, PSNR: 21.2119
+[12:44:53][Rendering Image] 1/1 START
+[12:45:03][Rendering Image] DONE
+[12:45:18][Train] Iteration 2200 / 200000 DONE, Loss : 0.0132, PSNR: 22.1495
+[12:45:32][Train] Iteration 2300 / 200000 DONE, Loss : 0.0142, PSNR: 21.4749
+[12:45:46][Train] Iteration 2400 / 200000 DONE, Loss : 0.0149, PSNR: 21.5485
+[12:45:46][Rendering Image] 1/1 START
+[12:45:57][Rendering Image] DONE
+[12:46:12][Train] Iteration 2500 / 200000 DONE, Loss : 0.0138, PSNR: 21.7551
+[12:46:27][Train] Iteration 2600 / 200000 DONE, Loss : 0.0127, PSNR: 21.9347
+[12:46:42][Train] Iteration 2700 / 200000 DONE, Loss : 0.0146, PSNR: 21.7140
+[12:46:42][Rendering Image] 1/1 START
+[12:46:53][Rendering Image] DONE
+[12:47:07][Train] Iteration 2800 / 200000 DONE, Loss : 0.0134, PSNR: 21.9280
+[12:47:22][Train] Iteration 2900 / 200000 DONE, Loss : 0.0136, PSNR: 21.7213
+[12:47:37][Train] Iteration 3000 / 200000 DONE, Loss : 0.0114, PSNR: 22.5038
+[12:47:37][Rendering Image] 1/1 START
+[12:47:48][Rendering Image] DONE
+[12:48:03][Train] Iteration 3100 / 200000 DONE, Loss : 0.0136, PSNR: 21.7316
+[12:48:12][Data] Shuffle data at 3238913th batch / Single batch size :1024
+[12:48:17][Train] Iteration 3200 / 200000 DONE, Loss : 0.0122, PSNR: 22.2681
+[12:48:32][Train] Iteration 3300 / 200000 DONE, Loss : 0.0107, PSNR: 22.7182
+[12:48:32][Rendering Image] 1/1 START
+[12:48:43][Rendering Image] DONE
+[12:48:58][Train] Iteration 3400 / 200000 DONE, Loss : 0.0107, PSNR: 22.9221
+[12:49:13][Train] Iteration 3500 / 200000 DONE, Loss : 0.0116, PSNR: 22.5340
+[12:49:28][Train] Iteration 3600 / 200000 DONE, Loss : 0.0130, PSNR: 22.0387
+[12:49:28][Rendering Image] 1/1 START
+[12:49:39][Rendering Image] DONE
+[12:49:54][Train] Iteration 3700 / 200000 DONE, Loss : 0.0115, PSNR: 22.5508
+[12:50:09][Train] Iteration 3800 / 200000 DONE, Loss : 0.0094, PSNR: 23.3713
+[12:50:24][Train] Iteration 3900 / 200000 DONE, Loss : 0.0117, PSNR: 22.5052
+[12:50:24][Rendering Image] 1/1 START
+[12:50:35][Rendering Image] DONE
+[12:50:50][Train] Iteration 4000 / 200000 DONE, Loss : 0.0104, PSNR: 23.1796
+[12:51:05][Train] Iteration 4100 / 200000 DONE, Loss : 0.0115, PSNR: 22.5588
+[12:51:20][Train] Iteration 4200 / 200000 DONE, Loss : 0.0114, PSNR: 22.4191
+[12:51:20][Rendering Image] 1/1 START
+[12:51:30][Rendering Image] DONE
+[12:51:45][Train] Iteration 4300 / 200000 DONE, Loss : 0.0105, PSNR: 22.9692
+[12:52:00][Train] Iteration 4400 / 200000 DONE, Loss : 0.0106, PSNR: 22.8118
+[12:52:15][Train] Iteration 4500 / 200000 DONE, Loss : 0.0106, PSNR: 22.8705
+[12:52:15][Rendering Image] 1/1 START
+[12:52:25][Rendering Image] DONE
+[12:52:40][Train] Iteration 4600 / 200000 DONE, Loss : 0.0101, PSNR: 23.0020
+[12:52:54][Train] Iteration 4700 / 200000 DONE, Loss : 0.0120, PSNR: 22.4859
+[12:53:09][Train] Iteration 4800 / 200000 DONE, Loss : 0.0103, PSNR: 22.9824
+[12:53:09][Rendering Image] 1/1 START
+[12:53:20][Rendering Image] DONE
+[12:53:36][Train] Iteration 4900 / 200000 DONE, Loss : 0.0107, PSNR: 22.8032
+[12:53:50][Train] Iteration 5000 / 200000 DONE, Loss : 0.0103, PSNR: 22.9536
+[12:54:05][Train] Iteration 5100 / 200000 DONE, Loss : 0.0116, PSNR: 22.4792
+[12:54:05][Rendering Image] 1/1 START
+[12:54:15][Rendering Image] DONE
+[12:54:30][Train] Iteration 5200 / 200000 DONE, Loss : 0.0102, PSNR: 23.0360
+[12:54:44][Train] Iteration 5300 / 200000 DONE, Loss : 0.0102, PSNR: 22.9085
+[12:54:59][Train] Iteration 5400 / 200000 DONE, Loss : 0.0128, PSNR: 22.0157
+[12:54:59][Rendering Image] 1/1 START
+[12:55:09][Rendering Image] DONE
+[12:55:24][Train] Iteration 5500 / 200000 DONE, Loss : 0.0116, PSNR: 22.4925
+[12:55:39][Train] Iteration 5600 / 200000 DONE, Loss : 0.0104, PSNR: 23.0218
+[12:55:53][Train] Iteration 5700 / 200000 DONE, Loss : 0.0122, PSNR: 22.3484
+[12:55:53][Rendering Image] 1/1 START
+[12:56:04][Rendering Image] DONE
+[12:56:18][Train] Iteration 5800 / 200000 DONE, Loss : 0.0102, PSNR: 23.1487
+[12:56:32][Train] Iteration 5900 / 200000 DONE, Loss : 0.0106, PSNR: 22.9036
+[12:56:47][Train] Iteration 6000 / 200000 DONE, Loss : 0.0108, PSNR: 22.8931
+[12:56:47][Rendering Image] 1/1 START
+[12:56:57][Rendering Image] DONE
+[12:57:12][Train] Iteration 6100 / 200000 DONE, Loss : 0.0106, PSNR: 23.1054
+[12:57:26][Train] Iteration 6200 / 200000 DONE, Loss : 0.0097, PSNR: 23.2239
+[12:57:40][Train] Iteration 6300 / 200000 DONE, Loss : 0.0099, PSNR: 23.1166
+[12:57:40][Rendering Image] 1/1 START
+[12:57:51][Rendering Image] DONE
+[12:57:55][Data] Shuffle data at 3238913th batch / Single batch size :1024
+[12:58:06][Train] Iteration 6400 / 200000 DONE, Loss : 0.0093, PSNR: 23.5980
+[12:58:20][Train] Iteration 6500 / 200000 DONE, Loss : 0.0094, PSNR: 23.3849
+[12:58:34][Train] Iteration 6600 / 200000 DONE, Loss : 0.0107, PSNR: 22.8692
+[12:58:34][Rendering Image] 1/1 START
+[12:58:46][Rendering Image] DONE
+[12:59:00][Train] Iteration 6700 / 200000 DONE, Loss : 0.0110, PSNR: 22.6096
+[12:59:15][Train] Iteration 6800 / 200000 DONE, Loss : 0.0102, PSNR: 22.8447
+[12:59:29][Train] Iteration 6900 / 200000 DONE, Loss : 0.0107, PSNR: 22.8757
+[12:59:29][Rendering Image] 1/1 START
+[12:59:40][Rendering Image] DONE
+[12:59:54][Train] Iteration 7000 / 200000 DONE, Loss : 0.0090, PSNR: 23.6553
+[13:00:09][Train] Iteration 7100 / 200000 DONE, Loss : 0.0099, PSNR: 23.3458
+[13:00:23][Train] Iteration 7200 / 200000 DONE, Loss : 0.0110, PSNR: 22.8769
+[13:00:23][Rendering Image] 1/1 START
+[13:00:34][Rendering Image] DONE
+[13:00:49][Train] Iteration 7300 / 200000 DONE, Loss : 0.0106, PSNR: 22.8284
+[13:01:04][Train] Iteration 7400 / 200000 DONE, Loss : 0.0085, PSNR: 23.8600
+[13:01:18][Train] Iteration 7500 / 200000 DONE, Loss : 0.0101, PSNR: 23.0481
+[13:01:18][Rendering Image] 1/1 START
+[13:01:29][Rendering Image] DONE
+[13:01:43][Train] Iteration 7600 / 200000 DONE, Loss : 0.0102, PSNR: 23.1532
+[13:01:58][Train] Iteration 7700 / 200000 DONE, Loss : 0.0100, PSNR: 23.2189
+[13:02:12][Train] Iteration 7800 / 200000 DONE, Loss : 0.0089, PSNR: 23.6009
+[13:02:12][Rendering Image] 1/1 START
+[13:02:23][Rendering Image] DONE
+[13:02:37][Train] Iteration 7900 / 200000 DONE, Loss : 0.0087, PSNR: 23.6522
+[13:02:51][Train] Iteration 8000 / 200000 DONE, Loss : 0.0104, PSNR: 22.8946
+[13:03:06][Train] Iteration 8100 / 200000 DONE, Loss : 0.0095, PSNR: 23.2268
+[13:03:06][Rendering Image] 1/1 START
+[13:03:17][Rendering Image] DONE
+[13:03:31][Train] Iteration 8200 / 200000 DONE, Loss : 0.0091, PSNR: 23.6948
+[13:03:45][Train] Iteration 8300 / 200000 DONE, Loss : 0.0095, PSNR: 23.2638
+[13:04:00][Train] Iteration 8400 / 200000 DONE, Loss : 0.0090, PSNR: 23.5960
+[13:04:00][Rendering Image] 1/1 START
+[13:04:11][Rendering Image] DONE
+[13:04:25][Train] Iteration 8500 / 200000 DONE, Loss : 0.0099, PSNR: 23.3888
+[13:04:40][Train] Iteration 8600 / 200000 DONE, Loss : 0.0089, PSNR: 23.5514
+[13:04:54][Train] Iteration 8700 / 200000 DONE, Loss : 0.0103, PSNR: 22.9263
+[13:04:54][Rendering Image] 1/1 START
+[13:05:05][Rendering Image] DONE
+[13:05:20][Train] Iteration 8800 / 200000 DONE, Loss : 0.0090, PSNR: 23.6949
+[13:05:34][Train] Iteration 8900 / 200000 DONE, Loss : 0.0090, PSNR: 23.7142
+[13:05:49][Train] Iteration 9000 / 200000 DONE, Loss : 0.0090, PSNR: 23.7838
+[13:05:49][Rendering Image] 1/1 START
+[13:06:00][Rendering Image] DONE
+[13:06:14][Train] Iteration 9100 / 200000 DONE, Loss : 0.0092, PSNR: 23.6855
+[13:06:29][Train] Iteration 9200 / 200000 DONE, Loss : 0.0089, PSNR: 23.8179
+[13:06:43][Train] Iteration 9300 / 200000 DONE, Loss : 0.0099, PSNR: 23.1388
+[13:06:43][Rendering Image] 1/1 START
+[13:06:54][Rendering Image] DONE
+[13:07:08][Train] Iteration 9400 / 200000 DONE, Loss : 0.0088, PSNR: 23.6469
+[13:07:21][Data] Shuffle data at 3238913th batch / Single batch size :1024
+[13:07:23][Train] Iteration 9500 / 200000 DONE, Loss : 0.0084, PSNR: 23.8279
+[13:07:38][Train] Iteration 9600 / 200000 DONE, Loss : 0.0087, PSNR: 23.6067
+[13:07:38][Rendering Image] 1/1 START
+[13:07:49][Rendering Image] DONE
+[13:08:03][Train] Iteration 9700 / 200000 DONE, Loss : 0.0097, PSNR: 23.3496
+[13:08:18][Train] Iteration 9800 / 200000 DONE, Loss : 0.0091, PSNR: 23.7032
+[13:08:32][Train] Iteration 9900 / 200000 DONE, Loss : 0.0079, PSNR: 24.3810
+[13:08:32][Rendering Image] 1/1 START
+[13:08:43][Rendering Image] DONE
+[13:08:57][Train] Iteration 10000 / 200000 DONE, Loss : 0.0084, PSNR: 23.8872
+[13:09:12][Train] Iteration 10100 / 200000 DONE, Loss : 0.0082, PSNR: 23.8724
+[13:09:27][Train] Iteration 10200 / 200000 DONE, Loss : 0.0085, PSNR: 23.8851
+[13:09:27][Rendering Image] 1/1 START
+[13:09:37][Rendering Image] DONE
+[13:09:51][Train] Iteration 10300 / 200000 DONE, Loss : 0.0098, PSNR: 23.3134
+[13:10:06][Train] Iteration 10400 / 200000 DONE, Loss : 0.0102, PSNR: 23.1783
+[13:10:21][Train] Iteration 10500 / 200000 DONE, Loss : 0.0093, PSNR: 23.3489
+[13:10:21][Rendering Image] 1/1 START
+[13:10:31][Rendering Image] DONE
+[13:10:45][Train] Iteration 10600 / 200000 DONE, Loss : 0.0073, PSNR: 24.5297
+[13:11:00][Train] Iteration 10700 / 200000 DONE, Loss : 0.0086, PSNR: 23.9769
+[13:11:15][Train] Iteration 10800 / 200000 DONE, Loss : 0.0090, PSNR: 23.7788
+[13:11:15][Rendering Image] 1/1 START
+[13:11:26][Rendering Image] DONE
+[13:11:41][Train] Iteration 10900 / 200000 DONE, Loss : 0.0082, PSNR: 24.1235
+[13:11:55][Train] Iteration 11000 / 200000 DONE, Loss : 0.0077, PSNR: 24.3949
+[13:12:10][Train] Iteration 11100 / 200000 DONE, Loss : 0.0096, PSNR: 23.2800
+[13:12:10][Rendering Image] 1/1 START
+[13:12:20][Rendering Image] DONE
+[13:12:35][Train] Iteration 11200 / 200000 DONE, Loss : 0.0085, PSNR: 23.9218
+[13:12:49][Train] Iteration 11300 / 200000 DONE, Loss : 0.0080, PSNR: 24.0751
+[13:13:03][Train] Iteration 11400 / 200000 DONE, Loss : 0.0079, PSNR: 24.0994
+[13:13:03][Rendering Image] 1/1 START
+[13:13:14][Rendering Image] DONE
+[13:13:28][Train] Iteration 11500 / 200000 DONE, Loss : 0.0085, PSNR: 23.6440
+[13:13:42][Train] Iteration 11600 / 200000 DONE, Loss : 0.0080, PSNR: 24.0279
+[13:13:57][Train] Iteration 11700 / 200000 DONE, Loss : 0.0089, PSNR: 23.5019
+[13:13:57][Rendering Image] 1/1 START
+[13:14:07][Rendering Image] DONE
+[13:14:21][Train] Iteration 11800 / 200000 DONE, Loss : 0.0093, PSNR: 23.9743
+[13:14:36][Train] Iteration 11900 / 200000 DONE, Loss : 0.0094, PSNR: 23.4567
+[13:14:50][Train] Iteration 12000 / 200000 DONE, Loss : 0.0094, PSNR: 23.5625
+[13:14:50][Rendering Image] 1/1 START
+[13:15:00][Rendering Image] DONE
+[13:15:15][Train] Iteration 12100 / 200000 DONE, Loss : 0.0080, PSNR: 24.0166
+[13:15:30][Train] Iteration 12200 / 200000 DONE, Loss : 0.0104, PSNR: 23.1920
+[13:15:45][Train] Iteration 12300 / 200000 DONE, Loss : 0.0085, PSNR: 23.8217
+[13:15:45][Rendering Image] 1/1 START
+[13:15:56][Rendering Image] DONE
+[13:16:10][Train] Iteration 12400 / 200000 DONE, Loss : 0.0084, PSNR: 23.9097
+[13:16:25][Train] Iteration 12500 / 200000 DONE, Loss : 0.0086, PSNR: 23.9080
+[13:16:42][Train] Iteration 12600 / 200000 DONE, Loss : 0.0086, PSNR: 23.6864
+[13:16:42][Rendering Image] 1/1 START
+[13:16:53][Rendering Image] DONE
+[13:17:00][Data] Shuffle data at 3238913th batch / Single batch size :1024
+[13:17:07][Train] Iteration 12700 / 200000 DONE, Loss : 0.0089, PSNR: 23.7161
+[13:17:22][Train] Iteration 12800 / 200000 DONE, Loss : 0.0089, PSNR: 23.9728
+[13:17:37][Train] Iteration 12900 / 200000 DONE, Loss : 0.0082, PSNR: 24.0830
+[13:17:37][Rendering Image] 1/1 START
+[13:17:48][Rendering Image] DONE
+[13:18:02][Train] Iteration 13000 / 200000 DONE, Loss : 0.0091, PSNR: 23.4443
+[13:18:17][Train] Iteration 13100 / 200000 DONE, Loss : 0.0092, PSNR: 23.4411
+[13:18:31][Train] Iteration 13200 / 200000 DONE, Loss : 0.0075, PSNR: 24.5259
+[13:18:31][Rendering Image] 1/1 START
+[13:18:42][Rendering Image] DONE
+[13:18:56][Train] Iteration 13300 / 200000 DONE, Loss : 0.0088, PSNR: 23.7388
+[13:19:10][Train] Iteration 13400 / 200000 DONE, Loss : 0.0097, PSNR: 23.3054
+[13:19:25][Train] Iteration 13500 / 200000 DONE, Loss : 0.0084, PSNR: 24.0160
+[13:19:25][Rendering Image] 1/1 START
+[13:19:35][Rendering Image] DONE
+[13:19:49][Train] Iteration 13600 / 200000 DONE, Loss : 0.0087, PSNR: 23.8706
+[13:20:04][Train] Iteration 13700 / 200000 DONE, Loss : 0.0074, PSNR: 24.3792
+[13:20:18][Train] Iteration 13800 / 200000 DONE, Loss : 0.0075, PSNR: 24.3637
+[13:20:18][Rendering Image] 1/1 START
+[13:20:29][Rendering Image] DONE
+[13:20:44][Train] Iteration 13900 / 200000 DONE, Loss : 0.0082, PSNR: 23.9680
+[13:20:58][Train] Iteration 14000 / 200000 DONE, Loss : 0.0078, PSNR: 24.2487
+[13:21:12][Train] Iteration 14100 / 200000 DONE, Loss : 0.0084, PSNR: 23.7807
+[13:21:12][Rendering Image] 1/1 START
+[13:21:23][Rendering Image] DONE
+[13:21:37][Train] Iteration 14200 / 200000 DONE, Loss : 0.0092, PSNR: 23.6407
+[13:21:52][Train] Iteration 14300 / 200000 DONE, Loss : 0.0076, PSNR: 24.3945
+[13:22:06][Train] Iteration 14400 / 200000 DONE, Loss : 0.0090, PSNR: 23.4596
+[13:22:06][Rendering Image] 1/1 START
+[13:22:16][Rendering Image] DONE
+[13:22:31][Train] Iteration 14500 / 200000 DONE, Loss : 0.0087, PSNR: 23.9369
+[13:22:45][Train] Iteration 14600 / 200000 DONE, Loss : 0.0081, PSNR: 24.1119
+[13:22:59][Train] Iteration 14700 / 200000 DONE, Loss : 0.0067, PSNR: 25.2708
+[13:22:59][Rendering Image] 1/1 START
+[13:23:10][Rendering Image] DONE
+[13:23:24][Train] Iteration 14800 / 200000 DONE, Loss : 0.0075, PSNR: 24.6452
+[13:23:39][Train] Iteration 14900 / 200000 DONE, Loss : 0.0085, PSNR: 23.9590
+[13:23:53][Train] Iteration 15000 / 200000 DONE, Loss : 0.0086, PSNR: 23.8515
+[13:23:53][Rendering Image] 1/1 START
+[13:24:05][Rendering Image] DONE
+[13:24:20][Train] Iteration 15100 / 200000 DONE, Loss : 0.0079, PSNR: 24.1233
+[13:24:35][Train] Iteration 15200 / 200000 DONE, Loss : 0.0084, PSNR: 24.1052
+[13:24:49][Train] Iteration 15300 / 200000 DONE, Loss : 0.0072, PSNR: 24.5693
+[13:24:49][Rendering Image] 1/1 START
+[13:25:00][Rendering Image] DONE
+[13:25:14][Train] Iteration 15400 / 200000 DONE, Loss : 0.0094, PSNR: 23.6545
+[13:25:28][Train] Iteration 15500 / 200000 DONE, Loss : 0.0082, PSNR: 24.0774
+[13:25:42][Train] Iteration 15600 / 200000 DONE, Loss : 0.0069, PSNR: 25.0707
+[13:25:42][Rendering Image] 1/1 START
+[13:25:53][Rendering Image] DONE
+[13:26:07][Train] Iteration 15700 / 200000 DONE, Loss : 0.0094, PSNR: 23.6880
+[13:26:22][Train] Iteration 15800 / 200000 DONE, Loss : 0.0086, PSNR: 23.8749
+[13:26:25][Data] Shuffle data at 3238913th batch / Single batch size :1024
+[13:26:37][Train] Iteration 15900 / 200000 DONE, Loss : 0.0085, PSNR: 23.7176
+[13:26:37][Rendering Image] 1/1 START
+[13:26:49][Rendering Image] DONE
+[13:27:05][Train] Iteration 16000 / 200000 DONE, Loss : 0.0069, PSNR: 24.9672
+[13:27:20][Train] Iteration 16100 / 200000 DONE, Loss : 0.0096, PSNR: 23.5318
+[13:27:35][Train] Iteration 16200 / 200000 DONE, Loss : 0.0068, PSNR: 24.8003
+[13:27:35][Rendering Image] 1/1 START
+[13:27:46][Rendering Image] DONE
+[13:28:00][Train] Iteration 16300 / 200000 DONE, Loss : 0.0085, PSNR: 23.9524
+[13:28:15][Train] Iteration 16400 / 200000 DONE, Loss : 0.0080, PSNR: 24.4144
+[13:28:29][Train] Iteration 16500 / 200000 DONE, Loss : 0.0090, PSNR: 23.6794
+[13:28:29][Rendering Image] 1/1 START
+[13:28:40][Rendering Image] DONE
+[13:28:54][Train] Iteration 16600 / 200000 DONE, Loss : 0.0082, PSNR: 24.2620
+[13:29:09][Train] Iteration 16700 / 200000 DONE, Loss : 0.0081, PSNR: 24.0338
+[13:29:24][Train] Iteration 16800 / 200000 DONE, Loss : 0.0080, PSNR: 24.1858
+[13:29:24][Rendering Image] 1/1 START
+[13:29:34][Rendering Image] DONE
+[13:29:49][Train] Iteration 16900 / 200000 DONE, Loss : 0.0088, PSNR: 23.8101
+[13:30:03][Train] Iteration 17000 / 200000 DONE, Loss : 0.0077, PSNR: 24.4693
+[13:30:18][Train] Iteration 17100 / 200000 DONE, Loss : 0.0080, PSNR: 24.1695
+[13:30:18][Rendering Image] 1/1 START
+[13:30:28][Rendering Image] DONE
+[13:30:43][Train] Iteration 17200 / 200000 DONE, Loss : 0.0074, PSNR: 24.6710
+[13:30:57][Train] Iteration 17300 / 200000 DONE, Loss : 0.0065, PSNR: 25.0734
+[13:31:11][Train] Iteration 17400 / 200000 DONE, Loss : 0.0081, PSNR: 24.0551
+[13:31:11][Rendering Image] 1/1 START
+[13:31:22][Rendering Image] DONE
+[13:31:36][Train] Iteration 17500 / 200000 DONE, Loss : 0.0087, PSNR: 23.6927
+[13:31:50][Train] Iteration 17600 / 200000 DONE, Loss : 0.0087, PSNR: 24.1158
+[13:32:04][Train] Iteration 17700 / 200000 DONE, Loss : 0.0077, PSNR: 24.4626
+[13:32:04][Rendering Image] 1/1 START
+[13:32:15][Rendering Image] DONE
+[13:32:29][Train] Iteration 17800 / 200000 DONE, Loss : 0.0064, PSNR: 25.2051
+[13:32:43][Train] Iteration 17900 / 200000 DONE, Loss : 0.0072, PSNR: 24.7017
+[13:32:58][Train] Iteration 18000 / 200000 DONE, Loss : 0.0069, PSNR: 24.7208
+[13:32:58][Rendering Image] 1/1 START
+[13:33:08][Rendering Image] DONE
+[13:33:24][Train] Iteration 18100 / 200000 DONE, Loss : 0.0085, PSNR: 23.7672
+[13:33:39][Train] Iteration 18200 / 200000 DONE, Loss : 0.0087, PSNR: 23.9955
+[13:33:53][Train] Iteration 18300 / 200000 DONE, Loss : 0.0065, PSNR: 25.0603
+[13:33:53][Rendering Image] 1/1 START
+[13:34:04][Rendering Image] DONE
+[13:34:18][Train] Iteration 18400 / 200000 DONE, Loss : 0.0083, PSNR: 23.9842
+[13:34:33][Train] Iteration 18500 / 200000 DONE, Loss : 0.0082, PSNR: 23.9116
+[13:34:47][Train] Iteration 18600 / 200000 DONE, Loss : 0.0073, PSNR: 24.7360
+[13:34:47][Rendering Image] 1/1 START
+[13:34:58][Rendering Image] DONE
+[13:35:12][Train] Iteration 18700 / 200000 DONE, Loss : 0.0081, PSNR: 24.1562
+[13:35:27][Train] Iteration 18800 / 200000 DONE, Loss : 0.0076, PSNR: 24.5241
+[13:35:42][Train] Iteration 18900 / 200000 DONE, Loss : 0.0070, PSNR: 24.6767
+[13:35:42][Rendering Image] 1/1 START
+[13:35:53][Rendering Image] DONE
+[13:36:04][Data] Shuffle data at 3238913th batch / Single batch size :1024
+[13:36:07][Train] Iteration 19000 / 200000 DONE, Loss : 0.0071, PSNR: 24.5995
+[13:36:22][Train] Iteration 19100 / 200000 DONE, Loss : 0.0077, PSNR: 24.6892
+[13:36:37][Train] Iteration 19200 / 200000 DONE, Loss : 0.0084, PSNR: 24.0762
+[13:36:37][Rendering Image] 1/1 START
+[13:36:47][Rendering Image] DONE
+[13:37:02][Train] Iteration 19300 / 200000 DONE, Loss : 0.0069, PSNR: 24.8221
+[13:37:16][Train] Iteration 19400 / 200000 DONE, Loss : 0.0065, PSNR: 25.1088
+[13:37:31][Train] Iteration 19500 / 200000 DONE, Loss : 0.0067, PSNR: 25.0671
+[13:37:31][Rendering Image] 1/1 START
+[13:37:41][Rendering Image] DONE
+[13:37:56][Train] Iteration 19600 / 200000 DONE, Loss : 0.0075, PSNR: 24.5685
+[13:38:10][Train] Iteration 19700 / 200000 DONE, Loss : 0.0069, PSNR: 24.9529
+[13:38:25][Train] Iteration 19800 / 200000 DONE, Loss : 0.0089, PSNR: 23.7548
+[13:38:25][Rendering Image] 1/1 START
+[13:38:36][Rendering Image] DONE
+[13:38:50][Train] Iteration 19900 / 200000 DONE, Loss : 0.0070, PSNR: 24.7169
+[13:39:04][Train] Iteration 20000 / 200000 DONE, Loss : 0.0070, PSNR: 25.0413
+[13:39:19][Train] Iteration 20100 / 200000 DONE, Loss : 0.0074, PSNR: 24.9656
+[13:39:19][Rendering Image] 1/1 START
+[13:39:29][Rendering Image] DONE
+[13:39:44][Train] Iteration 20200 / 200000 DONE, Loss : 0.0074, PSNR: 24.5178
+[13:39:59][Train] Iteration 20300 / 200000 DONE, Loss : 0.0072, PSNR: 24.8117
+[13:40:14][Train] Iteration 20400 / 200000 DONE, Loss : 0.0078, PSNR: 24.4427
+[13:40:14][Rendering Image] 1/1 START
+[13:40:24][Rendering Image] DONE
+[13:40:38][Train] Iteration 20500 / 200000 DONE, Loss : 0.0082, PSNR: 24.2496
+[13:40:53][Train] Iteration 20600 / 200000 DONE, Loss : 0.0076, PSNR: 24.3592
+[13:41:08][Train] Iteration 20700 / 200000 DONE, Loss : 0.0071, PSNR: 24.9259
+[13:41:08][Rendering Image] 1/1 START
+[13:41:18][Rendering Image] DONE
+[13:41:33][Train] Iteration 20800 / 200000 DONE, Loss : 0.0063, PSNR: 25.2246
+[13:41:48][Train] Iteration 20900 / 200000 DONE, Loss : 0.0075, PSNR: 24.1988
+[13:42:02][Train] Iteration 21000 / 200000 DONE, Loss : 0.0078, PSNR: 24.4891
+[13:42:02][Rendering Image] 1/1 START
+[13:42:13][Rendering Image] DONE
+[13:42:27][Train] Iteration 21100 / 200000 DONE, Loss : 0.0070, PSNR: 24.9467
+[13:42:41][Train] Iteration 21200 / 200000 DONE, Loss : 0.0074, PSNR: 24.8444
+[13:42:56][Train] Iteration 21300 / 200000 DONE, Loss : 0.0082, PSNR: 24.5084
+[13:42:56][Rendering Image] 1/1 START
+[13:43:06][Rendering Image] DONE
+[13:43:21][Train] Iteration 21400 / 200000 DONE, Loss : 0.0074, PSNR: 24.5888
+[13:43:35][Train] Iteration 21500 / 200000 DONE, Loss : 0.0063, PSNR: 25.1667
+[13:43:50][Train] Iteration 21600 / 200000 DONE, Loss : 0.0080, PSNR: 24.4469
+[13:43:50][Rendering Image] 1/1 START
+[13:44:00][Rendering Image] DONE
+[13:44:14][Train] Iteration 21700 / 200000 DONE, Loss : 0.0083, PSNR: 24.1668
+[13:44:29][Train] Iteration 21800 / 200000 DONE, Loss : 0.0073, PSNR: 24.7031
+[13:44:43][Train] Iteration 21900 / 200000 DONE, Loss : 0.0076, PSNR: 24.6373
+[13:44:43][Rendering Image] 1/1 START
+[13:44:53][Rendering Image] DONE
+[13:45:08][Train] Iteration 22000 / 200000 DONE, Loss : 0.0079, PSNR: 24.4531
+[13:45:23][Train] Iteration 22100 / 200000 DONE, Loss : 0.0064, PSNR: 25.2425
+[13:45:29][Data] Shuffle data at 3238913th batch / Single batch size :1024
+[13:45:38][Train] Iteration 22200 / 200000 DONE, Loss : 0.0070, PSNR: 24.9114
+[13:45:38][Rendering Image] 1/1 START
+[13:45:49][Rendering Image] DONE
+[13:46:04][Train] Iteration 22300 / 200000 DONE, Loss : 0.0072, PSNR: 24.8759
+[13:46:19][Train] Iteration 22400 / 200000 DONE, Loss : 0.0070, PSNR: 25.0933
+[13:46:34][Train] Iteration 22500 / 200000 DONE, Loss : 0.0064, PSNR: 25.1353
+[13:46:34][Rendering Image] 1/1 START
+[13:46:45][Rendering Image] DONE
+[13:47:00][Train] Iteration 22600 / 200000 DONE, Loss : 0.0069, PSNR: 25.0151
+[13:47:15][Train] Iteration 22700 / 200000 DONE, Loss : 0.0067, PSNR: 24.9299
+[13:47:30][Train] Iteration 22800 / 200000 DONE, Loss : 0.0069, PSNR: 24.9014
+[13:47:30][Rendering Image] 1/1 START
+[13:47:41][Rendering Image] DONE
+[13:47:56][Train] Iteration 22900 / 200000 DONE, Loss : 0.0071, PSNR: 24.6685
+[13:48:11][Train] Iteration 23000 / 200000 DONE, Loss : 0.0080, PSNR: 24.4862
+[13:48:25][Train] Iteration 23100 / 200000 DONE, Loss : 0.0066, PSNR: 24.9426
+[13:48:25][Rendering Image] 1/1 START
+[13:48:36][Rendering Image] DONE
+[13:48:50][Train] Iteration 23200 / 200000 DONE, Loss : 0.0075, PSNR: 24.4971
+[13:49:05][Train] Iteration 23300 / 200000 DONE, Loss : 0.0074, PSNR: 24.8011
+[13:49:19][Train] Iteration 23400 / 200000 DONE, Loss : 0.0065, PSNR: 25.0589
+[13:49:19][Rendering Image] 1/1 START
+[13:49:30][Rendering Image] DONE
+[13:49:44][Train] Iteration 23500 / 200000 DONE, Loss : 0.0080, PSNR: 24.3884
+[13:49:59][Train] Iteration 23600 / 200000 DONE, Loss : 0.0068, PSNR: 24.9394
+[13:50:14][Train] Iteration 23700 / 200000 DONE, Loss : 0.0077, PSNR: 24.3827
+[13:50:14][Rendering Image] 1/1 START
+[13:50:25][Rendering Image] DONE
+[13:50:41][Train] Iteration 23800 / 200000 DONE, Loss : 0.0072, PSNR: 24.6965
+[13:50:55][Train] Iteration 23900 / 200000 DONE, Loss : 0.0064, PSNR: 25.2731
+[13:51:10][Train] Iteration 24000 / 200000 DONE, Loss : 0.0068, PSNR: 24.8105
+[13:51:10][Rendering Image] 1/1 START
+[13:51:20][Rendering Image] DONE
+[13:51:35][Train] Iteration 24100 / 200000 DONE, Loss : 0.0077, PSNR: 24.2195
+[13:51:51][Train] Iteration 24200 / 200000 DONE, Loss : 0.0074, PSNR: 24.6828
+[13:52:05][Train] Iteration 24300 / 200000 DONE, Loss : 0.0073, PSNR: 24.7157
+[13:52:05][Rendering Image] 1/1 START
+[13:52:16][Rendering Image] DONE
+[13:52:31][Train] Iteration 24400 / 200000 DONE, Loss : 0.0073, PSNR: 24.7318
+[13:52:46][Train] Iteration 24500 / 200000 DONE, Loss : 0.0081, PSNR: 24.5586
+[13:53:01][Train] Iteration 24600 / 200000 DONE, Loss : 0.0059, PSNR: 25.6372
+[13:53:01][Rendering Image] 1/1 START
+[13:53:12][Rendering Image] DONE
+[13:53:27][Train] Iteration 24700 / 200000 DONE, Loss : 0.0066, PSNR: 25.2884
+[13:53:42][Train] Iteration 24800 / 200000 DONE, Loss : 0.0059, PSNR: 25.8383
+[13:53:56][Train] Iteration 24900 / 200000 DONE, Loss : 0.0075, PSNR: 24.7295
+[13:53:56][Rendering Image] 1/1 START
+[13:54:06][Rendering Image] DONE
+[13:54:21][Train] Iteration 25000 / 200000 DONE, Loss : 0.0075, PSNR: 24.7115
+[13:54:35][Train] Iteration 25100 / 200000 DONE, Loss : 0.0077, PSNR: 24.3711
+[13:54:50][Train] Iteration 25200 / 200000 DONE, Loss : 0.0063, PSNR: 25.0834
+[13:54:50][Rendering Image] 1/1 START
+[13:55:00][Rendering Image] DONE

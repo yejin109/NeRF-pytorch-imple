@@ -28,7 +28,7 @@ def render_preprocess(rays_chunk, N_samples=None, lindisp=False, perturb=0., pyt
     bounds = torch.reshape(rays_chunk[..., 6:8], [-1, 1, 2])
     near, far = bounds[...,0], bounds[...,1] # [-1,1]
 
-    t_vals = torch.linspace(0., 1., steps=N_samples).to(os.environ['device'])
+    t_vals = torch.linspace(0., 1., steps=N_samples).to(os.environ['DEVICE'])
     if not lindisp:
         z_vals = near * (1.-t_vals) + far * (t_vals)
     else:
@@ -42,7 +42,7 @@ def render_preprocess(rays_chunk, N_samples=None, lindisp=False, perturb=0., pyt
         upper = torch.cat([mids, z_vals[...,-1:]], -1)
         lower = torch.cat([z_vals[...,:1], mids], -1)
         # stratified samples in those intervals
-        t_rand = torch.rand(z_vals.shape).to(os.environ['device'])
+        t_rand = torch.rand(z_vals.shape).to(os.environ['DEVICE'])
 
         # Pytest, overwrite u with numpy's fixed random numbers
         if pytest:
@@ -149,7 +149,7 @@ def raw2outputs(raw, z_vals, rays_d, raw_noise_std=0, white_bkgd=False, pytest=F
     raw2alpha = lambda raw, dists, act_fn=F.relu: 1.-torch.exp(-act_fn(raw)*dists)
 
     dists = z_vals[...,1:] - z_vals[...,:-1]
-    dists = torch.cat([dists, torch.Tensor([1e10]).expand(dists[...,:1].shape).to(os.environ['device'])], -1)  # [N_rays, N_samples]
+    dists = torch.cat([dists, torch.Tensor([1e10]).expand(dists[...,:1].shape).to(os.environ['DEVICE'])], -1)  # [N_rays, N_samples]
 
     dists = dists * torch.norm(rays_d[...,None,:], dim=-1)
 

@@ -30,7 +30,7 @@ def get_model(multires, multires_views, i_embed, use_viewdirs, layer_num, layer_
         out_feature=output_ch,
         in_feature_view=input_ch_views,
         use_viewdirs=use_viewdirs,
-        skip_connection_layer_list=skips).to(os.environ['device'])
+        skip_connection_layer_list=skips).to(os.environ['DEVICE'])
     model.model_vars('Coarse model')
     models = {'model': model}
 
@@ -43,7 +43,7 @@ def get_model(multires, multires_views, i_embed, use_viewdirs, layer_num, layer_
             out_feature=output_ch,
             in_feature_view=input_ch_views,
             use_viewdirs=use_viewdirs,
-            skip_connection_layer_list=skips).to(os.environ['device'])
+            skip_connection_layer_list=skips).to(os.environ['DEVICE'])
         model.model_vars('Fine model')
     models['model_fine'] = model_fine
 

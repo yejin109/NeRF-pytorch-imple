@@ -36,20 +36,20 @@ if __name__ == '__main__':
     # model_architecture = 'nerf'
     # data = 'synthetic'
     # # data = 'llff'
-    #
+    
     # embedding_config, dataset_config, model_config, rendering_config, log_config = get_configs(data, model_architecture)
-    #
+    
     # # Step 1 : Load Dataset
     # if data == 'llff':
     #     dset = dataset.LLFFDataset(**dict(dataset_config, **{'render_pose_num': rendering_config['render_pose_num'], 'N_rots': rendering_config['N_rots'], 'zrate': rendering_config['zrate']}))
     # else:
     #     dset = dataset.SyntheticDataset(**dict(dataset_config, **{'render_pose_num': rendering_config['render_pose_num']}))
-    #
+    
     # # Step 2: Load Model
     # model_config = dict(model_config, **rendering_config)
     # model_config['embed_cfg'] = embedding_config
     # models, params, embedder_ray, embedder_view = model_nerf.get_model(**model_config)
-    #
+    
     # model_nerf.run(model_config, rendering_config, dataset_config, dset, params, models, embedder_ray, embedder_view)
 
     model_architecture = 'neus'

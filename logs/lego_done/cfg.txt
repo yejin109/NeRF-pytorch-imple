@@ -1,0 +1,58 @@
+====================================================================================================
+get_model:
+	Kwargs
+		layer_num:8
+		hidden_dim:256
+		layer_num_fine:8
+		hidden_feature_fine:256
+		batch_size:1024
+		lrate:0.0005
+		lrate_decay:250
+		lrate_schedule_gamma:0.1
+		N_iters:200000
+		chunk:32768
+		netchunk:65536
+		no_batching:False
+		no_reload:False
+		ft_path:None
+		random_seed:None,
+		precrop_iters:0
+		precrop_frac:0.5
+		N_samples:64
+		N_importance:64
+		perturb:1.0
+		use_viewdirs:True
+		i_embed:0
+		multires:10
+		multires_views:4
+		raw_noise_std:1
+		render_only:False
+		render_test:False
+		render_factor:0
+		render_pose_num:1
+		N_rots:2
+		zrate:0.5
+		shape:greek
+		embed_cfg:{'include_input': True, 'input_dims': 3, 'log_sampling': True}
+	args
+====================================================================================================
+get_render_kwargs:
+	Kwargs
+		data_type:nerf_synthetic
+		dataset:lego
+		run_type:train
+		factor:8
+		no_ndc:True
+		spherify:True
+		path_zflat:False
+		bd_factor:0.75
+		recenter:True
+		llffhold:8
+		half_res:True
+		white_bkgd:False
+	args
+		1.0
+		64
+		64
+		True
+		1
