@@ -13,10 +13,10 @@
 
 - NeRF
 
-Data : SYNTHETIC/lego
+Data : SYNTHETIC/lego \\
 ![NeRF-SYNTHETIC-lego](assets/SYNTHETIC_lego.png)
 
-Data : SYNTHE/fern
+Data : SYNTHE/fern\\
 ![NeRF-LLFF-fern](assets/LLFF_fern.png)
 
 # Progress
