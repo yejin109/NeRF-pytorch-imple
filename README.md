@@ -11,6 +11,13 @@
 |학습 속도|4it/s|5it/s|
 |렌더링 속도|21s/img|60s/img|   
 
+- NeRF
+
+Data : SYNTHETIC/lego
+![NeRF-SYNTHETIC-lego](assets/SYNTHETIC_lego.png)
+
+Data : SYNTHE/fern
+![NeRF-LLFF-fern](assets/LLFF_fern.png)
 
 # Progress
 
