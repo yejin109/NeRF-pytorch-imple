@@ -55,23 +55,6 @@ def get_model(multires, multires_views, i_embed, use_viewdirs, layer_num, layer_
     return models, params, embedder_ray, embedder_view
 
 
-class Dense(nn.Module):
-    def __init__(self, in_feature, out_feature, activation=None, use_bias=True, ):
-        super(Dense, self).__init__()
-        self.act = activation
-        if activation is not None:
-            self.act = activation()
-        self.in_feature = in_feature
-        self.out_feature = out_feature
-        self.w = nn.Linear(in_feature, out_feature, bias=use_bias)
-
-    def forward(self, x):
-        out = self.w(x)
-        if self.act is not None:
-            out = self.act(out)
-        return out
-
-
 class NeRF(nn.Module):
     def __init__(self, layer_num, in_feature, hidden_dim, out_feature, in_feature_view, use_viewdirs=False, viewdir_layer_num=1, skip_connection_layer_list=[4]):
         super(NeRF, self).__init__()

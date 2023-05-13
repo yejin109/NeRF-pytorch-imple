@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9cd33929-51c9-4b2f-b912-ac20d2da80fc" name="Default Changelist" comment="" />
+    <list default="true" id="9cd33929-51c9-4b2f-b912-ac20d2da80fc" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/model_hypernerf/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model_hypernerf/hypernerf.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model_hypernerf/hypernerf_modules.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model_hypernerf/hypernerf_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model_hypernerf/ray.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model_hypernerf/readme.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model_hypernerf/rendering.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config.yml" beforeDir="false" afterPath="$PROJECT_DIR$/config.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model_nerf/nerf.py" beforeDir="false" afterPath="$PROJECT_DIR$/model_nerf/nerf.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -34,7 +45,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/model_neus" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
@@ -99,11 +110,6 @@
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/model_nerf/ray.py</url>
-          <line>43</line>
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/model_nerf/run.py</url>
           <line>132</line>

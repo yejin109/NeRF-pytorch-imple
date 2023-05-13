@@ -80,6 +80,28 @@ rendering:
 
     render_pose_num: 1
 
+  hypernerf:
+    # NeRF rendering.
+    num_coarse_samples: 196
+    num_fine_samples: 196
+    use_stratified_sampling: True
+    use_white_background: False
+    use_linear_disparity: False
+    use_sample_at_infinity: True
+
+    spatial_point_min_deg: 0
+    spatial_point_max_deg: 10
+    hyper_point_min_deg: 0
+    hyper_point_max_deg: 4
+    viewdir_min_deg: 0
+    viewdir_max_deg: 4
+    use_posenc_identity: True
+
+    alpha_channels: 1
+    rgb_channels: 3
+    activation: nn.relu
+    norm_type: None
+    sigma_activation: nn.softplus
 
 
 model:
@@ -163,6 +185,39 @@ model:
       weight_norm: True
       multires_view: 4
       squeeze_out: True
+
+  hypernerf:
+    # NeRF architecture.
+    use_viewdirs: True
+    noise_std: None
+    nerf_trunk_depth: 8
+    nerf_trunk_width: 256
+    nerf_rgb_branch_depth: 1
+    nerf_rgb_branch_width: 128
+    nerf_skips:
+      - 4
+
+    # NeRF metadata configs.
+    use_nerf_embed: bool = False
+    nerf_embed_cls: Callable[..., nn.Module] = (
+      functools.partial(modules.GLOEmbed, num_dims=8))
+    nerf_embed_key: str = 'appearance'
+    use_alpha_condition: bool = False
+    use_rgb_condition: bool = False
+    hyper_slice_method: str = 'none'
+    hyper_embed_cls: Callable[..., nn.Module] = (
+      functools.partial(modules.GLOEmbed, num_dims=8))
+    hyper_embed_key: str = 'appearance'
+    hyper_use_warp_embed: bool = True
+    hyper_sheet_mlp_cls: Callable[..., nn.Module] = modules.HyperSheetMLP
+    hyper_sheet_use_input_points: bool = True
+
+    # Warp configs.
+    use_warp: bool = False
+    warp_field_cls: Callable[..., nn.Module] = warping.SE3Field
+    warp_embed_cls: Callable[..., nn.Module] = (
+      functools.partial(modules.GLOEmbed, num_dims=8))
+    warp_embed_key: str = 'warp'
 
 log:
   i_print: 200
