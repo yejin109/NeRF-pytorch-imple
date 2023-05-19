@@ -8,3 +8,5 @@ __pycache__/
 dataset/__pycache__
 model_nerf/__pycache__
 model_neus/__pycache__
+.idea
+Neus-main

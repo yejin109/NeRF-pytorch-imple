@@ -3,12 +3,16 @@ from typing import Dict, Any
 
 import torch.nn as nn
 
-from model_hypernerf import hypernerf_modules as modules
-from model_hypernerf import hypernerf_utils as model_utils
-from model_hypernerf.rendering import filter_sigma
+from model_hypernerf_torch import hypernerf_modules as modules
+from model_hypernerf_torch import hypernerf_utils as model_utils
+from model_hypernerf_torch.rendering import filter_sigma
 
 
-def get_model(key, batch_size: int, embeddings_dict: Dict[str, int], near: float, far: float):
+def get_model(in_feature, trunk_layer_num, trunk_hidden_dim, rgb_layer_num, rgb_hidden_dim, rgb_channels,
+              alpha_layer_num, alpha_hidden_dim, alpha_channels, num_fine_samples,
+              embedding_cfg,
+              skip_connection_layer_list=(4,),
+              ):
     """Neural Randiance Field.
 
     Args:
@@ -23,87 +27,78 @@ def get_model(key, batch_size: int, embeddings_dict: Dict[str, int], near: float
     model: nn.Model. Nerf model with parameters.
     state: flax.Module.state. Nerf model state for stateful parameters.
     """
-    model = HyperNeRF()
+    # TODO
+    # Embedding
+    if embedding_cfg.use_nerf_embed:
+        embedding_cfg.nerf_embed = embedding_cfg.nerf_embed_cls(num_embeddings=embedding_cfg.num_nerf_embeds)
+    if embedding_cfg.use_warp:
+        embedding_cfg.warp_embed = embedding_cfg.warp_embed_cls(num_embeddings=embedding_cfg.num_warp_embeds)
+
+    if embedding_cfg.hyper_slice_method == 'axis_aligned_plane':
+        embedding_cfg.hyper_embed = embedding_cfg.hyper_embed_cls(num_embeddings=embedding_cfg.num_hyper_embeds)
+    elif embedding_cfg.hyper_slice_method == 'bendy_sheet':
+        if not embedding_cfg.hyper_use_warp_embed:
+            embedding_cfg.hyper_embed = embedding_cfg.hyper_embed_cls(num_embeddings=embedding_cfg.num_hyper_embeds)
+        embedding_cfg.hyper_sheet_mlp = embedding_cfg.hyper_sheet_mlp_cls()
+
+    if embedding_cfg.use_warp:
+        embedding_cfg.warp_field = embedding_cfg.warp_field_cls()
+
+
+    # Coarse model
+    nerf_mlps = {
+        'coarse': modules.NeRFMLP(in_feature, trunk_layer_num, trunk_hidden_dim,
+                                  rgb_layer_num, rgb_hidden_dim, rgb_channels,
+                                  alpha_layer_num, alpha_hidden_dim, alpha_channels,
+                                  skip_connection_layer_list=skip_connection_layer_list)
+    }
+    # Coarse model
+    if num_fine_samples > 0:
+        nerf_mlps['fine'] = modules.NeRFMLP(in_feature, trunk_layer_num, trunk_hidden_dim,
+                                            rgb_layer_num, rgb_hidden_dim, rgb_channels,
+                                            alpha_layer_num, alpha_hidden_dim, alpha_channels,
+                                            skip_connection_layer_list=skip_connection_layer_list)
+
+    model = HyperNeRF(in_feature, nerf_mlps)
     # model = HyperNeRF(
     #   embeddings_dict=immutabledict.immutabledict(embeddings_dict),
     #   near=near,
     #   far=far)
 
-    init_rays_dict = {
-      'origins': np.ones((batch_size, 3), np.float32),
-      'directions': np.ones((batch_size, 3), np.float32),
-      'metadata': {
-          'warp': np.ones((batch_size, 1), np.uint32),
-          'camera': np.ones((batch_size, 1), np.uint32),
-          'appearance': np.ones((batch_size, 1), np.uint32),
-          'time': np.ones((batch_size, 1), np.float32),
-      }
-    }
-    extra_params = {
-      'nerf_alpha': 0.0,
-      'warp_alpha': 0.0,
-      'hyper_alpha': 0.0,
-      'hyper_sheet_alpha': 0.0,
-    }
+    # init_rays_dict = {
+    #   'origins': np.ones((batch_size, 3), np.float32),
+    #   'directions': np.ones((batch_size, 3), np.float32),
+    #   'metadata': {
+    #       'warp': np.ones((batch_size, 1), np.uint32),
+    #       'camera': np.ones((batch_size, 1), np.uint32),
+    #       'appearance': np.ones((batch_size, 1), np.uint32),
+    #       'time': np.ones((batch_size, 1), np.float32),
+    #   }
+    # }
+    # extra_params = {
+    #   'nerf_alpha': 0.0,
+    #   'warp_alpha': 0.0,
+    #   'hyper_alpha': 0.0,
+    #   'hyper_sheet_alpha': 0.0,
+    # }
 
     # key, key1, key2 = random.split(key, 3)
     key, key1, key2 = 1, 19, 46
-    params = model.init({
-      'params': key,
-      'coarse': key1,
-      'fine': key2
-    }, init_rays_dict, extra_params=extra_params)['params']
+    # params = model.init({
+    #   'params': key,
+    #   'coarse': key1,
+    #   'fine': key2
+    # }, init_rays_dict, extra_params=extra_params)['params']
 
-    return model, params
+    # return model, params
+    return model
 
 
 class HyperNeRF(nn.Module):
-    def __init__(self):
+    def __init__(self, in_feature, nerf_mlps):
         super(HyperNeRF, self).__init__()
-        if self.use_nerf_embed and not (self.use_rgb_condition or self.use_alpha_condition):
-            raise ValueError('Template metadata is enabled but none of the condition branches are.')
-
-        if self.use_nerf_embed:
-            self.nerf_embed = self.nerf_embed_cls(num_embeddings=self.num_nerf_embeds)
-        if self.use_warp:
-            self.warp_embed = self.warp_embed_cls(num_embeddings=self.num_warp_embeds)
-
-        if self.hyper_slice_method == 'axis_aligned_plane':
-            self.hyper_embed = self.hyper_embed_cls(num_embeddings=self.num_hyper_embeds)
-        elif self.hyper_slice_method == 'bendy_sheet':
-            if not self.hyper_use_warp_embed:
-                self.hyper_embed = self.hyper_embed_cls(num_embeddings=self.num_hyper_embeds)
-            self.hyper_sheet_mlp = self.hyper_sheet_mlp_cls()
-
-        if self.use_warp:
-            self.warp_field = self.warp_field_cls()
-
-
-        norm_layer = modules.get_norm_layer(self.norm_type)
-        nerf_mlps = {
-            'coarse': modules.NerfMLP(
-                trunk_depth=self.nerf_trunk_depth,
-                trunk_width=self.nerf_trunk_width,
-                rgb_branch_depth=self.nerf_rgb_branch_depth,
-                rgb_branch_width=self.nerf_rgb_branch_width,
-                activation=self.activation,
-                norm=norm_layer,
-                skips=self.nerf_skips,
-                alpha_channels=self.alpha_channels,
-                rgb_channels=self.rgb_channels)
-        }
-        if self.num_fine_samples > 0:
-            nerf_mlps['fine'] = modules.NerfMLP(
-              trunk_depth=self.nerf_trunk_depth,
-              trunk_width=self.nerf_trunk_width,
-              rgb_branch_depth=self.nerf_rgb_branch_depth,
-              rgb_branch_width=self.nerf_rgb_branch_width,
-              activation=self.activation,
-              norm=norm_layer,
-              skips=self.nerf_skips,
-              alpha_channels=self.alpha_channels,
-              rgb_channels=self.rgb_channels)
-            self.nerf_mlps = nerf_mlps
+        self.norm_layer = modules.get_norm_layer(self.norm_type, in_feature)
+        self.nerf_mlps = nerf_mlps
 
     @property
     def num_nerf_embeds(self):
@@ -166,7 +161,6 @@ class HyperNeRF(nn.Module):
     def encode_warp_embed(self, metadata):
         return self._encode_embed(metadata[self.warp_embed_key], self.warp_embed)
 
-
     def get_condition_inputs(self, viewdirs, metadata, metadata_encoded=False):
         """Create the condition inputs for the NeRF template."""
         alpha_conditions = []
@@ -174,23 +168,23 @@ class HyperNeRF(nn.Module):
 
         # Point attribute predictions
         if self.use_viewdirs:
-          viewdirs_feat = model_utils.posenc(
+            viewdirs_feat = model_utils.posenc(
               viewdirs,
               min_deg=self.viewdir_min_deg,
               max_deg=self.viewdir_max_deg,
               use_identity=self.use_posenc_identity)
-          rgb_conditions.append(viewdirs_feat)
+            rgb_conditions.append(viewdirs_feat)
 
         if self.use_nerf_embed:
-          if metadata_encoded:
-            nerf_embed = metadata['encoded_nerf']
-          else:
-            nerf_embed = metadata[self.nerf_embed_key]
-            nerf_embed = self.nerf_embed(nerf_embed)
-          if self.use_alpha_condition:
-            alpha_conditions.append(nerf_embed)
-          if self.use_rgb_condition:
-            rgb_conditions.append(nerf_embed)
+            if metadata_encoded:
+                nerf_embed = metadata['encoded_nerf']
+            else:
+                nerf_embed = metadata[self.nerf_embed_key]
+                nerf_embed = self.nerf_embed(nerf_embed)
+            if self.use_alpha_condition:
+                alpha_conditions.append(nerf_embed)
+            if self.use_rgb_condition:
+                rgb_conditions.append(nerf_embed)
 
         # The condition inputs have a shape of (B, C) now rather than (B, S, C)
         # since we assume all samples have the same condition input. We might want

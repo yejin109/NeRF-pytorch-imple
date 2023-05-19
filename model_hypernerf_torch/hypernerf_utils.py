@@ -34,8 +34,6 @@ from typing import Optional
 #     }
 
 
-
-
 def piecewise_constant_pdf(key, bins, weights, num_coarse_samples,
                            use_stratified_sampling):
   """Piecewise-Constant PDF sampling.
@@ -212,25 +210,25 @@ def identity_initializer(_, shape):
 
 
 def posenc(x, min_deg, max_deg, use_identity=False, alpha=None):
-  """Encode `x` with sinusoids scaled by 2^[min_deg:max_deg-1]."""
-  batch_shape = x.shape[:-1]
-  scales = 2.0 ** jnp.arange(min_deg, max_deg)
-  # (*, F, C).
-  xb = x[..., None, :] * scales[:, None]
-  # (*, F, 2, C).
-  four_feat = jnp.sin(jnp.stack([xb, xb + 0.5 * jnp.pi], axis=-2))
+    """Encode `x` with sinusoids scaled by 2^[min_deg:max_deg-1]."""
+    batch_shape = x.shape[:-1]
+    scales = 2.0 ** jnp.arange(min_deg, max_deg)
+    # (*, F, C).
+    xb = x[..., None, :] * scales[:, None]
+    # (*, F, 2, C).
+    four_feat = jnp.sin(jnp.stack([xb, xb + 0.5 * jnp.pi], axis=-2))
 
-  if alpha is not None:
-    window = posenc_window(min_deg, max_deg, alpha)
-    four_feat = window[..., None, None] * four_feat
+    if alpha is not None:
+        window = posenc_window(min_deg, max_deg, alpha)
+        four_feat = window[..., None, None] * four_feat
 
-  # (*, 2*F*C).
-  four_feat = four_feat.reshape((*batch_shape, -1))
+    # (*, 2*F*C).
+    four_feat = four_feat.reshape((*batch_shape, -1))
 
-  if use_identity:
-    return jnp.concatenate([x, four_feat], axis=-1)
-  else:
-    return four_feat
+    if use_identity:
+        return jnp.concatenate([x, four_feat], axis=-1)
+    else:
+        return four_feat
 
 
 def posenc_window(min_deg, max_deg, alpha):

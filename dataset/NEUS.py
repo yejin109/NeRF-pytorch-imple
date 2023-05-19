@@ -34,10 +34,10 @@ class NeusDataset(Dataset):
         ty = torch.linspace(0, self.H - 1, self.H // l)
         pixels_x, pixels_y = torch.meshgrid(tx, ty)
         p = torch.stack([pixels_x, pixels_y, torch.ones_like(pixels_y)], dim=-1) # W, H, 3
-        p = torch.matmul(self.c2w[img_idx, None, None, :3, :3], p[:, :, :, None]).squeeze()  # W, H, 3
+        p = torch.matmul(self.w2c[img_idx, None, None, :3, :3], p[:, :, :, None]).squeeze()  # W, H, 3
         rays_v = p / torch.linalg.norm(p, ord=2, dim=-1, keepdim=True)  # W, H, 3
-        rays_v = torch.matmul(self.c2w[img_idx, None, None, :3, :3], rays_v[:, :, :, None]).squeeze()  # W, H, 3
-        rays_o = self.c2w[img_idx, None, None, :3, 3].expand(rays_v.shape)  # W, H, 3
+        rays_v = torch.matmul(self.w2c[img_idx, None, None, :3, :3], rays_v[:, :, :, None]).squeeze()  # W, H, 3
+        rays_o = self.w2c[img_idx, None, None, :3, 3].expand(rays_v.shape)  # W, H, 3
         return rays_o.transpose(0, 1), rays_v.transpose(0, 1)
 
     def gen_random_rays_at(self, img_idx, batch_size):
@@ -49,10 +49,10 @@ class NeusDataset(Dataset):
         color = self.imgs[img_idx][(pixels_y, pixels_x)]    # batch_size, 3
         mask = self.masks[img_idx][(pixels_y, pixels_x)]      # batch_size, 3
         p = torch.stack([pixels_x, pixels_y, torch.ones_like(pixels_y)], dim=-1).float()  # batch_size, 3
-        p = torch.matmul(self.c2w[img_idx, None, :3, :3], p[:, :, None]).squeeze() # batch_size, 3
+        p = torch.matmul(self.w2c[img_idx, None, :3, :3], p[:, :, None]).squeeze() # batch_size, 3
         rays_v = p / torch.linalg.norm(p, ord=2, dim=-1, keepdim=True)    # batch_size, 3
-        rays_v = torch.matmul(self.c2w[img_idx, None, :3, :3], rays_v[:, :, None]).squeeze()  # batch_size, 3
-        rays_o = self.c2w[img_idx, None, :3, 3].expand(rays_v.shape) # batch_size, 3
+        rays_v = torch.matmul(self.w2c[img_idx, None, :3, :3], rays_v[:, :, None]).squeeze()  # batch_size, 3
+        rays_o = self.w2c[img_idx, None, :3, 3].expand(rays_v.shape) # batch_size, 3
         return torch.cat([rays_o, rays_v, color, mask[:, :1]], dim=-1).cuda()    # batch_size, 10
 
     def gen_rays_between(self, idx_0, idx_1, ratio, resolution_level=1):
@@ -64,7 +64,7 @@ class NeusDataset(Dataset):
         ty = torch.linspace(0, self.H - 1, self.H // l)
         pixels_x, pixels_y = torch.meshgrid(tx, ty)
         p = torch.stack([pixels_x, pixels_y, torch.ones_like(pixels_y)], dim=-1)  # W, H, 3
-        p = torch.matmul(self.c2w[0, None, None, :3, :3], p[:, :, :, None]).squeeze()  # W, H, 3
+        p = torch.matmul(self.w2c[0, None, None, :3, :3], p[:, :, :, None]).squeeze()  # W, H, 3
         rays_v = p / torch.linalg.norm(p, ord=2, dim=-1, keepdim=True)  # W, H, 3
         trans = self._poses[idx_0, :3, 3] * (1.0 - ratio) + self._poses[idx_1, :3, 3] * ratio
         pose_0 = self._poses[idx_0].detach().cpu().numpy()

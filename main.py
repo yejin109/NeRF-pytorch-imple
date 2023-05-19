@@ -52,6 +52,7 @@ if __name__ == '__main__':
     
     # model_nerf.run(model_config, rendering_config, dataset_config, dset, params, models, embedder_ray, embedder_view)
 
+    #############
     model_architecture = 'neus'
     data = 'thin_structure'
 

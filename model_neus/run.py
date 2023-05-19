@@ -63,7 +63,7 @@ def train(params_to_train, learning_rate, N_iters, dataset, white_bkgd, batch_si
         log_train(loss, color_fine_loss, eikonal_loss, s_val.mean(), cdf, weight_max, psnr, total_grad_norm(params_to_train))
 
         if (iter_step+1) % i_print == 0:
-            log_internal('[Train] ')
+            # log_internal('[Train] ')
             log_internal(
                 f"[Train] Iteration {iter_step + 1} / {N_iters} DONE, Loss : {loss.item():.4f}, PSNR: {psnr.item():.4f}")
 
@@ -139,7 +139,7 @@ def validate_image(iter_step, dataset, renderer, validate_resolution_level, batc
 
     out_rgb_fine = []
     out_normal_fine = []
-
+    print(f"{len(rays_o)}/{70} ~ {len(rays_o)/70: .3f}s")
     for rays_o_batch, rays_d_batch in zip(rays_o, rays_d):
         near, far = dataset.near_far_from_sphere(rays_o_batch, rays_d_batch)
         background_rgb = torch.ones([1, 3]) if use_white_bkgd else None

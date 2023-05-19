@@ -55,7 +55,8 @@ Data : SYNTHE/fern
 - [230420, ray] : ray.get_rays_np()에서 기존 구현에서 문제가 있었던 것 수정
 - [230420, model] : Embedding에서 multries에 따라서 model 구조가 달라지고 있었음
 ### NeUS
-- [****] [230429, model] : 현재 update가 느리게 혹은 안되고 있는데 이게 자연스러운 현상인지 확인해야 함.
+- [****] [230429, model] : 현재 update가 느리게 혹은 안되고 있는데 이게 자연스러운 현상인지 확인해야 함.  
+    - far, near, rays_o값이 이상함 
 
 ## Profiling
 ### NeRF

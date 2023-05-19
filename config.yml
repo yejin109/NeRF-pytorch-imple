@@ -127,18 +127,18 @@ model:
     precrop_iters: 0 # 'number of steps to train on central crops'
     precrop_frac: .5 # fraction of img taken for central crops
 
-  neus:
+  neus: # with mask configuration
     learning_rate: 5.0E-4
     learning_rate_alpha: 0.05
     N_iters: 300000
 
-    batch_size: 512
+    batch_size: 16 # default 512
     validate_resolution_level: 4
     warm_up_end: 5000
-    anneal_end: 50000 # default for with maks. without mask, 50000, thin structure : 50000
+    anneal_end: 0 # default for with mask. without mask, 50000, thin structure : 0
 
     igr_weight: 0.1
-    mask_weight: 0.0
+    mask_weight: 0.1
 
     layer_num_fine: 8 # netdepth_fine: 8 # layers in fine network
     hidden_feature_fine: 256 # netwidth_fine: 256 # channels per layer in fine network
@@ -168,7 +168,7 @@ model:
         - 4
       multires: 6
       bias: 0.5
-      scale: 3.0
+      scale: 1.0 # used 3.0
       geometric_init: True
       weight_norm: True
 
@@ -221,7 +221,7 @@ model:
 
 log:
   i_print: 200
-  i_img: 5000 # frequency of tensorboard image logging
+  i_img: 1000 # frequency of tensorboard image logging, default 5000
   i_weights: 10000 # frequency of weight ckpt saving
   i_testset: 5000 # frequency of testset saving
   i_video: 20000 # frequency of render_poses video saving
