@@ -26,7 +26,10 @@ Data : SYNTHE/fern
 Data : SYNTHE/neus_thin_structure/thin_catbus 
 
 (5000 epochs)
+
+
 ![NeUS-5000-norm](assets/NeUS_5000_norm.png)
+
 ![NeUS-5000-img](assets/NeUS_5000_img.png)
 
 # Progress
