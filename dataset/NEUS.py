@@ -34,7 +34,7 @@ class NeusDataset(Dataset):
         ty = torch.linspace(0, self.H - 1, self.H // l)
         pixels_x, pixels_y = torch.meshgrid(tx, ty)
         p = torch.stack([pixels_x, pixels_y, torch.ones_like(pixels_y)], dim=-1) # W, H, 3
-        p = torch.matmul(self.w2c[img_idx, None, None, :3, :3], p[:, :, :, None]).squeeze()  # W, H, 3
+        p = torch.matmul(torch.inverse(self.intrinsic_matrix)[img_idx, None, None, :3, :3], p[:, :, :, None]).squeeze()  # W, H, 3
         rays_v = p / torch.linalg.norm(p, ord=2, dim=-1, keepdim=True)  # W, H, 3
         rays_v = torch.matmul(self.w2c[img_idx, None, None, :3, :3], rays_v[:, :, :, None]).squeeze()  # W, H, 3
         rays_o = self.w2c[img_idx, None, None, :3, 3].expand(rays_v.shape)  # W, H, 3
@@ -49,7 +49,7 @@ class NeusDataset(Dataset):
         color = self.imgs[img_idx][(pixels_y, pixels_x)]    # batch_size, 3
         mask = self.masks[img_idx][(pixels_y, pixels_x)]      # batch_size, 3
         p = torch.stack([pixels_x, pixels_y, torch.ones_like(pixels_y)], dim=-1).float()  # batch_size, 3
-        p = torch.matmul(self.w2c[img_idx, None, :3, :3], p[:, :, None]).squeeze() # batch_size, 3
+        p = torch.matmul(torch.inverse(self.intrinsic_matrix)[img_idx, None, :3, :3], p[:, :, None]).squeeze() # batch_size, 3
         rays_v = p / torch.linalg.norm(p, ord=2, dim=-1, keepdim=True)    # batch_size, 3
         rays_v = torch.matmul(self.w2c[img_idx, None, :3, :3], rays_v[:, :, None]).squeeze()  # batch_size, 3
         rays_o = self.w2c[img_idx, None, :3, 3].expand(rays_v.shape) # batch_size, 3
@@ -64,11 +64,11 @@ class NeusDataset(Dataset):
         ty = torch.linspace(0, self.H - 1, self.H // l)
         pixels_x, pixels_y = torch.meshgrid(tx, ty)
         p = torch.stack([pixels_x, pixels_y, torch.ones_like(pixels_y)], dim=-1)  # W, H, 3
-        p = torch.matmul(self.w2c[0, None, None, :3, :3], p[:, :, :, None]).squeeze()  # W, H, 3
+        p = torch.matmul(torch.inverse(self.intrinsic_matrix)[0, None, None, :3, :3], p[:, :, :, None]).squeeze()  # W, H, 3
         rays_v = p / torch.linalg.norm(p, ord=2, dim=-1, keepdim=True)  # W, H, 3
-        trans = self._poses[idx_0, :3, 3] * (1.0 - ratio) + self._poses[idx_1, :3, 3] * ratio
-        pose_0 = self._poses[idx_0].detach().cpu().numpy()
-        pose_1 = self._poses[idx_1].detach().cpu().numpy()
+        trans = self.w2c[idx_0, :3, 3] * (1.0 - ratio) + self.w2c[idx_1, :3, 3] * ratio
+        pose_0 = self.w2c[idx_0].detach().cpu().numpy()
+        pose_1 = self.w2c[idx_1].detach().cpu().numpy()
         pose_0 = np.linalg.inv(pose_0)
         pose_1 = np.linalg.inv(pose_1)
         rot_0 = pose_0[:3, :3]
@@ -113,6 +113,7 @@ class NeusDataset(Dataset):
 
     @Dataset.c2w.getter
     def c2w(self):
+        # 이 데이터셋에선 사용하지 않음
         return torch.inverse(self.intrinsic_matrix)  # [n_images, 4, 4]
 
     def load_imgs(self):
@@ -151,6 +152,8 @@ class NeusDataset(Dataset):
         object_bbox_min = np.linalg.inv(scale_mats_np[0]) @ object_scale_mat @ object_bbox_min[:, None]
         object_bbox_max = np.linalg.inv(scale_mats_np[0]) @ object_scale_mat @ object_bbox_max[:, None]
 
+        object_bbox_min = object_bbox_min[:3, 0]
+        object_bbox_max = object_bbox_max[:3, 0]
         return intrinsics_all, pose_all, object_bbox_min, object_bbox_max
 
 

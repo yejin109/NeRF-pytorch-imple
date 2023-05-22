@@ -21,6 +21,14 @@ Data : SYNTHE/fern
 
 ![NeRF-LLFF-fern](assets/LLFF_fern.png)
 
+- NeUS
+
+Data : SYNTHE/neus_thin_structure/thin_catbus 
+
+(5000 epochs)
+![NeUS-5000-norm](assets/NeUS_5000_norm.png)
+![NeUS-5000-img](assets/NeUS_5000_img.png)
+
 # Progress
 
 - 230426 : NeRF 동작 확인
@@ -55,8 +63,9 @@ Data : SYNTHE/fern
 - [230420, ray] : ray.get_rays_np()에서 기존 구현에서 문제가 있었던 것 수정
 - [230420, model] : Embedding에서 multries에 따라서 model 구조가 달라지고 있었음
 ### NeUS
-- [****] [230429, model] : 현재 update가 느리게 혹은 안되고 있는데 이게 자연스러운 현상인지 확인해야 함.  
-    - far, near, rays_o값이 이상함 
+- [230429, model] : 현재 update가 느리게 혹은 안되고 있는데 이게 자연스러운 현상인지 확인해야 함.  
+    - far, near, rays_o값이 이상함. dataset에서 pose_all과 intrinsic_inv를 사용하는 것과 c2w, w2c와 충돌 문제로 보임
+    - [230523] 현재 조정해서 적절히 나오는 것으로 판단
 
 ## Profiling
 ### NeRF
