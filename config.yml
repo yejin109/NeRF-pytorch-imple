@@ -221,7 +221,7 @@ model:
 
 log:
   i_print: 200
-  i_img: 2500 # frequency of tensorboard image logging, default 5000
-  i_weights: 10000 # frequency of weight ckpt saving
-  i_testset: 5000 # frequency of testset saving
-  i_video: 20000 # frequency of render_poses video saving
+  i_img: 5000 # frequency of tensorboard image logging, default 5000
+  i_weights: 10000 # frequency of weight ckpt saving, 10000
+  i_testset: 5000 # frequency of testset saving, 5000
+  i_video: 20000 # frequency of render_poses video saving, 20000
