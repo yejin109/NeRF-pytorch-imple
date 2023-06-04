@@ -17,6 +17,7 @@ import torch
 import dataset
 import model_nerf
 import model_neus
+import model_hypernerf_torch as hypernerf
 
 
 def get_configs(_data, _model_architecture):
@@ -67,4 +68,22 @@ if __name__ == '__main__':
     renderer = model_neus.NeuSRenderer(nerf_outside, sdf_network, deviation_network, color_network, **rendering_config)
 
     model_neus.run(model_config, rendering_config, dataset_config, log_config, params_to_train, renderer, dset)
+
+    #############
+    # model_architecture = 'hypernerf'
+    # data = 'thin_structure' # TODO
+    #
+    # embedding_config, dataset_config, model_config, rendering_config, log_config = get_configs(data, model_architecture)
+
+    # TODO
+    # Step 1 : Load Dataset
+    # dset = dataset.NeusDataset(**dict(dataset_config, **{'render_pose_num': rendering_config['render_pose_num']}))
+
+    # Step 2: Load Renderer and Model
+    # nerf_outside, sdf_network, deviation_network, color_network, params_to_train = hypernerf.get_model(model_config)
+
+    # renderer = model_neus.NeuSRenderer(nerf_outside, sdf_network, deviation_network, color_network, **rendering_config)
+    #
+    # model_neus.run(model_config, rendering_config, dataset_config, log_config, params_to_train, renderer, dset)
+    print()
 

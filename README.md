@@ -3,6 +3,7 @@
 1. 현재 지원하는 모델 :
     - NeRF 
     - NeUS
+    - HyperNeRF(TBD)
 
 2. 퍼포먼스 :
 
@@ -25,12 +26,12 @@ Data : SYNTHE/fern
 
 Data : SYNTHE/neus_thin_structure/thin_catbus 
 
-(5000 epochs)
+(300000 epochs)
 
 
-![NeUS-5000-norm](assets/NeUS_5000_norm.png)
+![NeUS-5000-norm](assets/NeUS_300000_norm.png)
 
-![NeUS-5000-img](assets/NeUS_5000_img.png)
+![NeUS-5000-img](assets/NeuS_thin_structure_300000.png)
 
 # Progress
 
@@ -84,8 +85,12 @@ Data : SYNTHE/neus_thin_structure/thin_catbus
 
 ### NeUS
 - [230429, OOM] 현재 batch_size 512에서 OOM이 확인. 현재 256으로 약 6GB 사용.
+- [230602, Model] NeRF가 항상 사용되는 것은 아니고 config 중 n_outside를 1이상 지정시 사용.
+    - 1) NeuSRenderer.render에서 background_alpha를 계산할 때 사용
+    - 2) NeuSRenderer.render_core에서 sampled_color 계산시 사용. 이 값이 최종 예측한 color 값
 
 ## Parameter effect
+### NeUS
 - [230420, shuffling] : ray.prepare_ray_batching()에서 np.random.shuffle(rays_rgb)을 하지 않게 되면 이상하게 나옴
 
 

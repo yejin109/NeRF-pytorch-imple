@@ -42,10 +42,44 @@ data:
     white_bkgd: False
 
 embed:
-  include_input: True
-  input_dims : 3
-  log_sampling: True
+  nerf:
+    include_input: True
+    input_dims : 3
+    log_sampling: True
 
+  neus:
+    include_input: True
+    input_dims : 3
+    log_sampling: True
+
+  hypernerf:
+    # NeRF metadata configs.
+    use_nerf_embed: False
+    nerf_embed_key: appearance
+    nerf_num_embeddings: 8 # TODO
+    nerf_num_dims: 8 # TODO
+
+    # Warp configs.
+    use_warp: False
+    warp_embed_key: warp
+    warp_num_embeddings: 8 # TODO
+    warp_num_dims: 8 # TODO
+
+    warp_field_cls: Callable[..., nn.Module] = warping.SE3Field
+
+    use_alpha_condition: bool = False
+    use_rgb_condition: bool = False
+
+    hyper_slice_method: none
+    hyper_num_embeddings: 8 # TODO
+    hyper_num_dims: 8 # TODO
+    hyper_embed_cls: Callable[..., nn.Module] = (
+      functools.partial(modules.GLOEmbed, num_dims=8))
+    hyper_embed_key: str = 'appearance'
+
+    hyper_use_warp_embed: bool = True
+    hyper_sheet_mlp_cls: Callable[..., nn.Module] = modules.HyperSheetMLP
+    hyper_sheet_use_input_points: bool = True
 
 rendering:
   nerf:
@@ -135,10 +169,10 @@ model:
     batch_size: 16 # default 512
     validate_resolution_level: 4
     warm_up_end: 5000
-    anneal_end: 0 # default for with mask. without mask, 50000, thin structure : 0
+    anneal_end: 50000 # default for with mask. without mask, wmaks : 0 , thin structure : 50000
 
     igr_weight: 0.1
-    mask_weight: 0.1
+    mask_weight: 0.0 # wmask : 0.1, thin structure : 0.0
 
     layer_num_fine: 8 # netdepth_fine: 8 # layers in fine network
     hidden_feature_fine: 256 # netwidth_fine: 256 # channels per layer in fine network
@@ -158,7 +192,6 @@ model:
         - 4
       use_viewdirs: True
 
-
     sdf_network:
       d_out: 257
       d_in: 3
@@ -168,7 +201,7 @@ model:
         - 4
       multires: 6
       bias: 0.5
-      scale: 1.0 # used 3.0
+      scale: 3.0 # used thin structure : 3.0 wmask : 1.0
       geometric_init: True
       weight_norm: True
 
@@ -187,38 +220,35 @@ model:
       squeeze_out: True
 
   hypernerf:
-    # NeRF architecture.
     use_viewdirs: True
     noise_std: None
+
+    # NeRF architecture.
+    in_feature : 10 # TODO: dummy
+    use_fine_model : True
     nerf_trunk_depth: 8
     nerf_trunk_width: 256
     nerf_rgb_branch_depth: 1
     nerf_rgb_branch_width: 128
+    nerf_rgb_channels: 3
+    nerf_alpha_depth: 0
+    nerf_alapha_width: 8
+    nerf_alpha_channels: 1
+    nerf_norm : None
+    nerf_activation: relu
     nerf_skips:
       - 4
 
-    # NeRF metadata configs.
-    use_nerf_embed: bool = False
-    nerf_embed_cls: Callable[..., nn.Module] = (
-      functools.partial(modules.GLOEmbed, num_dims=8))
-    nerf_embed_key: str = 'appearance'
-    use_alpha_condition: bool = False
-    use_rgb_condition: bool = False
-    hyper_slice_method: str = 'none'
-    hyper_embed_cls: Callable[..., nn.Module] = (
-      functools.partial(modules.GLOEmbed, num_dims=8))
-    hyper_embed_key: str = 'appearance'
-    hyper_use_warp_embed: bool = True
-    hyper_sheet_mlp_cls: Callable[..., nn.Module] = modules.HyperSheetMLP
-    hyper_sheet_use_input_points: bool = True
-
-    # Warp configs.
-    use_warp: bool = False
-    warp_field_cls: Callable[..., nn.Module] = warping.SE3Field
-    warp_embed_cls: Callable[..., nn.Module] = (
-      functools.partial(modules.GLOEmbed, num_dims=8))
-    warp_embed_key: str = 'warp'
-
+    hypersheet:
+      in_channels: 10 # TODO
+      out_channels: 3 # TODO
+      min_deg: 0
+      max_deg: 1
+      depth: 6
+      width: 64
+      skips:
+        - 4
+      use_residual: False
 log:
   i_print: 200
   i_img: 5000 # frequency of tensorboard image logging, default 5000

@@ -1,0 +1,1 @@
+from .hypernerf import get_model

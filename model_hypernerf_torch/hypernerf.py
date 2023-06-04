@@ -3,16 +3,33 @@ from typing import Dict, Any
 
 import torch.nn as nn
 
+from model_hypernerf_torch import embed
 from model_hypernerf_torch import hypernerf_modules as modules
 from model_hypernerf_torch import hypernerf_utils as model_utils
 from model_hypernerf_torch.rendering import filter_sigma
 
 
-def get_model(in_feature, trunk_layer_num, trunk_hidden_dim, rgb_layer_num, rgb_hidden_dim, rgb_channels,
-              alpha_layer_num, alpha_hidden_dim, alpha_channels, num_fine_samples,
-              embedding_cfg,
-              skip_connection_layer_list=(4,),
-              ):
+def get_model(model_cfg, embed_cfg):
+    model = _load_hypernerf(
+        in_feature= model_cfg['in_feature'],
+        trunk_layer_num=model_cfg['nerf_trunk_depth'],
+        trunk_hidden_dim=model_cfg['nerf_trunk_width'],
+        rgb_layer_num=model_cfg['nerf_rgb_branch_depth'],
+        rgb_hidden_dim=model_cfg['nerf_rgb_branch_width'],
+        rgb_channels=model_cfg['nerf_rgb_channels'],
+        alpha_layer_num=model_cfg['nerf_alpha_depth'],
+        alpha_hidden_dim=model_cfg['nerf_alapha_width'],
+        alpha_channels=model_cfg['nerf_alpha_channels'],
+        use_fine_model=model_cfg['use_fine_model'],
+        emb_cfg=embed_cfg,
+        skips=model_cfg['nerf_skips'],
+        hypersheet_cfg=model_cfg['hypersheet']
+    )
+    return model
+
+
+def _load_hypernerf(in_feature, trunk_layer_num, trunk_hidden_dim, rgb_layer_num, rgb_hidden_dim, rgb_channels,
+                    alpha_layer_num, alpha_hidden_dim, alpha_channels, use_fine_model, emb_cfg, hypersheet_cfg, skips):
     """Neural Randiance Field.
 
     Args:
@@ -29,68 +46,45 @@ def get_model(in_feature, trunk_layer_num, trunk_hidden_dim, rgb_layer_num, rgb_
     """
     # TODO
     # Embedding
-    if embedding_cfg.use_nerf_embed:
-        embedding_cfg.nerf_embed = embedding_cfg.nerf_embed_cls(num_embeddings=embedding_cfg.num_nerf_embeds)
-    if embedding_cfg.use_warp:
-        embedding_cfg.warp_embed = embedding_cfg.warp_embed_cls(num_embeddings=embedding_cfg.num_warp_embeds)
+    if emb_cfg.use_nerf_embed:
+        nerf_embed = embed.GLOEmbed(num_embeddings=emb_cfg.nerf_num_embeddings, num_dims=emb_cfg.nerf_num_dims)
+    if emb_cfg.use_warp:
+        warp_embed = embed.GLOEmbed(num_embeddings=emb_cfg.warp_num_embeddings, num_dims=emb_cfg.warp_num_dims)
 
-    if embedding_cfg.hyper_slice_method == 'axis_aligned_plane':
-        embedding_cfg.hyper_embed = embedding_cfg.hyper_embed_cls(num_embeddings=embedding_cfg.num_hyper_embeds)
-    elif embedding_cfg.hyper_slice_method == 'bendy_sheet':
-        if not embedding_cfg.hyper_use_warp_embed:
-            embedding_cfg.hyper_embed = embedding_cfg.hyper_embed_cls(num_embeddings=embedding_cfg.num_hyper_embeds)
-        embedding_cfg.hyper_sheet_mlp = embedding_cfg.hyper_sheet_mlp_cls()
+    if emb_cfg.hyper_slice_method == 'axis_aligned_plane':
+        hyper_embed = embed.GLOEmbed(num_embeddings=emb_cfg.hyper_num_embeddings, num_dims=emb_cfg.hyper_num_dims)
+    elif emb_cfg.hyper_slice_method == 'bendy_sheet':
+        if not emb_cfg.hyper_use_warp_embed:
+            hyper_embed = embed.GLOEmbed(num_embeddings=emb_cfg.hyper_num_embeddings, num_dims=emb_cfg.hyper_num_dims)
+        hyper_sheet_mlp = modules.HyperSheetMLP(
+            in_channels=hypersheet_cfg['in_channels'],
+            out_channels=hypersheet_cfg['out_channels'],
+            min_deg=hypersheet_cfg['min_deg'],
+            max_deg=hypersheet_cfg['max_deg'],
+            depth=hypersheet_cfg['depth'],
+            width=hypersheet_cfg['width'],
+            skips=hypersheet_cfg['skips'],
+            use_residual=hypersheet_cfg['use_residual'],
+        )
 
-    if embedding_cfg.use_warp:
-        embedding_cfg.warp_field = embedding_cfg.warp_field_cls()
-
+    if emb_cfg.use_warp:
+        emb_cfg.warp_field = emb_cfg.warp_field_cls()
 
     # Coarse model
     nerf_mlps = {
         'coarse': modules.NeRFMLP(in_feature, trunk_layer_num, trunk_hidden_dim,
                                   rgb_layer_num, rgb_hidden_dim, rgb_channels,
                                   alpha_layer_num, alpha_hidden_dim, alpha_channels,
-                                  skip_connection_layer_list=skip_connection_layer_list)
+                                  skipts=skips)
     }
-    # Coarse model
-    if num_fine_samples > 0:
+    # Fine model
+    if use_fine_model > 0:
         nerf_mlps['fine'] = modules.NeRFMLP(in_feature, trunk_layer_num, trunk_hidden_dim,
                                             rgb_layer_num, rgb_hidden_dim, rgb_channels,
                                             alpha_layer_num, alpha_hidden_dim, alpha_channels,
-                                            skip_connection_layer_list=skip_connection_layer_list)
+                                            skipts=skips)
 
     model = HyperNeRF(in_feature, nerf_mlps)
-    # model = HyperNeRF(
-    #   embeddings_dict=immutabledict.immutabledict(embeddings_dict),
-    #   near=near,
-    #   far=far)
-
-    # init_rays_dict = {
-    #   'origins': np.ones((batch_size, 3), np.float32),
-    #   'directions': np.ones((batch_size, 3), np.float32),
-    #   'metadata': {
-    #       'warp': np.ones((batch_size, 1), np.uint32),
-    #       'camera': np.ones((batch_size, 1), np.uint32),
-    #       'appearance': np.ones((batch_size, 1), np.uint32),
-    #       'time': np.ones((batch_size, 1), np.float32),
-    #   }
-    # }
-    # extra_params = {
-    #   'nerf_alpha': 0.0,
-    #   'warp_alpha': 0.0,
-    #   'hyper_alpha': 0.0,
-    #   'hyper_sheet_alpha': 0.0,
-    # }
-
-    # key, key1, key2 = random.split(key, 3)
-    key, key1, key2 = 1, 19, 46
-    # params = model.init({
-    #   'params': key,
-    #   'coarse': key1,
-    #   'fine': key2
-    # }, init_rays_dict, extra_params=extra_params)['params']
-
-    # return model, params
     return model
 
 
@@ -233,23 +227,24 @@ class HyperNeRF(nn.Module):
 
         return rgb, sigma
 
-    def map_spatial_points(self, points, warp_embed, extra_params, use_warp=True,
-                         return_warp_jacobian=False):
-        warp_jacobian = None
-        if self.use_warp and use_warp:
-          warp_fn = jax.vmap(jax.vmap(self.warp_field, in_axes=(0, 0, None, None)),
-                             in_axes=(0, 0, None, None))
-          warp_out = warp_fn(points,
-                             warp_embed,
-                             extra_params,
-                             return_warp_jacobian)
-          if return_warp_jacobian:
-            warp_jacobian = warp_out['jacobian']
-          warped_points = warp_out['warped_points']
-        else:
-          warped_points = points
-
-        return warped_points, warp_jacobian
+    # TODO
+    # def map_spatial_points(self, points, warp_embed, extra_params, use_warp=True,
+    #                      return_warp_jacobian=False):
+    #     warp_jacobian = None
+    #     if self.use_warp and use_warp:
+    #       warp_fn = jax.vmap(jax.vmap(self.warp_field, in_axes=(0, 0, None, None)),
+    #                          in_axes=(0, 0, None, None))
+    #       warp_out = warp_fn(points,
+    #                          warp_embed,
+    #                          extra_params,
+    #                          return_warp_jacobian)
+    #       if return_warp_jacobian:
+    #         warp_jacobian = warp_out['jacobian']
+    #       warped_points = warp_out['warped_points']
+    #     else:
+    #       warped_points = points
+    #
+    #     return warped_points, warp_jacobian
 
     def map_hyper_points(self, points, hyper_embed, extra_params,
                        hyper_point_override=None):

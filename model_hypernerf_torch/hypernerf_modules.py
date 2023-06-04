@@ -13,11 +13,10 @@
 # limitations under the License.
 
 """Modules for NeRF models."""
-# from hypernerf import model_utils
-# from hypernerf import types
-
+import numpy as np
 import torch
 import torch.nn as nn
+from model_hypernerf_torch import hypernerf_utils
 
 
 def get_norm_layer(norm_type, in_features):
@@ -94,7 +93,7 @@ class NeRFMLP(nn.Module):
                  trunk_layer_num, trunk_hidden_dim,
                  rgb_layer_num, rgb_hidden_dim, rgb_channels,
                  alpha_layer_num, alpha_hidden_dim, alpha_channels,
-                 skip_connection_layer_list=(4,),
+                 skipts,
                  rgb_condition=None, alpha_condition=None):
         super(NeRFMLP, self).__init__()
 
@@ -102,33 +101,33 @@ class NeRFMLP(nn.Module):
         self.alpha_condition = alpha_condition
 
         # TODO: config로 옮기기
-        self.trunk_depth: int = 8
-        self.trunk_width: int = 256
-
-        self.rgb_branch_depth: int = 1
-        self.rgb_branch_width: int = 128
-        self.rgb_channels: int = 3
-
-        self.alpha_branch_depth: int = 0
-        self.alpha_branch_width: int = 128
-        self.alpha_channels: int = 1
-
-        self.norm = None
-        self.activation = 'relu'
-        self.skips = skip_connection_layer_list
+        # self.trunk_depth: int = 8
+        # self.trunk_width: int = 256
+        #
+        # self.rgb_branch_depth: int = 1
+        # self.rgb_branch_width: int = 128
+        # self.rgb_channels: int = 3
+        #
+        # self.alpha_branch_depth: int = 0
+        # self.alpha_branch_width: int = 128
+        # self.alpha_channels: int = 1
+        #
+        # self.norm = None
+        # self.activation = 'relu'
+        # self.skips = skip_connection_layer_list
 
         self.trunk_mlp = None
         if trunk_layer_num > 0:
             self.trunk_mlp = MLP(trunk_layer_num, in_feature, trunk_hidden_dim, hidden_activation=self.activation,
-                                 hidden_norm=self.norm, skip_connection_layer_list=skip_connection_layer_list)
+                                 hidden_norm=self.norm, skip_connection_layer_list=skipts)
         self.rgb_mlp = None
         if rgb_layer_num > 0:
-            self.rgb_mlp = MLP(rgb_layer_num, trunk_hidden_dim, rgb_hidden_dim, hidden_activation=self.activation, hidden_norm=self.norm,
-                               out_feature=rgb_channels, skip_connection_layer_list=skip_connection_layer_list)
+            self.rgb_mlp = MLP(rgb_layer_num, trunk_hidden_dim, rgb_hidden_dim, hidden_activation=self.activation,
+                               hidden_norm=self.norm, out_feature=rgb_channels, skip_connection_layer_list=skipts)
         self.alpha_mlp = None
         if alpha_layer_num > 0:
             self.alpha_mlp = MLP(alpha_layer_num, trunk_hidden_dim, alpha_hidden_dim, hidden_activation=self.activation,
-                               hidden_norm=self.norm, out_feature=alpha_channels, skip_connection_layer_list=skip_connection_layer_list)
+                                 hidden_norm=self.norm, out_feature=alpha_channels, skip_connection_layer_list=skipts)
 
         self.bottleneck = None
         if (alpha_condition is not None) or (rgb_condition is not None):
@@ -171,6 +170,39 @@ class NeRFMLP(nn.Module):
             'rgb': rgb.reshape((-1, num_samples, self.rgb_channels)),
             'alpha': alpha.reshape((-1, num_samples, self.alpha_channels)),
         }
+
+
+class HyperSheetMLP(nn.Module):
+    """An MLP that defines a bendy slicing surface through hyper space."""
+    def __init__(self, in_channels, out_channels, min_deg, max_deg, depth, width, skips, use_residual):
+        super(HyperSheetMLP, self).__init__()
+        self.out_channels = out_channels
+        self.min_deg = min_deg
+        self.max_deg = max_deg
+        self.depth = depth
+        self.width = width
+        self.skips = skips
+        self.use_residual = use_residual
+        # hidden_init: types.Initializer = jax.nn.initializers.glorot_uniform()
+        # output_init: types.Initializer = jax.nn.initializers.normal(1e-5)
+        # ayer_num, in_feature, hidden_dim, out_feature = 0, skip_connection_layer_list = (4,),
+        # hidden_norm = None, hidden_activation = 'relu', use_bias = True, output_activation = None):
+        self.mlp = MLP(
+            layer_num=depth,
+            in_feature=in_channels,
+            hidden_dim=width,
+            out_feature=out_channels,
+            skip_connection_layer_list=skips,
+        )
+
+    def forward(self, points, embed, alpha=None):
+        points_feat = hypernerf_utils.posenc(
+            points, self.min_deg, self.max_deg, alpha=alpha)
+        inputs = np.concatenate([points_feat, embed], axis=-1)
+        if self.use_residual:
+            return self.mlp(inputs) + embed
+        else:
+            return self.mlp(inputs)
 
 
 def broadcast_condition(c, num_samples):
