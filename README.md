@@ -60,6 +60,44 @@ Data : SYNTHE/neus_thin_structure/thin_catbus
     - Volumetric Rendering : Run network and then rendering(raw2output). Hierarchical sampling implemented.
     - Post process : aggregate chunk into and batch and backpropagation
 
+## NeRF Studio API
+사용시 문제점
+- 기본적으로 지원하는 GPU는 제한적.(docker를 사용하든 manual로 설치하든 cuda 11.8부터 사용이 가능할 것 같다.) 
+
+### Overview
+- 현재 지원하고 있는 모델 
+    - Instant-NGP, K-Planes, Mip-NeRF, NeRF, TensoRF and etc.
+- 주요 component
+    - [Camera model](https://docs.nerf.studio/en/latest/nerfology/model_components/visualize_cameras.html)
+        - 기본적인 카메라 모델에서 다루는 요소들
+        - Instrinsic/Extrinsic
+        - Equirectangular/Spherical Camera Model
+        - Distortion Parameters
+    - [Sample representation](https://docs.nerf.studio/en/latest/nerfology/model_components/visualize_samples.html)
+        - NeRF에서 핵심이 되는 volumetric rendering 관련 내용
+    - [Ray samplers](https://docs.nerf.studio/en/latest/nerfology/model_components/visualize_samplers.html)
+        - Volumetric Rendering을 진행하기 위해서 ray를 해당 direction에서 sampling을 해야할 때 다루는 내용
+        - Strafied Sampling, Heirarchical Sampling 
+    - [Spatial distortions](https://docs.nerf.studio/en/latest/nerfology/model_components/visualize_spatial_distortions.html)
+        - 단순히 물체 rendering만 하는 것이 아니라, scene을 rendering하기 위해서 spatial distortion을 처리할 필요가 존재.
+        - (TBD) 향후 scene rendering 모델을 다루게 될 때 다시 방문하도록
+    - [Encoders](https://docs.nerf.studio/en/latest/nerfology/model_components/visualize_encoders.html)
+        - Positional Encoding을 포함해서 여러 pixel들의 위치 정보를 나타내는 방식
+
+### Pipeline
+![pipeline](./assets/nerfstudio_pipeline.JPG)
+- 여기서 Model을 제외하고 DataManager에 해당하는 것만 사용할 계획
+    - NOTE! RayGT and RayOutputs are currently dictionaries. In the future, they will be typed objects.
+- 주요 Component
+    - RayBundles
+        - the input to the forward pass of the Model. needed for both training and inference time
+        - origin과 viewing directions을 표현하고, rendering으로 이어지게 된다.
+    - RayGT objects, however, are needed only during training to calculate the losses in the Loss Dict.
+        - pixel과 같은 ground truth 정보를 포함해서 Loss 계산에 사용하게 된다.
+
+## HyperNeRF Process
+사용시 문제점
+- 현재 가지고 있는 파이프라인을 사용은 가능하나, 데이터 처리가 HyperNeRF에 의존적이다.(Dataset이 맞춰져 있다.)
 
 # Log
 ## Performance, Error
@@ -104,3 +142,7 @@ Data : SYNTHE/neus_thin_structure/thin_catbus
 2. volumetric rendering in NeRF [link](https://keras.io/examples/vision/nerf/)
 3. Camera calibration [link](https://www.mathworks.com/help/vision/ug/camera-calibration.html)
 4. NeUS [link](https://github.com/Totoro97/NeuS/tree/6f96f96005d72a7a358379d2b576c496a1ab68dd)
+5. NeRF Studio
+    - [blog](https://xoft.tistory.com/26), [Docs](https://docs.nerf.studio/en/latest/index.html)
+    
+    
