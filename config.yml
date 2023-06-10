@@ -106,11 +106,11 @@ rendering:
     shape: greek # options, armchair/ cube/ greek/ vase
 
   neus:
-    n_samples: 64
-    n_importance: 64
+    n_samples: 64 # The number of samples in z axis
+    n_importance: 64 # Determine whether to up sampling or not
     n_outside: 0 # default with mask. without mask, use 32
-    up_sample_steps: 4     # 1 for simple coarse-to-fine sampling
-    perturb:  1.0
+    up_sample_steps: 4     # 1 for simple coarse-to-fine sampling. The number of updating z_vals
+    perturb:  1.0 # positive value -> perturbation on samples of z values.
 
     render_pose_num: 1
 
