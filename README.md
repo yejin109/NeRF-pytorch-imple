@@ -108,6 +108,7 @@ Data : SYNTHE/neus_thin_structure/thin_catbus
 - [230429, model] : 현재 update가 느리게 혹은 안되고 있는데 이게 자연스러운 현상인지 확인해야 함.  
     - far, near, rays_o값이 이상함. dataset에서 pose_all과 intrinsic_inv를 사용하는 것과 c2w, w2c와 충돌 문제로 보임
     - [230523] 현재 조정해서 적절히 나오는 것으로 판단
+- [230611, inference] 현재 이미지가 되게 둥글둥글 나오게 되는데, 구현상으로 보면 gradient(nabla 혹은 normal)에서 clamp로 값의 범위를 한정하게 되는데, 이게 결국 smoothign과 연관되지 않을까 생각
 
 ## Profiling
 ### NeRF
