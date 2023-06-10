@@ -104,7 +104,7 @@ class NeuSRenderer:
 
         # Section length
         dists = z_vals[..., 1:] - z_vals[..., :-1]
-        dists = torch.cat([dists, torch.Tensor([sample_dist]).expand(dists[..., :1].shape)], -1)
+        wlsrk = torch.cat([dists, torch.Tensor([sample_dist]).expand(dists[..., :1].shape)], -1)
         mid_z_vals = z_vals + dists * 0.5
 
         # Section midpoints
@@ -138,6 +138,9 @@ class NeuSRenderer:
     def up_sample(self, rays_o, rays_d, z_vals, sdf, n_importance, inv_s):
         """
         Up sampling give a fixed inv_s
+        실제로 들어오는 값은 다음과 같다.
+        - n_importance : self.n_importance // self.up_sample_steps
+        - inv_s 64 * 2**i(iteration 순서)
         """
         batch_size, n_samples = z_vals.shape
         pts = rays_o[:, None, :] + rays_d[:, None, :] * z_vals[..., :, None]  # n_rays, n_samples, 3
@@ -169,11 +172,15 @@ class NeuSRenderer:
         cos_val, _ = torch.min(cos_val, dim=-1, keepdim=False)
         cos_val = cos_val.clip(-1e3, 0.0) * inside_sphere
 
+        # Numerical하게 SDF 값을 조정하게 된다. 여기서 robust한 mid_sdf(prev와 next의 중점)값에서 gradient에 해당하는 cos_val에 곱하고
+        # 그 사이 간격 dist를 곱함으로써 robust한 SDF에서 해당 위치의 값을 Tayler linearization으로 구한 것.
+        # 여기서 1/2가 들어가고, gradient(cos_val)이 들어가고 delta(dist)가 들어가기에 Taylor Linearization인 것.
         dist = (next_z_vals - prev_z_vals)
         prev_esti_sdf = mid_sdf - cos_val * dist * 0.5
         next_esti_sdf = mid_sdf + cos_val * dist * 0.5
         prev_cdf = torch.sigmoid(prev_esti_sdf * inv_s)
         next_cdf = torch.sigmoid(next_esti_sdf * inv_s)
+        # discrete opacity, Paper Equation 13, 22
         alpha = (prev_cdf - next_cdf + 1e-5) / (prev_cdf + 1e-5)
         weights = alpha * torch.cumprod(
             torch.cat([torch.ones([batch_size, 1]), 1. - alpha + 1e-7], -1), -1)[:, :-1]
@@ -227,12 +234,14 @@ class NeuSRenderer:
         sdf = sdf_nn_output[:, :1]
         feature_vector = sdf_nn_output[:, 1:]
 
+        # IDF Network를 구현하기 위해서 필요한 것 중 normal vector가 있고, 이를 계산하는 것
         gradients = sdf_network.gradient(pts).squeeze()
         sampled_color = color_network(pts, gradients, dirs, feature_vector).reshape(batch_size, n_samples, 3)
 
         inv_s = deviation_network(torch.zeros([1, 3]))[:, :1].clip(1e-6, 1e6)           # Single parameter
         inv_s = inv_s.expand(batch_size * n_samples, 1)
 
+        # inner product로 실제 cosine 값을 계산하게 된다. 이러한 작업들로 인해서 gradient가 normal하게 만드는 효과가 존재하지 않을까
         true_cos = (dirs * gradients).sum(-1, keepdim=True)
 
         # "cos_anneal_ratio" grows from 0 to 1 in the beginning training iterations. The anneal strategy below makes
@@ -241,9 +250,13 @@ class NeuSRenderer:
                      F.relu(-true_cos) * cos_anneal_ratio)  # always non-positive
 
         # Estimate signed distances at section points
+        # 여기에서 아이디어는 결국 iter_cos는 gradient(nabla)값을 얘기하게 되고, 1/2 term을 통해서 First order Taylor expansion을 취한 것으로 보인다.
+        # 즉 iter_cos를 함께 고려해서 true_cos 값에 normal이니 방향은 반대로 잡은 상태에서 expansion으로 계산하게 되는 것.
+        # 이 때 cos_anneal_ratio는 이러한 gradient가 train 초반에 불안정할 것을 고려해서 조정하게 하는 것
         estimated_next_sdf = sdf + iter_cos * dists.reshape(-1, 1) * 0.5
         estimated_prev_sdf = sdf - iter_cos * dists.reshape(-1, 1) * 0.5
-
+        
+        # SDF 값이 결국 Sigmoid의 derivative로 정의하고 있어서 Sigmoid를 계산하게 하는 것
         prev_cdf = torch.sigmoid(estimated_prev_sdf * inv_s)
         next_cdf = torch.sigmoid(estimated_next_sdf * inv_s)
 
@@ -260,10 +273,10 @@ class NeuSRenderer:
         if background_alpha is not None:
             alpha = alpha * inside_sphere + background_alpha[:, :n_samples] * (1.0 - inside_sphere)
             alpha = torch.cat([alpha, background_alpha[:, n_samples:]], dim=-1)
-            sampled_color = sampled_color * inside_sphere[:, :, None] +\
-                            background_sampled_color[:, :n_samples] * (1.0 - inside_sphere)[:, :, None]
+            sampled_color = sampled_color * inside_sphere[:, :, None] + background_sampled_color[:, :n_samples] * (1.0 - inside_sphere)[:, :, None]
             sampled_color = torch.cat([sampled_color, background_sampled_color[:, n_samples:]], dim=1)
-
+        
+        # NeRF에서 사용하던 Volumetric Rendering과정. NeRF의 raw2outputs() 참고
         weights = alpha * torch.cumprod(torch.cat([torch.ones([batch_size, 1]), 1. - alpha + 1e-7], -1), -1)[:, :-1]
         weights_sum = weights.sum(dim=-1, keepdim=True)
 
@@ -332,7 +345,7 @@ class NeuSRenderer:
                                                 rays_d,
                                                 z_vals,
                                                 sdf,
-                                                self.n_importance // self.up_sample_steps,
+                                                self.n_importance // self.up_sample_steps, # n_importance의 역할을 함,
                                                 64 * 2**i)
                     z_vals, sdf = self.cat_z_vals(rays_o,
                                                   rays_d,

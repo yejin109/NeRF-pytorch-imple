@@ -144,12 +144,7 @@ def validate_image(iter_step, dataset, renderer, validate_resolution_level, batc
         near, far = dataset.near_far_from_sphere(rays_o_batch, rays_d_batch)
         background_rgb = torch.ones([1, 3]) if use_white_bkgd else None
 
-        render_out = renderer.render(rays_o_batch,
-                                          rays_d_batch,
-                                          near,
-                                          far,
-                                          cos_anneal_ratio=get_cos_anneal_ratio(iter_step, anneal_end),
-                                          background_rgb=background_rgb)
+        render_out = renderer.render(rays_o_batch, rays_d_batch, near, far, cos_anneal_ratio=get_cos_anneal_ratio(iter_step, anneal_end), background_rgb=background_rgb)
 
         def feasible(key):
             return (key in render_out) and (render_out[key] is not None)
