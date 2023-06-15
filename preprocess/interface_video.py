@@ -48,4 +48,3 @@ def video_to_png(dataset_path, video_name, max_scale=1.0, fps=-1, target_num_fra
 if __name__ == '__main__':
     path = "C:/Users/user/github/nerf/dataset/custom/test/cup.mp4"
     video_to_png(path)
-

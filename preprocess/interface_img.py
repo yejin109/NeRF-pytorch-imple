@@ -1,14 +1,21 @@
 import os
+import cv2
 import json
 import struct
+import imageio
 import numpy as np
+from glob import glob
 from preprocess._utils import run_cmd, log
 from preprocess.camera import CameraModels, Camera, parse_colmap_camera_params
 from preprocess.image import Image
 
 
-def img_to_colmap(dataset_dir, camera_model, colmap_version, vocab_tree_filename=None, matching_method='vocab_tree', gpu=False):
+def img_to_colmap(dataset_dir, camera_model, colmap_version,
+                  vocab_tree_filename=None, matching_method='vocab_tree', gpu=False):
     """
+    :param gpu
+    :param vocab_tree_filename
+    :param colmap_version
     :param dataset_dir:
     :param camera_model: C
     :param matching_method:
@@ -17,6 +24,7 @@ def img_to_colmap(dataset_dir, camera_model, colmap_version, vocab_tree_filename
         should only be used for videos.
     :return:
     """
+
     log("="*100, add_time=False)
     log(f"Image to Colmap Conversion started")
     img_dir = f"{dataset_dir}/img"
@@ -186,10 +194,10 @@ def read_images_binary(path_to_model_file):
             while current_char != b"\x00":  # look for the ASCII 0 entry
                 image_name += current_char.decode("utf-8")
                 current_char = read_next_bytes(fid, 1, "c")[0]
-            num_points2D = read_next_bytes(fid, num_bytes=8, format_char_sequence="Q")[0]
-            x_y_id_s = read_next_bytes(fid, num_bytes=24 * num_points2D, format_char_sequence="ddq" * num_points2D)
+            num_points_2d = read_next_bytes(fid, num_bytes=8, format_char_sequence="Q")[0]
+            x_y_id_s = read_next_bytes(fid, num_bytes=24 * num_points_2d, format_char_sequence="ddq" * num_points_2d)
             xys = np.column_stack([tuple(map(float, x_y_id_s[0::3])), tuple(map(float, x_y_id_s[1::3]))])
-            point3D_ids = np.array(tuple(map(int, x_y_id_s[2::3])))
+            point_3d_ids = np.array(tuple(map(int, x_y_id_s[2::3])))
             images[image_id] = Image(
                 idx=image_id,
                 qvec=qvec,
@@ -197,7 +205,7 @@ def read_images_binary(path_to_model_file):
                 camera_idx=camera_id,
                 name=image_name,
                 xys=xys,
-                point3D_id=point3D_ids,
+                point3D_id=point_3d_ids,
             )
     return images
 
@@ -212,3 +220,53 @@ def read_next_bytes(fid, num_bytes, format_char_sequence, endian_character="<"):
     """
     data = fid.read(num_bytes)
     return struct.unpack(endian_character + format_char_sequence, data)
+
+
+def resize(dataset_dir, image_scales):
+    img_dir = f"{dataset_dir}/img"
+    for image_path in glob(f"{img_dir}/*.png"):
+        image = make_divisible(imageio.imread(image_path), max(image_scales))
+        for scale in image_scales:
+            output_path = f"{img_dir}_{scale}"
+            os.makedirs(output_path, exist_ok=True)
+            save_image(f'{output_path}/{image_path.split("/")[-1]}', image_to_uint8(downsample_image(image, scale)))
+
+
+def save_image(path, image: np.ndarray, extension='png') -> None:
+    with open(path, 'wb') as f:
+        image = Image.fromarray(np.asarray(image))
+        image.save(f, format=extension)
+
+
+def image_to_uint8(image: np.ndarray) -> np.ndarray:
+    """Convert the image to a uint8 array."""
+    if image.dtype == np.uint8:
+        return image
+    if not issubclass(image.dtype.type, np.floating):
+        raise ValueError(f'Input image should be a floating type but is of type {image.dtype!r}')
+    return (image * 255).clip(0.0, 255).astype(np.uint8)
+
+
+def make_divisible(image: np.ndarray, divisor: int) -> np.ndarray:
+    """Trim the image if not divisible by the divisor."""
+    height, width = image.shape[:2]
+    if height % divisor == 0 and width % divisor == 0:
+        return image
+
+    new_height = height - height % divisor
+    new_width = width - width % divisor
+
+    return image[:new_height, :new_width]
+
+
+def downsample_image(image: np.ndarray, scale: int) -> np.ndarray:
+    """Downsamples the image by an integer factor to prevent artifacts."""
+    if scale == 1:
+        return image
+
+    height, width = image.shape[:2]
+    if height % scale > 0 or width % scale > 0:
+        raise ValueError(f'Image shape ({height},{width}) must be divisible by the scale ({scale}).')
+    out_height, out_width = height // scale, width // scale
+    resized = cv2.resize(image, (out_width, out_height), cv2.INTER_AREA)
+    return resized

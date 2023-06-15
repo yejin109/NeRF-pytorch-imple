@@ -60,7 +60,7 @@ def parse_colmap_camera_params(camera):
         out["k2"] = 0.0
         out["p1"] = 0.0
         out["p2"] = 0.0
-        camera_model='OPENCV'
+        camera_model = 'OPENCV'
     elif camera.model == "PINHOLE":
         # f, cx, cy, k
 
@@ -74,7 +74,7 @@ def parse_colmap_camera_params(camera):
         out["k2"] = 0.0
         out["p1"] = 0.0
         out["p2"] = 0.0
-        camera_model='OPENCV'
+        camera_model = 'OPENCV'
     elif camera.model == "SIMPLE_RADIAL":
         # f, cx, cy, k
 

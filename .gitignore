@@ -1,7 +1,10 @@
 dataset/nerf_llff_data
 dataset/nerf_synthetic
 dataset/neus*
+
 dataset/custom/cup/colmap
+dataset/custom/cat/colmap
+
 src/__pycache__/
 logs/export
 logs/TEST-*
