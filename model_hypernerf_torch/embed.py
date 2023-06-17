@@ -1,36 +1,53 @@
 import torch
 import torch.nn as nn
-from model_hypernerf_torch import hypernerf_utils as model_utils
-from model_hypernerf_torch.hypernerf_modules import MLP
+from model_hypernerf_torch import _utils as model_utils
+from model_hypernerf_torch.modules import MLP
 
 
-class GLOEmbed(nn.Module):
-    """A GLO encoder module, which is just a thin wrapper around nn.Embed.
-
-    Attributes:
-        num_embeddings: The number of embeddings.
-        num_dims: The dimensions of each embedding.
-        embedding_init: The initializer to use for each.
+class GloEmbed(nn.Module):
     """
-    def __init__(self, num_embeddings, num_dims):
-        super(GLOEmbed, self).__init__()
-        self.embed = nn.Embedding(num_embeddings=num_embeddings, embedding_dim=num_dims)
-        # TODO 이거 해야 함.
-        # nn.init.uniform()
+        A GLO encoder module, which is just a thin wrapper around nn.Embed.
 
-    def forward(self, inputs):
-        """Method to get embeddings for specified indices.
+        Attributes:
+        num_embeddings: The number of embeddings.
+        embedding_dim: The dimensions of each embedding.
+        [TBD] embedding_init: The initializer to use for each.
+    """
+    def __init__(self, num_embeddings, embedding_dim):        
+        super(GloEmbed, self).__init__()
+        self.embed = nn.Embed(num_embeddings=num_embeddings, embedding_dim=embedding_dim)
 
-        Args:
-          inputs: The indices to fetch embeddings for.
+    def forward(self, x):
+        return self.embed(x)
+    
 
-        Returns:
-          The embeddings corresponding to the indices provided.
-        """
-        if inputs.shape[-1] == 1:
-            inputs = torch.squeeze(inputs, dim=-1)
+# class GLOEmbed(nn.Module):
+#     """A GLO encoder module, which is just a thin wrapper around nn.Embed.
 
-        return self.embed(inputs)
+#     Attributes:
+#         num_embeddings: The number of embeddings.
+#         num_dims: The dimensions of each embedding.
+#         embedding_init: The initializer to use for each.
+#     """
+#     def __init__(self, num_embeddings, num_dims):
+#         super(GLOEmbed, self).__init__()
+#         self.embed = nn.Embedding(num_embeddings=num_embeddings, embedding_dim=num_dims)
+#         # TODO 이거 해야 함.
+#         # nn.init.uniform()
+
+#     def forward(self, inputs):
+#         """Method to get embeddings for specified indices.
+
+#         Args:
+#           inputs: The indices to fetch embeddings for.
+
+#         Returns:
+#           The embeddings corresponding to the indices provided.
+#         """
+#         if inputs.shape[-1] == 1:
+#             inputs = torch.squeeze(inputs, dim=-1)
+
+#         return self.embed(inputs)
 
 
 class HyperSheetMLP(nn.Module):

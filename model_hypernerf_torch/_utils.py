@@ -270,3 +270,22 @@ def posenc_window(min_deg, max_deg, alpha):
     bands = np.arange(min_deg, max_deg)
     x = np.clip(alpha - bands, 0.0, 1.0)
     return 0.5 * (1 + np.cos(np.pi * x + np.pi))
+
+
+def noise_regularize(raw, noise_std, use_stratified_sampling):
+    """
+    Regularize the density prediction by adding gaussian noise.
+
+    Args:
+        key: jnp.ndarray(float32), [2,], random number generator.
+        raw: jnp.ndarray(float32), [batch_size, num_coarse_samples, 4].
+        noise_std: float, std dev of noise added to regularize sigma output.
+        use_stratified_sampling: add noise only if use_stratified_sampling is True.
+
+    Returns:
+        raw: jnp.ndarray(float32), [batch_size, num_coarse_samples, 4], updated raw.
+    """
+    if (noise_std is not None) and noise_std > 0.0 and use_stratified_sampling:
+        noise = torch.rand(raw[..., 3:4].shape) * noise_std
+        raw = torch.concat([raw[..., :3], raw[..., 3:4] + noise], axis=-1)
+    return raw

@@ -14,7 +14,7 @@ def get_model(model_cfg):
 
 
 class Nerfies(nn.Module):
-    def __init__(self, 
+    def __init__(self, use_viewdirs,
                  use_fine_samples, coarse_args, fine_args,
                  use_warp, warp_field_args, use_warp_jacobian,
                  use_appearance_metadata, appearance_encoder_args,
@@ -23,6 +23,7 @@ class Nerfies(nn.Module):
                  ):
         super(Nerfies, self).__init__()
 
+        self.use_viewdirs = use_viewdirs
         self.warp_field = None
         self.use_warp = use_warp
         self.use_warp_jacobian = use_warp_jacobian

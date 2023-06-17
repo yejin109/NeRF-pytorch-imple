@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from model_nerfies.modules import MLP
 from model_nerfies.embed import AnnealedSinusoidalEncoder, GloEncoder, TimeEncoder
-from model_nerfies._utils import exponential_se3, from_homogenous, to_homogenous
+from model_nerfies._utils import exponential_se3, from_homogenous, to_homogenous, posenc
 
 
 def create_warp_field(field_type, field_args, num_batch_dims):
@@ -21,34 +21,11 @@ def create_warp_field(field_type, field_args, num_batch_dims):
 
 class TranslationField(nn.Module):
     def __init__(self, 
-                 points_encoder_args, #  num_freqs, min_freq_log2, max_freq_log2, scale, use_identity, 
-                 metadata_encoder_type, glo_encoder_args, time_encoder_args,
+                 points_encoder_args,
                  mlp_depth, mlp_hidden_dim, mlp_output_dim, mlp_skips, mlp_hidden_activation, mlp_output_actvation,
                  **kwargs):
         super(TranslationField, self).__init__()
-
-        self.points_encoder = AnnealedSinusoidalEncoder(
-            # {'num_freqs': num_freqs, 'min_freq_log2':min_freq_log2, 'max_freq_log2': max_freq_log2, 'scale': scale, 'use_identity': use_identity}
-            **points_encoder_args
-            )
-        if metadata_encoder_type == 'glo':
-            self.metadata_encoder = GloEncoder(**glo_encoder_args)
-                # num_embeddings=self.num_embeddings,
-                # features=self.num_embedding_features
-        elif metadata_encoder_type == 'time':
-            self.metadata_encoder = TimeEncoder(**time_encoder_args)
-                # num_freqs=self.metadata_encoder_num_freqs,
-                # features=self.num_embedding_features)
-        elif metadata_encoder_type == 'blend':
-            self.glo_encoder = GloEncoder(**glo_encoder_args)
-                # num_embeddings=self.num_embeddings,
-                # features=self.num_embedding_features)
-            self.time_encoder = TimeEncoder(**time_encoder_args)
-                # num_freqs=self.metadata_encoder_num_freqs,
-                # features=self.num_embedding_features)
-        else:
-            raise ValueError(f'Unknown metadata encoder type {self.metadata_encoder_type}')
-
+        self.points_encoder_args = points_encoder_args
         self.mlp_output_dim = mlp_output_dim
         assert self.mlp_output_dim == 3
         assert mlp_hidden_activation is None
@@ -64,49 +41,31 @@ class TranslationField(nn.Module):
             output_activation=mlp_output_actvation
         )
 
-    def encode_metadata(self, metadata, time_alpha):
-        if self.metadata_encoder_type == 'time':
-            metadata_embed = self.metadata_encoder(metadata, time_alpha)  
-        elif self.metadata_encoder_type == 'blend':
-            glo_embed = self.glo_encoder(metadata)
-            time_embed = self.time_encoder(metadata)
-            metadata_embed = ((1.0 - time_alpha) * glo_embed +
-                                time_alpha * time_embed)
-        elif self.metadata_encoder_type == 'glo':
-            metadata_embed = self.metadata_encoder(metadata)
-        else:
-            raise RuntimeError(f'Unknown metadata encoder type {self.metadata_encoder_type}')
-        
-        return metadata_embed
-    
     def warp(self,points, metadata_embed, extra: dict):
-        points_embed = self.points_encoder(points, alpha=extra['alpha'])
+        # Nerfie version :
+        # points_embed = self.points_encoder(points, alpha=extra.get('alpha'))
+        points_embed = posenc(points, **self.points_encoder_args)
         inputs = torch.concat([points_embed, metadata_embed], dim=-1)
         translation = self.mlp(inputs)
         warped_points = points + translation
 
         return warped_points
             
-    def forward(self, points, metadata, extra, return_jacobian, is_metadata_encoded):
+    def forward(self, points, metadata_embed, extra, return_jacobian):
         """
             Warp the given points using a warp field.
 
             Args:
             points: the points to warp.
-            metadata: metadata indices if is_metadata_encoded is False else pre-encoded
+            metadata_embed: metadata indices if is_metadata_encoded is False else pre-encoded
                 metadata.
             extra: extra parameters used in the warp field e.g., the warp alpha.
             return_jacobian: if True compute and return the Jacobian of the warp.
-            is_metadata_encoded: if True assumes the metadata is already encoded.
 
             Returns:
             The warped points and the Jacobian of the warp if `return_jacobian` is
                 True.
         """
-        if is_metadata_encoded:
-            metadata_embed = metadata
-        else:
-            metadata_embed = self.encode_metadata(metadata, extra.get('time_alpha'))
 
         out = {'warped_points': self.warp(points, metadata_embed, extra)}
 
@@ -127,37 +86,13 @@ class SE3Field(nn.Module):
                  ):
         super(SE3Field, self).__init__()
 
-        self.points_encoder = AnnealedSinusoidalEncoder(
-            # {'num_freqs': num_freqs, 'min_freq_log2':min_freq_log2, 'max_freq_log2': max_freq_log2, 'scale': scale, 'use_identity': use_identity}
-            **points_encoder_args
-            )
-        if metadata_encoder_type == 'glo':
-            self.metadata_encoder = GloEncoder(**glo_encoder_args)
-                # num_embeddings=self.num_embeddings,
-                # features=self.num_embedding_features
-        elif metadata_encoder_type == 'time':
-            self.metadata_encoder = TimeEncoder(**time_encoder_args)
-        else:
-            raise ValueError(f'Unknown metadata encoder type {self.metadata_encoder_type}')
+        self.points_encoder_args = points_encoder_args
+
         self.trunk = MLP(**mlp_trunk_args)        
         self.branches = {
             'w': MLP(**mlp_branch_w_args),
             'v': MLP(**mlp_branch_v_args)
-        }
-        if use_pivot:
-            self.branches['p'] = MLP(**mlp_branch_p_args)
-        if use_translation:
-            self.branches['t'] = MLP(**mlp_branch_t_args)
-    
-    def encode_metadata(self, metadata, time_alpha):
-        if self.metadata_encoder_type == 'time':
-            metadata_embed = self.metadata_encoder(metadata, time_alpha)
-        elif self.metadata_encoder_type == 'glo':
-            metadata_embed = self.metadata_encoder(metadata)
-        else:
-            raise RuntimeError(f'Unknown metadata encoder type {self.metadata_encoder_type}')
-
-        return metadata_embed        
+        }      
     
     def warp(self, points, metadata_embed, extra):
         points_embed = self.points_encoder(points, alpha=extra.get('alpha'))
@@ -173,22 +108,11 @@ class SE3Field(nn.Module):
         transform = exponential_se3(screw_axis, theta)        
         
         warped_points = points
-        if self.use_pivot:
-            pivot = self.branches['p'](trunk_output)
-            warped_points = warped_points + pivot
-
         warped_points = from_homogenous(transform @ to_homogenous(warped_points))
-
-        if self.use_pivot:
-            warped_points = warped_points - pivot
-
-        if self.use_translation:
-            t = self.branches['t'](trunk_output)
-            warped_points = warped_points + t
 
         return warped_points
     
-    def forward(self, points, metadata, extra, return_jacobian, is_metadata_encoded):
+    def forward(self, points, metadata_embed, extra, return_jacobian):
         """
             Warp the given points using a warp field.
 
@@ -201,17 +125,11 @@ class SE3Field(nn.Module):
                 'time_alpha': the alpha value for the time positional encoding
                 (if applicable).
             return_jacobian: if True compute and return the Jacobian of the warp.
-            metadata_encoded: if True assumes the metadata is already encoded.
 
             Returns:
             The warped points and the Jacobian of the warp if `return_jacobian` is
                 True.
         """
-        if is_metadata_encoded:
-            metadata_embed = metadata
-        else:
-            metadata_embed = self.encode_metadata(metadata, extra.get('time_alpha'))
-
         out = {'warped_points': self.warp(points, metadata_embed, extra)}
 
         if return_jacobian:

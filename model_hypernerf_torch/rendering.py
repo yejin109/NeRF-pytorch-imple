@@ -1,4 +1,33 @@
+import torch
+import torch.nn as nn
 import numpy as np
+from model_hypernerf_torch._utils import noise_regularize, posenc
+
+
+def render_samples(mlp, 
+                   points, points_encoder_args, 
+                   alpha_conditions, rgb_conditions,
+                   z_vals, rays_d, return_weights,
+                   use_white_background, sample_at_infinity, render_opts,
+                   noise_std, use_stratified_sampling,
+                   ):
+    """
+        mlp : coarse일 수도, fine 일 수도
+    """
+    points_embed = posenc(points[:, :3], **points_encoder_args)
+    if points.size(-1)> 3:
+        hyper_embed = posenc(points[:, 3:], **points_encoder_args)
+        points_embed = torch.concat((points_embed, hyper_embed), dim=-1)
+    
+    raw = mlp(points_embed, alpha_conditions, rgb_conditions)
+    raw = noise_regularize(raw, noise_std, use_stratified_sampling)
+    rgb = nn.sigmoid(raw['rgb'])
+
+    sigma = nn.relu(raw['alpha'].squeeze(-1))
+
+    sigma = filter_sigma(points, sigma, render_opts)
+    out = volumetric_rendering(rgb, sigma, z_vals, rays_d, use_white_background, sample_at_infinity, return_weights)
+    return out
 
 
 def volumetric_rendering(rgb,

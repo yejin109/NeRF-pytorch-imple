@@ -20,6 +20,7 @@ def render_samples(mlp,
     out = volumetric_rendering(rgb, sigma, z_vals, rays_d, use_white_background, sample_at_infinity, return_weights)
     return out
 
+
 def volumetric_rendering(rgb, sigma, z_vals, dirs, use_white_background, sample_at_infinity, return_weights, eps=1e-10):
     """
         Volumetric Rendering Function.

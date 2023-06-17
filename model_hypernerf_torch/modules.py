@@ -16,7 +16,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from model_hypernerf_torch import hypernerf_utils
+from model_hypernerf_torch import _utils
 
 
 def get_norm_layer(norm_type, in_features):
@@ -196,7 +196,7 @@ class HyperSheetMLP(nn.Module):
         )
 
     def forward(self, points, embed, alpha=None):
-        points_feat = hypernerf_utils.posenc(
+        points_feat = _utils.posenc(
             points, self.min_deg, self.max_deg, alpha=alpha)
         inputs = np.concatenate([points_feat, embed], axis=-1)
         if self.use_residual:
