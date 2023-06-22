@@ -8,8 +8,39 @@ from model_nerfies.rendering import render_samples
 from model_nerfies.embed import SinusoidalEncoder, GloEncoder
 
 
-def get_model(model_cfg):
-    model = Nerfies(**model_cfg)
+def get_model(model_cfg, render_cfg):
+    mlp_args = {
+        'mlp_trunk_args' : model_cfg['backbone']['trunk'],
+        'mlp_rgb_args' : model_cfg['backbone']['rgb'],
+        'mlp_alpha_args': model_cfg['bacbone']['alpha'],
+        'use_rgb_condition': model_cfg['use_rgb_condition'],
+        'use_alpha_condition': model_cfg['use_alpha_condition']
+    }
+
+    warp_field_args = {
+        "field_type": model_cfg['warp']['warp_field_type'],
+        'field_args': model_cfg['warp']['warp_field_args'],
+        'num_batch_dims': 0,
+    }
+
+    _cfg = {
+        "use_fine_samples": render_cfg['use_fine_samples'],
+        "coarse_args": mlp_args,
+        "fine_args": mlp_args,
+
+        "use_warp": model_cfg['warp']['use_warp'],
+        "warp_field_args": warp_field_args,
+        "use_warp_jacobian": model_cfg['warp']['use_warp_jacobian'],
+
+        "use_appearance_metadata": model_cfg['use_appearance_metadata'],
+        "appearance_encoder_args": model_cfg['appearance_encoder_args'],
+
+        "use_camera_metadata": model_cfg['use_camera_metadata'],
+        "camera_encoder_args": camera_encoder_args,
+        "use_trunk_condition": model_cfg['use_trunk_condition'],
+        "use_alpha_condition": model_cfg['use_alpha_condition']
+    }
+    model = Nerfies(**_cfg)
     return model
 
 
@@ -24,13 +55,13 @@ class Nerfies(nn.Module):
         super(Nerfies, self).__init__()
 
         self.use_viewdirs = use_viewdirs
-        self.warp_field = None
+
         self.use_warp = use_warp
         self.use_warp_jacobian = use_warp_jacobian
+        self.warp_field = None
         if use_warp:
             self.warp_field = create_warp_field(**warp_field_args)
 
-        # TODO: model package level로 올리기
         self.point_encoder = SinusoidalEncoder(
             # num_freqs
         )             
@@ -48,12 +79,10 @@ class Nerfies(nn.Module):
         if use_camera_metadata:
             self.camera_encoder = GloEncoder(**camera_encoder_args)
         
-        self.mlps = {
-            'coarse': NeRFMLP(coarse_args)
-        }
+        self.mlps = {'coarse': NeRFMLP(**coarse_args)}
 
         if use_fine_samples:
-            self.mlps['fine'] = NeRFMLP(fine_args)
+            self.mlps['fine'] = NeRFMLP(**fine_args)
 
     def get_condition(self, viewdirs, metadata, is_metadata_encoded):
         """Create the condition inputs for the NeRF template."""
@@ -88,9 +117,9 @@ class Nerfies(nn.Module):
         # The condition inputs have a shape of (B, C) now rather than (B, S, C)
         # since we assume all samples have the same condition input. We might want
         # to change this later.
-        trunk_conditions = (torch.concat(trunk_conditions, axis=-1) if trunk_conditions else None)
-        alpha_conditions = (torch.concat(alpha_conditions, axis=-1) if alpha_conditions else None)
-        rgb_conditions = (torch.concat(rgb_conditions, axis=-1) if rgb_conditions else None)
+        trunk_conditions = (torch.concat(trunk_conditions, dim=-1) if trunk_conditions else None)
+        alpha_conditions = (torch.concat(alpha_conditions, dim=-1) if alpha_conditions else None)
+        rgb_conditions = (torch.concat(rgb_conditions, dim=-1) if rgb_conditions else None)
         return trunk_conditions, alpha_conditions, rgb_conditions
 
     def forward(self, 
@@ -152,25 +181,26 @@ class Nerfies(nn.Module):
             
             # Ray Colorization : Fine
             fine_ret = render_samples(
-            self.mlps['fine'], 
-            points_embed, trunk_conditions, alpha_conditions, rgb_conditions,
-            z_vals, rays_d, return_weights,
-            **rendering_args
-        )
+                self.mlps['fine'],
+                points_embed, trunk_conditions, alpha_conditions, rgb_conditions,
+                z_vals, rays_d, return_weights,
+                **rendering_args
+            )
 
         return coarse_ret, fine_ret
 
 
-def create_warp_field(model, num_batch_dims):
-        return warping.create_warp_field(
-            field_type=model.warp_field_type,
-            num_freqs=model.num_warp_freqs,
-            num_embeddings=model.num_warp_embeddings,
-            num_features=model.num_warp_features,
-            num_batch_dims=num_batch_dims,
-            metadata_encoder_type=model.warp_metadata_encoder_type,
-            **model.warp_kwargs)
-        
+def create_warp_field(warp_field_type, field_args, num_batch_dims):
+    return warping.create_warp_field(
+        field_type=warp_field_type,
+        field_args=field_args,
+        num_batch_dims=num_batch_dims,
+        # num_freqs=model.num_warp_freqs,
+        # num_embeddings=model.num_warp_embeddings,
+        # num_features=model.num_warp_features,
+        # metadata_encoder_type=model.warp_metadata_encoder_type,
+        )
+
 
 
 

@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from model_nerfies._utils import init_activation
 
+
 class MLP(nn.Module):
     def __init__(self,  depth, in_feature, hidden_dim, hidden_activation, output_feature, output_activation, skips):
         super(MLP, self).__init__()
@@ -61,28 +62,8 @@ class NeRFMLP(nn.Module):
             alpha_condition: a condition array provided to the alpha branch.
             rgb_condition: a condition array provided in the RGB branch.
     """
-    def __init__(self, mlp_trunk_args,  mlp_rgb_args, mlp_alpha_args,
-                 rgb_condition=None, alpha_condition=None):
+    def __init__(self, mlp_trunk_args,  mlp_rgb_args, mlp_alpha_args, use_alpha_condition, use_rgb_condition, **kwargs):
         super(NeRFMLP, self).__init__()
-
-        self.rgb_condition = rgb_condition
-        self.alpha_condition = alpha_condition
-
-        # TODO: config로 옮기기
-        # self.trunk_depth: int = 8
-        # self.trunk_width: int = 256
-        #
-        # self.rgb_branch_depth: int = 1
-        # self.rgb_branch_width: int = 128
-        # self.rgb_channels: int = 3
-        #
-        # self.alpha_branch_depth: int = 0
-        # self.alpha_branch_width: int = 128
-        # self.alpha_channels: int = 1
-        #
-        # self.norm = None
-        # self.activation = 'relu'
-        # self.skips = skip_connection_layer_list
 
         self.trunk_mlp = None
         if mlp_trunk_args['depth'] > 0:
@@ -97,7 +78,7 @@ class NeRFMLP(nn.Module):
             self.alpha_mlp = MLP(**mlp_alpha_args)
 
         self.bottleneck = None
-        if (alpha_condition is not None) or (rgb_condition is not None):
+        if use_alpha_condition or use_rgb_condition:
             # TODO: exact infeatures?
             self.bottleneck = nn.Linear(mlp_trunk_args['hidden_dim'], mlp_trunk_args['hidden_dim'])
 
@@ -124,28 +105,29 @@ class NeRFMLP(nn.Module):
             trunk_input = x
         x = self.trunk_mlp(trunk_input)
 
-        if (self.alpha_condition is not None) or (self.rgb_condition is not None):
+        if (alpha_condition is not None) or (rgb_condition is not None):
             bottleneck = self.bottleneck(x)
 
-            if self.alpha_condition is not None:
-                alpha_condition = broadcast_condition(self.alpha_condition, num_samples)
+            if alpha_condition is not None:
+                alpha_condition = broadcast_condition(alpha_condition, num_samples)
                 alpha_input = torch.cat([bottleneck, alpha_condition], dim=-1)
             else:
                 alpha_input = x
             alpha = self.alpha_mlp(alpha_input)
 
-            if self.rgb_condition is not None:
-                  rgb_condition = broadcast_condition(self.rgb_condition, num_samples)
-                  rgb_input = torch.cat([bottleneck, rgb_condition], dim=-1)
+            if rgb_condition is not None:
+                rgb_condition = broadcast_condition(rgb_condition, num_samples)
+                rgb_input = torch.cat([bottleneck, rgb_condition], dim=-1)
             else:
-              rgb_input = x
+                rgb_input = x
             rgb = self.rgb_mlp(rgb_input)
 
         return {
             'rgb': rgb.reshape((-1, num_samples, self.rgb_channels)),
             'alpha': alpha.reshape((-1, num_samples, self.alpha_channels)),
         }
-    
+
+
 def broadcast_condition(c, num_samples):
     # Broadcast condition from [batch, feature] to
     # [batch, num_coarse_samples, feature] since all the samples along the

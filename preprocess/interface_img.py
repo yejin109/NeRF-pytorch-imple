@@ -1,6 +1,7 @@
 import os
 import cv2
 import json
+import tqdm
 import struct
 import imageio
 import numpy as np
@@ -8,6 +9,8 @@ from glob import glob
 from preprocess._utils import run_cmd, log
 from preprocess.camera import CameraModels, Camera, parse_colmap_camera_params
 from preprocess.image import Image
+
+from PIL import Image as PIL_Image
 
 
 def img_to_colmap(dataset_dir, camera_model, colmap_version,
@@ -224,7 +227,8 @@ def read_next_bytes(fid, num_bytes, format_char_sequence, endian_character="<"):
 
 def resize(dataset_dir, image_scales):
     img_dir = f"{dataset_dir}/img"
-    for image_path in glob(f"{img_dir}/*.png"):
+    for image_path in tqdm.tqdm(glob(f"{img_dir}/*.png"), desc=f'Resize Image of {",".join([str(i) for i in image_scales])}'):
+        image_path = image_path.replace('\\', '/')
         image = make_divisible(imageio.imread(image_path), max(image_scales))
         for scale in image_scales:
             output_path = f"{img_dir}_{scale}"
@@ -234,7 +238,7 @@ def resize(dataset_dir, image_scales):
 
 def save_image(path, image: np.ndarray, extension='png') -> None:
     with open(path, 'wb') as f:
-        image = Image.fromarray(np.asarray(image))
+        image = PIL_Image.fromarray(np.asarray(image))
         image.save(f, format=extension)
 
 

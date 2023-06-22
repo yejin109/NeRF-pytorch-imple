@@ -1,0 +1,91 @@
+data:
+    thin_structure:
+        data_type: neus_thin_structure
+        dataset: thin_catbus
+
+        camera_outside_sphere: True
+        scale_mat_scale: 1.1
+
+        white_bkgd: False
+
+embed:
+    include_input: True
+    input_dims: 3
+    log_sampling: True
+
+
+render:
+    n_samples: 64 # The number of samples in z axis
+    n_importance: 64 # Determine whether to up sampling or not
+    n_outside: 0 # default with mask. without mask, use 32
+    up_sample_steps: 4     # 1 for simple coarse-to-fine sampling. The number of updating z_vals
+    perturb: 1.0 # positive value -> perturbation on samples of z values.
+
+    render_pose_num: 1
+
+
+model: # with mask configuration
+    learning_rate: 5.0E-4
+    learning_rate_alpha: 0.05
+    N_iters: 300000
+
+    batch_size: 16 # default 512
+    validate_resolution_level: 4
+    warm_up_end: 5000
+    anneal_end: 50000 # default for with mask. without mask, wmaks : 0 , thin structure : 50000
+
+    igr_weight: 0.1
+    mask_weight: 0.0 # wmask : 0.1, thin structure : 0.0
+
+    layer_num_fine: 8 # netdepth_fine: 8 # layers in fine network
+    hidden_feature_fine: 256 # netwidth_fine: 256 # channels per layer in fine network
+
+    layer_num: 8
+    hidden_dim: 256
+
+    backbone:
+        D: 8
+        d_in: 4
+        d_in_view: 3
+        W: 256
+        multires: 10
+        multires_view: 4
+        output_ch: 4
+        skips:
+          - 4
+        use_viewdirs: True
+
+    sdf_network:
+        d_out: 257
+        d_in: 3
+        d_hidden: 256
+        n_layers:  8
+        skip_in:
+          - 4
+        multires: 6
+        bias: 0.5
+        scale: 3.0 # used thin structure : 3.0 wmask : 1.0
+        geometric_init: True
+        weight_norm: True
+
+    variance_network:
+        init_val: 0.3
+
+    rendering_network:
+        d_feature : 256
+        mode: idr
+        d_in: 9
+        d_out: 3
+        d_hidden: 256
+        n_layers:  4
+        weight_norm: True
+        multires_view: 4
+        squeeze_out: True
+
+
+log:
+    i_print: 200
+    i_img: 5000 # frequency of tensorboard image logging, default 5000
+    i_weights: 10000 # frequency of weight ckpt saving, 10000
+    i_testset: 5000 # frequency of testset saving, 5000
+    i_video: 20000 # frequency of render_poses video saving, 20000

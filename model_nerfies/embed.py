@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from model_nerfies import MLP
+from model_nerfies.modules import MLP
 
 class SinusoidalEncoder(nn.Module):
     def __init__(self):

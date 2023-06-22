@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 def init_activation(act_str):
     if act_str is None:
         return None
@@ -8,6 +9,7 @@ def init_activation(act_str):
         return nn.relu()
     else:
         raise KeyError(f'Cannot support {act_str} activation')
+
 
 def noise_regularize(raw, noise_std, use_stratified_sampling):
     """

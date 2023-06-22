@@ -1,0 +1,55 @@
+data:
+  None: None
+
+
+embed:
+  # NeRF metadata configs.
+  use_nerf_embed: False
+  nerf_embed_key: appearance
+  nerf_num_embeddings: 8 # TODO
+  nerf_num_dims: 8 # TODO
+
+  # Warp configs.
+  use_warp: False
+  warp_embed_key: warp
+  warp_num_embeddings: 8 # TODO
+  warp_num_dims: 8 # TODO
+
+  warp_field_cls: Callable[..., nn.Module] = warping.SE3Field
+
+  use_alpha_condition: bool = False
+  use_rgb_condition: bool = False
+
+  hyper_slice_method: none
+  hyper_num_embeddings: 8 # TODO
+  hyper_num_dims: 8 # TODO
+  hyper_embed_cls: Callable[..., nn.Module] = (functools.partial(modules.GLOEmbed, num_dims=8))
+  hyper_embed_key: str = 'appearance'
+
+  hyper_use_warp_embed: bool = True
+  hyper_sheet_mlp_cls: Callable[..., nn.Module] = modules.HyperSheetMLP
+  hyper_sheet_use_input_points: bool = True
+
+
+rendering:
+  # NeRF rendering.
+  num_coarse_samples: 196
+  num_fine_samples: 196
+  use_stratified_sampling: True
+  use_white_background: False
+  use_linear_disparity: False
+  use_sample_at_infinity: True
+
+  spatial_point_min_deg: 0
+  spatial_point_max_deg: 10
+  hyper_point_min_deg: 0
+  hyper_point_max_deg: 4
+  viewdir_min_deg: 0
+  viewdir_max_deg: 4
+  use_posenc_identity: True
+
+  alpha_channels: 1
+  rgb_channels: 3
+  activation: nn.relu
+  norm_type: None
+  sigma_activation: nn.softplus

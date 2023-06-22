@@ -8,57 +8,53 @@ Step 5: Ray Colorization
 """
 
 import _init_env
-import datetime
-
 
 import yaml
 import torch
+import datetime
+import argparse
 
 import dataset
 import model_nerf
 import model_neus
-import model_hypernerf_torch as hypernerf
+# import model_nerfies
+# import model_hypernerf_torch as hypernerf
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--model', default='nerf')
+parser.add_argument('--data', default='llff')
 
 
 def get_configs(_data, _model_architecture):
+    setting = yaml.safe_load(open(f'./configs/model_{_model_architecture}.yml'))
     embedding_cfg = setting['embed']
-    dataset_cfg = setting['data'][data]
-    model_cfg = setting['model'][model_architecture]
-    rendering_cfg = setting['rendering'][model_architecture]
+    dataset_cfg = setting['data'][_data]
+    model_cfg = setting['model']
+    rendering_cfg = setting['render']
     log_cfg = setting['log']
     return embedding_cfg, dataset_cfg, model_cfg, rendering_cfg, log_cfg
 
 
-if __name__ == '__main__':
-    torch.backends.cudnn.benchmark = True
-    setting = yaml.safe_load(open('./config.yml'))
+def nerf_pipeline():
+    global model_config
+    global data
 
-    # TODO: argparse로 나중에 분리하기
-    # model_architecture = 'nerf'
-    # data = 'synthetic'
-    # # data = 'llff'
-    
-    # embedding_config, dataset_config, model_config, rendering_config, log_config = get_configs(data, model_architecture)
-    
-    # # Step 1 : Load Dataset
-    # if data == 'llff':
-    #     dset = dataset.LLFFDataset(**dict(dataset_config, **{'render_pose_num': rendering_config['render_pose_num'], 'N_rots': rendering_config['N_rots'], 'zrate': rendering_config['zrate']}))
-    # else:
-    #     dset = dataset.SyntheticDataset(**dict(dataset_config, **{'render_pose_num': rendering_config['render_pose_num']}))
-    
-    # # Step 2: Load Model
-    # model_config = dict(model_config, **rendering_config)
-    # model_config['embed_cfg'] = embedding_config
-    # models, params, embedder_ray, embedder_view = model_nerf.get_model(**model_config)
-    
-    # model_nerf.run(model_config, rendering_config, dataset_config, dset, params, models, embedder_ray, embedder_view)
+    # Step 1 : Load Dataset
+    if data == 'llff':
+        dset = dataset.LLFFDataset(**dict(dataset_config, **{'render_pose_num': rendering_config['render_pose_num'], 'N_rots': rendering_config['N_rots'], 'zrate': rendering_config['zrate']}))
+    else:
+        dset = dataset.SyntheticDataset(**dict(dataset_config, **{'render_pose_num': rendering_config['render_pose_num']}))
 
-    #############
-    model_architecture = 'neus'
-    data = 'thin_structure'
+    # Step 2: Load Model
+    model_config = dict(model_config, **rendering_config)
+    model_config['embed_cfg'] = embedding_config
+    models, params, embedder_ray, embedder_view = model_nerf.get_model(**model_config)
 
-    embedding_config, dataset_config, model_config, rendering_config, log_config = get_configs(data, model_architecture)
+    model_nerf.run(model_config, rendering_config, dataset_config, dset, params, models, embedder_ray, embedder_view)
 
+
+def neus_pipeline():
     # Step 1 : Load Dataset
     dset = dataset.NeusDataset(**dict(dataset_config, **{'render_pose_num': rendering_config['render_pose_num']}))
 
@@ -69,21 +65,34 @@ if __name__ == '__main__':
 
     model_neus.run(model_config, rendering_config, dataset_config, log_config, params_to_train, renderer, dset)
 
-    #############
+
+def nerfies_pipeline(model_architecture, data):
+    pass
+
+
+def hypernerf_pipeline():
+    pass
+
+
+if __name__ == '__main__':
+    args = parser.parse_args()
+    torch.backends.cudnn.benchmark = True
+
+    model_architecture = args.model
+    data = args.data
+
+    embedding_config, dataset_config, model_config, rendering_config, log_config = get_configs(data, model_architecture)
+    print()
+    # model_architecture = 'nerf'
+    # data = 'synthetic'
+    # # data = 'llff'
+    # nerf_pipeline()
+
+    # model_architecture = 'neus'
+    # data = 'thin_structure'
+    # neus_pipeline(args.model, args.data)
+
     # model_architecture = 'hypernerf'
     # data = 'thin_structure' # TODO
-    #
-    # embedding_config, dataset_config, model_config, rendering_config, log_config = get_configs(data, model_architecture)
-
-    # TODO
-    # Step 1 : Load Dataset
-    # dset = dataset.NeusDataset(**dict(dataset_config, **{'render_pose_num': rendering_config['render_pose_num']}))
-
-    # Step 2: Load Renderer and Model
-    # nerf_outside, sdf_network, deviation_network, color_network, params_to_train = hypernerf.get_model(model_config)
-
-    # renderer = model_neus.NeuSRenderer(nerf_outside, sdf_network, deviation_network, color_network, **rendering_config)
-    #
-    # model_neus.run(model_config, rendering_config, dataset_config, log_config, params_to_train, renderer, dset)
-    print()
+    # hypernerf_pipeline(args.model, args.data)
 

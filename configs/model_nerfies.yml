@@ -1,117 +1,204 @@
-num_coarse_samples:  # int, the number of samples for coarse nerf.
-num_fine_samples:  # int, the number of samples for fine nerf.
-use_viewdirs: # bool, use viewdirs as a condition.
-near: # float, near clip.
-far: # float, far clip.
-noise_std: # float, std dev of noise added to regularize sigma output.
-nerf_trunk_depth: # int, the depth of the first part of MLP.
-nerf_trunk_width: # int, the width of the first part of MLP.
-nerf_rgb_branch_depth: # int, the depth of the second part of MLP.
-nerf_rgb_branch_width: int, the width of the second part of MLP.
-activation: the activation function used in the MLP.
-sigma_activation: the activation function applied to the sigma density.
-nerf_skips: which layers to add skip layers in the NeRF model.
-alpha_channels: int, the number of alpha_channelss.
-rgb_channels: int, the number of rgb_channelss.
-use_stratified_sampling: use stratified sampling.
-use_white_background: composite rendering on to a white background.
-num_nerf_point_freqs: degree of positional encoding for positions.
-num_nerf_viewdir_freqs: degree of positional encoding for viewdirs.
-use_linear_disparity: sample linearly in disparity rather than depth.
-num_appearance_embeddings: the number of appearance exemplars.
-num_appearance_features: the dimension size for the appearance code.
-num_camera_embeddings: the number of camera exemplars.
-num_camera_features: the dimension size for the camera code.
+data:
+  broom:
+    image_scale: 8
 
-num_warp_freqs: 8 # the number of frequencies for the warp positional encoding.
-num_warp_embeddings: the number of embeddings for the warp GLO encoder.
-num_warp_features: the number of features for the warp GLO encoder.
-
-use_appearance_metadata: if True use the appearance metadata.
-use_camera_metadata: True # if True use the camera metadata.
-use_warp: True # whether to use the warp field or not.
-use_warp_jacobian: if True the model computes and returns the Jacobian of
-  the warped points.
-use_weights: if True return the density weights.
-use_trunk_condition: whether to feed the appearance metadata to the trunk.
-use_alpha_condition: whether to feed the appearance metadata to the alpha
-  branch.
-use_rgb_condition: whether to feed the appearance metadata to the rgb
-  branch.
-warp_kwargs: extra keyword arguments for the warp field.
-
-lr_delay_steps : 2500
-lr_delay_mult : 0.01
-
-# schedule configuration
-annealed_warp_alpha_schedule :
-  - type : linear
-  - initial_value : 0.0
-  - final_value : 8 # ssynch with num_warp_freqs
-  - num_steps : 80000
-constant_warp_alpha_schedule :
-  - type : constant
-  - value : 8 # ssynch with num_warp_freqs
-constant_elastic_loss_schedule :
-  - type : constant
-  - value : 0.01 # synch with elastic_init_weight
-decaying_elastic_loss_schedule :
-  - type : piecewise
-  - schedule :
-    - 50000
-    - constant
-    - 0.01
+embed:
 
 
+render:
+  use_fine_samples: True
+  num_coarse_samples:  64 # The number of coarse samples along each ray.
+  num_fine_samples:  64 # The number of fine samples along each ray.
 
-elastic_init_weight : 0.01
-use_elastic_loss:  True
-use_background_loss: True
+  use_linear_disparity: False # Sample linearly in disparity rather than depth.
+  use_white_background: False # Use white as the default background.
+  use_stratified_sampling: True # Use stratified sampling.
+  use_sample_at_infinity: True # Use the sample at infinity.
+  noise_std: None # The standard deviation of the alpha noise.
 
-"""
-# From model
-num_coarse_samples: int
-num_fine_samples: int
-use_viewdirs: bool
-near: float
-far: float
-noise_std: Optional[float]
-nerf_trunk_depth: int
-nerf_trunk_width: int
-nerf_rgb_branch_depth: int
-nerf_rgb_branch_width: int
-nerf_skips: Tuple[int]
-alpha_channels: int
-rgb_channels: int
-use_stratified_sampling: bool
-num_nerf_point_freqs: int
-num_nerf_viewdir_freqs: int
+model:
+  N_iters : 100000
+  batch_size : 16
 
-appearance_ids: Sequence[int]
-camera_ids: Sequence[int]
-warp_ids: Sequence[int]
+  use_viewdirs : True
 
-num_appearance_features: int
-num_camera_features: int
-num_warp_features: int
-num_warp_freqs: int
+  num_nerf_point_freqs: 10 # The number of positional encodings for points.
+  num_nerf_viewdir_freqs: 4 # The number of positional encodings for viewdirs.
 
-activation: types.Activation = nn.relu
-sigma_activation: types.Activation = nn.relu
-use_white_background: bool = False
-use_linear_disparity: bool = False
-use_sample_at_infinity: bool = True
+  warp_metadata_encoder_type: 'glo'
 
-warp_field_type: str = 'se3'
-warp_metadata_encoder_type: str = 'glo'
-use_appearance_metadata: bool = False
-use_camera_metadata: bool = False
-use_warp: bool = False
-use_warp_jacobian: True
-use_weights: bool = False
-use_trunk_condition: bool = False
-use_alpha_condition: bool = False
-use_rgb_condition: bool = False
-warp_kwargs: Mapping[str, Any] = immutabledict.immutabledict()
+  use_trunk_condition: False # Whether to condition the entire NeRF MLP.
+  use_rgb_condition: False # Whether to condition the RGB of the template NeRF.
+  use_alpha_condition: False # Whether to condition the density of the template NeRF.
 
-metadata_encoded: bool = False
+  use_appearance_metadata: True # Whether to use the appearance metadata for the conditional branch.
+  appearance_metadata_dims: 8 # The number of dimensions for the appearance metadata.
+
+  use_camera_metadata: False # Whether to use the camera metadata for the conditional branch.
+  camera_metadata_dims: 2 # The number of dimensions for the camera metadata.
+
+  use_elastic_loss: True
+  elastic_init_weight: 0.01
+  elastic_reduce_method: 'weight'
+
+  use_background_loss: True
+
+  sigma_activation: relu # The sigma activation for the NeRF.
+
+  warp:
+    use_warp: True
+    warp_field_type: se3
+    warp_field_args : # field type에 따라서 달라지게 된다.
+
+#    points_encoder_args,
+#    metadata_encoder_type, glo_encoder_args, time_encoder_args,
+#    mlp_trunk_args, mlp_branch_w_args, mlp_branch_v_args,
+#    use_pivot, mlp_branch_p_args,
+#    use_translation, mlp_branch_t_args
+      num_warp_freqs: 8
+      num_warp_embeddings: # the number of embeddings for the warp GLO encoder.
+      num_warp_features:  # the number of features for the warp GLO encoder.
+      use_warp_jacobian: False # if True the model computes and returns the Jacobian of the warped points.
+
+  # schedule configuration
+  lr_schedule :
+    - type: exponential
+    - initial_value : 0.001
+    - final_value : 0.0001
+    - num_steps : 1000000
+
+  warp_alpha_schedule:
+    - type: linear
+    - intial_value: 0.0
+    - final_value : 8.0
+    - num_steps: 80000
+
+  annealed_warp_alpha_schedule :
+    - type : linear
+    - initial_value : 0.0
+    - final_value : 8 # ssynch with num_warp_freqs
+    - num_steps : 80000
+
+  constant_warp_alpha_schedule :
+    - type : constant
+    - value : 8 # ssynch with num_warp_freqs
+
+  constant_elastic_loss_schedule :
+    - type : constant
+    - value : 0.01 # synch with elastic_init_weight
+
+  decaying_elastic_loss_schedule :
+    - type : piecewise
+    - schedule :
+      - 50000
+      - constant
+      - 0.01
+
+  backbone:
+    activation: relu # The intermediate activation for the NeRF.
+    nerf_skips: # Adds a skip connection every N layers.
+      - 4
+
+    trunk:
+      depth: 8 # The depth of the NeRF.
+      in_feature : -1 # TODO
+      hidden_dim: 256 # The width of the NeRF.
+      output_feature: 0 # The number of trunk output channels. For 0, it does not pass output layer. See modules.py
+      output_activation: None
+
+    rgb:
+      depth: 1 # The depth of the conditional part of the MLP.
+      in_feature : -1 # TODO
+      hidden_dim: 128 # The width of the conditional part of the MLP.
+      output_feature: 3 # The number of RGB output channels.
+      output_activation: None
+
+    alpha:
+      depth: 0
+      hidden_dim: 128
+      output_feature: 1 # The number of alpha output channels.
+      output_activation: None
+
+log:
+  i_print: 200
+  i_img: 5000 # frequency of tensorboard image logging, default 5000
+  i_weights: 10000 # frequency of weight ckpt saving, 10000
+  i_testset: 5000 # frequency of testset saving, 5000
+  i_video: 20000 # frequency of render_poses video saving, 20000
+
+
+#near: # float, near clip.
+#far: # float, far clip.
+#noise_std: # float, std dev of noise added to regularize sigma output.
+#nerf_rgb_branch_depth: # int, the depth of the second part of MLP.
+#nerf_rgb_branch_width: int, the width of the second part of MLP.
+#activation: the activation function used in the MLP.
+#sigma_activation: the activation function applied to the sigma density.
+#nerf_skips: which layers to add skip layers in the NeRF model.
+#alpha_channels: int, the number of alpha_channelss.
+#rgb_channels: int, the number of rgb_channelss.
+#use_stratified_sampling: use stratified sampling.
+#use_white_background: composite rendering on to a white background.
+#num_nerf_point_freqs: degree of positional encoding for positions.
+#num_nerf_viewdir_freqs: degree of positional encoding for viewdirs.
+#use_linear_disparity: sample linearly in disparity rather than depth.
+#num_appearance_embeddings: the number of appearance exemplars.
+#num_appearance_features: the dimension size for the appearance code.
+#num_camera_embeddings: the number of camera exemplars.
+#num_camera_features: the dimension size for the camera code.
+#
+#
+#
+#use_appearance_metadata: if True use the appearance metadata.
+#use_camera_metadata: True # if True use the camera metadata.
+#use_warp_jacobian:
+#use_weights: if True return the density weights.
+#use_alpha_condition: whether to feed the appearance metadata to the alpha
+#  branch.
+#use_rgb_condition: whether to feed the appearance metadata to the rgb
+#  branch.
+#warp_kwargs: extra keyword arguments for the warp field.
+#
+#lr_delay_steps : 2500
+#lr_delay_mult : 0.01
+#
+#
+#
+#"""
+## From model
+#near: float
+#far: float
+#nerf_rgb_branch_width: int
+#alpha_channels: int
+#rgb_channels: int
+#use_stratified_sampling: bool
+#num_nerf_point_freqs: int
+#num_nerf_viewdir_freqs: int
+#
+#appearance_ids: Sequence[int]
+#camera_ids: Sequence[int]
+#warp_ids: Sequence[int]
+#
+#num_appearance_features: int
+#num_camera_features: int
+#num_warp_features: int
+#num_warp_freqs: int
+#
+#activation: types.Activation = nn.relu
+#sigma_activation: types.Activation = nn.relu
+#use_white_background: bool = False
+#use_linear_disparity: bool = False
+#use_sample_at_infinity: bool = True
+#
+#warp_field_type: str = 'se3'
+#
+#use_appearance_metadata: bool = False
+#use_camera_metadata: bool = False
+#use_warp: bool = False
+#
+#use_weights: bool = False
+#use_alpha_condition: bool = False
+#use_rgb_condition: bool = False
+#warp_kwargs: Mapping[str, Any] = immutabledict.immutabledict()
+#
+#metadata_encoded: bool = False

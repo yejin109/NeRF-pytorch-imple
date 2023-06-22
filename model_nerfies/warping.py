@@ -118,6 +118,7 @@ class TranslationField(nn.Module):
 
         return out            
 
+
 class SE3Field(nn.Module):
     def __init__(self, points_encoder_args,
                  metadata_encoder_type, glo_encoder_args, time_encoder_args,

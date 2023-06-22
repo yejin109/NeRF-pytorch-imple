@@ -1,9 +1,14 @@
-dataset/nerf_llff_data
-dataset/nerf_synthetic
+dataset/nerf*
 dataset/neus*
+dataset/nerfies*
 
 dataset/custom/cup/colmap
 dataset/custom/cat/colmap
+dataset/custom/cat/img_1
+dataset/custom/cat/img_2
+dataset/custom/cat/img_4
+dataset/custom/cat/img_8
+
 
 src/__pycache__/
 logs/export
