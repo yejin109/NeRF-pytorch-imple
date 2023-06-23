@@ -1,6 +1,12 @@
 data:
   broom:
+    data_type: nerfies_vrig
+    dataset: broom
+
     image_scale: 8
+    shuffle_pixels: False
+    test_camera_trajectory: orbit-extreme
+
 
 embed:
 
@@ -15,6 +21,7 @@ render:
   use_stratified_sampling: True # Use stratified sampling.
   use_sample_at_infinity: True # Use the sample at infinity.
   noise_std: None # The standard deviation of the alpha noise.
+
 
 model:
   N_iters : 100000
@@ -45,20 +52,93 @@ model:
 
   sigma_activation: relu # The sigma activation for the NeRF.
 
+  backbone:
+    activation: relu # The intermediate activation for the NeRF.
+    nerf_skips: # Adds a skip connection every N layers.
+      - 4
+
+    encoder_args:
+      scale: 1.0
+      min_freq_log2: 0
+      max_freq_log2: None
+      use_identity_map: True
+
+    trunk:
+      depth: 8 # The depth of the NeRF.
+      in_feature : -1 # TODO
+      hidden_dim: 256 # The width of the NeRF.
+      output_feature: 0 # The number of trunk output channels. For 0, it does not pass output layer. See modules.py
+      output_activation: None
+
+    rgb:
+      depth: 1 # The depth of the conditional part of the MLP.
+      in_feature : -1 # TODO
+      hidden_dim: 128 # The width of the conditional part of the MLP.
+      output_feature: 3 # The number of RGB output channels.
+      output_activation: None
+
+    alpha:
+      depth: 0
+      hidden_dim: 128
+      output_feature: 1 # The number of alpha output channels.
+      output_activation: None
+
   warp:
+    use_warp_jacobian: False # if True the model computes and returns the Jacobian of the warped points.
     use_warp: True
     warp_field_type: se3
-    warp_field_args : # field type에 따라서 달라지게 된다.
+    num_warp_features: 8
 
-#    points_encoder_args,
-#    metadata_encoder_type, glo_encoder_args, time_encoder_args,
-#    mlp_trunk_args, mlp_branch_w_args, mlp_branch_v_args,
-#    use_pivot, mlp_branch_p_args,
-#    use_translation, mlp_branch_t_args
+    # Common setup
+    encoder_args:
       num_warp_freqs: 8
-      num_warp_embeddings: # the number of embeddings for the warp GLO encoder.
-      num_warp_features:  # the number of features for the warp GLO encoder.
-      use_warp_jacobian: False # if True the model computes and returns the Jacobian of the warped points.
+      min_freq_log2: 0
+      max_freq_log2: None
+      use_identity_map: True
+
+    # Common setup
+    mlp_args:
+      depth: 6
+      in_feature: 5 # TODO not exact
+      hidden_dim: 128
+      hidden_activation: relu
+      output_feature: 0
+      output_activation: identity
+      skips:
+        - 4
+
+    points_encoder_args:
+      scale : 1
+
+    time_encoder_args:
+      scale: 1
+      time_mlp_args:
+        hidden_dim: 64
+        output_feature: 10
+
+    mlp_branch_w_args:
+      depth: 0
+      output_feature: 3
+      skips:
+        -  # None
+
+    mlp_branch_v_args:
+      depth: 0
+      output_feature: 3
+      skips:
+        - # None
+
+    mlp_branch_p_args:
+      depth: 0
+      output_feature: 3
+      skips:
+        - # None
+
+    mlp_branch_t_args:
+      depth: 0
+      output_feature: 3
+      skips:
+        - # None
 
   # schedule configuration
   lr_schedule :
@@ -94,30 +174,6 @@ model:
       - constant
       - 0.01
 
-  backbone:
-    activation: relu # The intermediate activation for the NeRF.
-    nerf_skips: # Adds a skip connection every N layers.
-      - 4
-
-    trunk:
-      depth: 8 # The depth of the NeRF.
-      in_feature : -1 # TODO
-      hidden_dim: 256 # The width of the NeRF.
-      output_feature: 0 # The number of trunk output channels. For 0, it does not pass output layer. See modules.py
-      output_activation: None
-
-    rgb:
-      depth: 1 # The depth of the conditional part of the MLP.
-      in_feature : -1 # TODO
-      hidden_dim: 128 # The width of the conditional part of the MLP.
-      output_feature: 3 # The number of RGB output channels.
-      output_activation: None
-
-    alpha:
-      depth: 0
-      hidden_dim: 128
-      output_feature: 1 # The number of alpha output channels.
-      output_activation: None
 
 log:
   i_print: 200

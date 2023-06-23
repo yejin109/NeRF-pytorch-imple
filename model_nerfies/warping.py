@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from model_nerfies.modules import MLP
 from model_nerfies.embed import AnnealedSinusoidalEncoder, GloEncoder, TimeEncoder
-from model_nerfies._utils import exponential_se3, from_homogenous, to_homogenous
+from model_nerfies._utils import exponential_se3, from_homogenous, to_homogenous, get_value
 
 
 def create_warp_field(field_type, field_args, num_batch_dims):
@@ -129,7 +129,6 @@ class SE3Field(nn.Module):
         super(SE3Field, self).__init__()
 
         self.points_encoder = AnnealedSinusoidalEncoder(
-            # {'num_freqs': num_freqs, 'min_freq_log2':min_freq_log2, 'max_freq_log2': max_freq_log2, 'scale': scale, 'use_identity': use_identity}
             **points_encoder_args
             )
         if metadata_encoder_type == 'glo':

@@ -1,22 +1,75 @@
 import torch
 import torch.nn as nn
 from model_nerfies.modules import MLP
+from model_nerfies._utils import get_value
+
 
 class SinusoidalEncoder(nn.Module):
-    def __init__(self):
+    def __init__(self, num_freqs, min_freq_log2, max_freq_log2, scale, use_identity):
         super(SinusoidalEncoder, self).__init__()
+        self.num_freqs = num_freqs
+        self.min_freq_log2 = min_freq_log2
+        self.max_freq_log2 = get_value(max_freq_log2)
+        self.scale = scale
+        self.use_identity = use_identity
+
+        if self.max_freq_log2 is None:
+            max_freq_log2 = self.num_freqs - 1.0
+        else:
+            max_freq_log2 = self.max_freq_log2
+        self.freq_bands = 2.0 ** torch.linspace(self.min_freq_log2, max_freq_log2, int(self.num_freqs))
+
+        self.freqs = torch.reshape(self.freq_bands, (self.num_freqs, 1))
+
+    def forward(self, x, alpha):
+        """A vectorized sinusoidal encoding.
+
+        Args:
+          x: the input features to encode.
+          alpha: a dummy argument for API compatibility.
+
+        Returns:
+          A tensor containing the encoded features.
+        """
+        if self.num_freqs == 0:
+            return x
+
+        x_expanded = torch.unsqueeze(x, -1)  # (1, C).
+        # Will be broadcasted to shape (F, C).
+        angles = self.scale * x_expanded * self.freqs
+
+        # The shape of the features is (F, 2, C) so that when we reshape it
+        # it matches the ordering of the original NeRF code.
+        # Vectorize the computation of the high-frequency (sin, cos) terms.
+        # We use the trigonometric identity: cos(x) = sin(x + pi/2)
+        features = torch.stack((angles, angles + torch.pi / 2), dim=-2)
+        features = features.flatten()
+        features = torch.sin(features)
+
+        # Prepend the original signal for the identity.
+        if self.use_identity:
+            features = torch.concat([x, features], dim=-1)
+        return features
 
 
 class AnnealedSinusoidalEncoder(nn.Module):
-    def __init__(self, **kwargs):
+    def __init__(self, num_freqs, min_freq_log2, max_freq_log2, scale, use_identity, **kwargs):
         super(AnnealedSinusoidalEncoder, self).__init__()
-        self.num_freqs = kwargs.num_freqs
-        self.min_freq_log2 = kwargs.min_freq_log2
-        self.max_freq_log2 = kwargs.max_freq_log2 # Optional
-        self.scale = kwargs.scale
-        self.use_identiy = kwargs.use_identity
+        self.num_freqs = num_freqs
+        self.min_freq_log2 = min_freq_log2
+        self.max_freq_log2 = get_value(max_freq_log2) # Optional
+        self.scale = scale
+        self.use_identiy = use_identity
 
-    def cosine_easing_window(cls, min_freq_log2, max_freq_log2, num_bands, alpha):
+        self.base_encoder = SinusoidalEncoder(
+            num_freqs=self.num_freqs,
+            min_freq_log2=self.min_freq_log2,
+            max_freq_log2=self.max_freq_log2,
+            scale=self.scale,
+            use_identity=self.use_identity)
+
+    @staticmethod
+    def cosine_easing_window(min_freq_log2, max_freq_log2, num_bands, alpha):
         """Eases in each frequency one by one with a cosine.
 
         This is equivalent to taking a Tukey window and sliding it to the right
@@ -45,16 +98,10 @@ class AnnealedSinusoidalEncoder(nn.Module):
 
         num_channels = x.shape[-1]
 
-        base_encoder = SinusoidalEncoder(
-            num_freqs=self.num_freqs,
-            min_freq_log2=self.min_freq_log2,
-            max_freq_log2=self.max_freq_log2,
-            scale=self.scale,
-            use_identity=self.use_identity)
-        features = base_encoder(x)
+        features = self.base_encoder(x)
 
         if self.use_identity:
-            identity, features = torch.split(features, (x.shape[-1],), axis=-1)
+            identity, features = torch.split(features, [x.size(-1), ], dim=-1)
 
         # Apply the window by broadcasting to save on memory.
         features = torch.reshape(features, (-1, 2, num_channels))
@@ -63,7 +110,7 @@ class AnnealedSinusoidalEncoder(nn.Module):
         features = window * features
 
         if self.use_identity:
-            return torch.concat([identity, features.flatten()], axis=-1)
+            return torch.concat([identity, features.flatten()], dim=-1)
         else:
             return features.flatten()
 
@@ -79,21 +126,19 @@ class GloEncoder(nn.Module):
     """
     def __init__(self, num_embeddings, embedding_dim):        
         super(GloEncoder, self).__init__()
-        self.embed = nn.Embed(num_embeddings=num_embeddings, embedding_dim=embedding_dim)
+        self.embed = nn.Embedding(num_embeddings=num_embeddings, embedding_dim=embedding_dim)
 
     def forward(self, x):
         return self.embed(x)
 
 
 class TimeEncoder(nn.Module):
-    def __init__(self, 
-                 num_freqs,
-                 mlp_args,
-                #  mlp_depth, mlp_hidden_dim, mlp_output_dim, mlp_skips, mlp_hidden_activation, mlp_output_actvation,
-                 ):
+    def __init__(self, num_freqs, min_freq_log2, max_freq_log2, scale, use_identity, mlp_args):
+        super(TimeEncoder, self).__init__()
         self.num_freqs = num_freqs
-        self.position_encoder = AnnealedSinusoidalEncoder(num_freqs=self.num_freqs)
-        self.mlp =  MLP(**mlp_args)
+        self.position_encoder = AnnealedSinusoidalEncoder(num_freqs, min_freq_log2, max_freq_log2, scale, use_identity)
+        self.mlp = MLP(**mlp_args)
+
     def forward(self, time, alpha=None):
         if alpha is None:
             alpha = self.num_freqs

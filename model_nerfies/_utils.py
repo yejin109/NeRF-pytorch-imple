@@ -6,9 +6,17 @@ def init_activation(act_str):
     if act_str is None:
         return None
     elif act_str == 'relu':
-        return nn.relu()
+        return nn.ReLU()
+    elif act_str == 'identity':
+        return nn.Identity()
     else:
         raise KeyError(f'Cannot support {act_str} activation')
+
+
+def get_value(val):
+    if val == 'None':
+        return None
+    return val
 
 
 def noise_regularize(raw, noise_std, use_stratified_sampling):
@@ -50,6 +58,7 @@ def exponential_se3(S, theta):
     p = (theta * torch.eye(3) + (1.0 - torch.cos(theta)) * W +(theta - torch.sin(theta)) * W @ W) @ v
     return rp_to_se3(R, p)
 
+
 def exp_so3(w, theta: float):
     """
         Exponential map from Lie algebra so3 to Lie group SO3.
@@ -66,6 +75,7 @@ def exp_so3(w, theta: float):
     """
     W = skew(w)
     return torch.eye(3) + torch.sin(theta) * W + (1.0 - torch.cos(theta)) * W @ W
+
 
 def skew(w):
     """

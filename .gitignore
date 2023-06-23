@@ -1,6 +1,6 @@
-dataset/nerf*
-dataset/neus*
-dataset/nerfies*
+dataset/nerf_*
+dataset/neus_*
+dataset/nerfies_*
 
 dataset/custom/cup/colmap
 dataset/custom/cat/colmap

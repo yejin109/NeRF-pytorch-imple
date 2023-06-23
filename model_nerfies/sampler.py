@@ -48,12 +48,11 @@ def sample_along_rays(
     return z_vals, points
 
 
-def sample_pdf(key, bins, weights, origins, directions, z_vals,
+def sample_pdf(bins, weights, origins, directions, z_vals,
                num_coarse_samples, use_stratified_sampling):
     """Hierarchical sampling.
 
     Args:
-        key: jnp.ndarray(float32), [2,], random number generator.
         bins: jnp.ndarray(float32), [batch_size, n_bins + 1].
         weights: jnp.ndarray(float32), [batch_size, n_bins].
         origins: ray origins.
@@ -68,14 +67,13 @@ def sample_pdf(key, bins, weights, origins, directions, z_vals,
         points: jnp.ndarray(float32),
         [batch_size, n_coarse_samples + num_fine_samples, 3].
     """
-    z_samples = piecewise_constant_pdf(key, bins, weights, num_coarse_samples,
-                                        use_stratified_sampling)
+    z_samples = piecewise_constant_pdf(bins, weights, num_coarse_samples, use_stratified_sampling)
     # Compute united z_vals and sample points
-    z_vals = torch.sort(torch.concatenate([z_vals, z_samples], dim=-1), axis=-1)
+    z_vals = torch.sort(torch.concatenate([z_vals, z_samples], dim=-1), dim=-1)
     return z_vals, (origins[..., None, :] + z_vals[..., None] * directions[..., None, :])
 
 
-def piecewise_constant_pdf(key, bins, weights, num_coarse_samples,
+def piecewise_constant_pdf(bins, weights, num_coarse_samples,
                            use_stratified_sampling):
     """Piecewise-Constant PDF sampling.
 
@@ -93,8 +91,8 @@ def piecewise_constant_pdf(key, bins, weights, num_coarse_samples,
 
     # Get pdf
     weights += eps  # prevent nans
-    pdf = weights / weights.sum(axis=-1, keepdims=True)
-    cdf = torch.cumsum(pdf, axis=-1)
+    pdf = weights / weights.sum(dim=-1, keepdims=True)
+    cdf = torch.cumsum(pdf, dim=-1)
     cdf = torch.concat([torch.zeros(list(cdf.shape[:-1]) + [1]), cdf], dim=-1)
 
     # Take uniform samples
@@ -118,6 +116,7 @@ def piecewise_constant_pdf(key, bins, weights, num_coarse_samples,
     # TODO Prevent gradient from backprop-ing through samples
     # torch.stop_gradient(z_samples)
     return z_samples
+
 
 def minmax(x, mask):
     x0 = torch.max(torch.where(mask, x[..., None], x[..., :1, None]), -2)
