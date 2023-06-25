@@ -3,10 +3,10 @@ from typing import Dict, Any
 
 import torch.nn as nn
 
-from model_hypernerf_torch import embed
-from model_hypernerf_torch import modules as modules
-from model_hypernerf_torch import _utils as model_utils
-from model_hypernerf_torch.rendering import filter_sigma
+from model_hypernerf import embed
+from model_hypernerf import modules as modules
+from model_hypernerf import _utils as model_utils
+from model_hypernerf.rendering import filter_sigma
 
 
 def get_model(model_cfg, embed_cfg):

@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
-from model_hypernerf_torch import _utils as model_utils
-from model_hypernerf_torch.modules import MLP
+from model_hypernerf import _utils as model_utils
+from model_hypernerf.modules import MLP
 
 
 class GloEmbed(nn.Module):

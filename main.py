@@ -17,8 +17,8 @@ import argparse
 import dataset
 import model_nerf
 import model_neus
-# import model_nerfies
-# import model_hypernerf_torch as hypernerf
+import model_nerfies
+# import model_hypernerf as hypernerf
 
 
 parser = argparse.ArgumentParser()
@@ -66,8 +66,13 @@ def neus_pipeline():
     model_neus.run(model_config, rendering_config, dataset_config, log_config, params_to_train, renderer, dset)
 
 
-def nerfies_pipeline(model_architecture, data):
-    pass
+def nerfies_pipeline():
+    # Step 1 : Load Dataset
+    dset = dataset.NerfiesDataSet(**dataset_config)
+
+    # Step 2: Load Model
+    nerfies = model_nerfies.get_model(model_config, rendering_config, dset)
+    print()
 
 
 def hypernerf_pipeline():
@@ -78,8 +83,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
     torch.backends.cudnn.benchmark = True
 
-    model_architecture = args.model
-    data = args.data
+    # model_architecture = args.model
+    # data = args.data
+    model_architecture = 'nerfies'
+    data = 'broom'
 
     embedding_config, dataset_config, model_config, rendering_config, log_config = get_configs(data, model_architecture)
     print()
@@ -92,7 +99,6 @@ if __name__ == '__main__':
     # data = 'thin_structure'
     # neus_pipeline(args.model, args.data)
 
-    # model_architecture = 'hypernerf'
-    # data = 'thin_structure' # TODO
     # hypernerf_pipeline(args.model, args.data)
+    nerfies_pipeline()
 

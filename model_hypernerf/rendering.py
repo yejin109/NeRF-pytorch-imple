@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import numpy as np
-from model_hypernerf_torch._utils import noise_regularize, posenc
+from model_hypernerf._utils import noise_regularize, posenc
 
 
 def render_samples(mlp, 

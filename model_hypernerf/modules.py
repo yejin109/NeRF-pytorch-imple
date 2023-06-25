@@ -16,7 +16,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from model_hypernerf_torch import _utils
+from model_hypernerf import _utils
 
 
 def get_norm_layer(norm_type, in_features):

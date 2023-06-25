@@ -3,12 +3,13 @@ import torch.nn as nn
 
 
 def init_activation(act_str):
-    if act_str is None:
+    if act_str == 'None':
         return None
     elif act_str == 'relu':
         return nn.ReLU()
     elif act_str == 'identity':
         return nn.Identity()
+
     else:
         raise KeyError(f'Cannot support {act_str} activation')
 

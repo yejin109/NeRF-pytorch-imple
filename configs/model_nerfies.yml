@@ -6,6 +6,8 @@ data:
     image_scale: 8
     shuffle_pixels: False
     test_camera_trajectory: orbit-extreme
+    use_appearance_id : False
+    use_camera_id : False
 
 
 embed:
@@ -61,27 +63,36 @@ model:
       scale: 1.0
       min_freq_log2: 0
       max_freq_log2: None
-      use_identity_map: True
+      use_identity: True
 
     trunk:
       depth: 8 # The depth of the NeRF.
-      in_feature : -1 # TODO
+      in_feature : 1 # TODO
       hidden_dim: 256 # The width of the NeRF.
       output_feature: 0 # The number of trunk output channels. For 0, it does not pass output layer. See modules.py
       output_activation: None
+      hidden_activation: relu
+      skips:
+        - 4
 
     rgb:
       depth: 1 # The depth of the conditional part of the MLP.
-      in_feature : -1 # TODO
+      in_feature : 1 # TODO
       hidden_dim: 128 # The width of the conditional part of the MLP.
       output_feature: 3 # The number of RGB output channels.
       output_activation: None
+      hidden_activation: relu
+      skips:
+        - 4
 
     alpha:
       depth: 0
       hidden_dim: 128
       output_feature: 1 # The number of alpha output channels.
       output_activation: None
+      hidden_activation: relu
+      skips:
+        - 4
 
   warp:
     use_warp_jacobian: False # if True the model computes and returns the Jacobian of the warped points.
@@ -91,15 +102,15 @@ model:
 
     # Common setup
     encoder_args:
-      num_warp_freqs: 8
+      num_freqs: 8
       min_freq_log2: 0
       max_freq_log2: None
-      use_identity_map: True
+      use_identity: True
 
     # Common setup
     mlp_args:
       depth: 6
-      in_feature: 5 # TODO not exact
+      in_feature: 1 # TODO not exact
       hidden_dim: 128
       hidden_activation: relu
       output_feature: 0

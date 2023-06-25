@@ -5,9 +5,10 @@ from model_nerfies.modules import NeRFMLP
 from model_nerfies.sampler import sample_along_rays, sample_pdf
 from model_nerfies.rendering import render_samples
 from model_nerfies.embed import SinusoidalEncoder, GloEncoder
+from dataset import NerfiesDataSet
 
 
-def get_model(model_cfg, render_cfg):
+def get_model(model_cfg, render_cfg, dataset: NerfiesDataSet):
     backbone_cfg = model_cfg['backbone']
     warp_cfg = model_cfg['warp']
     mlp_args = {
@@ -18,13 +19,14 @@ def get_model(model_cfg, render_cfg):
         'use_alpha_condition': model_cfg['use_alpha_condition']
     }
 
-    time_encoder_args = {dict(warp_cfg['encoder_args'], ** {
+    time_encoder_args = dict(warp_cfg['encoder_args'], ** {
         'scale': warp_cfg['time_encoder_args']['scale'],
         'mlp_args': dict(warp_cfg['mlp_args'], **warp_cfg['time_encoder_args']['time_mlp_args'])
-    })}
+    })
     field_args = {
         'points_encoder_args': dict(warp_cfg['points_encoder_args'], **warp_cfg['encoder_args']),
-        'glo_encoder_args': {'num_embeddings': 12, # TODO 데이터셋에서 가져와야 함
+        'metadata_encoder_type': model_cfg['warp_metadata_encoder_type'],
+        'glo_encoder_args': {'num_embeddings': dataset.num_appearance_embeddings,
                              'embedding_dim': warp_cfg['num_warp_features']},
         'time_encoder_args': time_encoder_args,
         'mlp_trunk_args': warp_cfg['mlp_args'],
@@ -43,6 +45,7 @@ def get_model(model_cfg, render_cfg):
     }
 
     _cfg = {
+        "use_viewdirs": model_cfg['use_viewdirs'],
         "use_fine_samples": render_cfg['use_fine_samples'],
         "coarse_args": mlp_args,
         "fine_args": mlp_args,
@@ -52,12 +55,12 @@ def get_model(model_cfg, render_cfg):
         "use_warp_jacobian": model_cfg['warp']['use_warp_jacobian'],
 
         "use_appearance_metadata": model_cfg['use_appearance_metadata'],
-        "appearance_encoder_args": {'num_embeddings': 12, # TODO 데이터셋에서 가져와야 함
-                                    'embedding_dim': warp_cfg['appearance_metadata_dims']},
+        "appearance_encoder_args": {'num_embeddings': dataset.num_appearance_embeddings,
+                                    'embedding_dim': model_cfg['appearance_metadata_dims']},
 
         "use_camera_metadata": model_cfg['use_camera_metadata'],
-        "camera_encoder_args": {'num_embeddings': 12, # TODO 데이터셋에서 가져와야 함
-                                'embedding_dim': warp_cfg['camera_metadata_dims']},
+        "camera_encoder_args": {'num_embeddings': dataset.num_camera_embeddings,
+                                'embedding_dim': model_cfg['camera_metadata_dims']},
 
         "use_trunk_condition": model_cfg['use_trunk_condition'],
         "use_alpha_condition": model_cfg['use_alpha_condition'],
@@ -214,15 +217,11 @@ class Nerfies(nn.Module):
         return coarse_ret
 
 
-def create_warp_field(warp_field_type, field_args, num_batch_dims):
+def create_warp_field(field_type, field_args, num_batch_dims, **kwargs):
     return warping.create_warp_field(
-        field_type=warp_field_type,
+        field_type=field_type,
         field_args=field_args,
         num_batch_dims=num_batch_dims,
-        # num_freqs=model.num_warp_freqs,
-        # num_embeddings=model.num_warp_embeddings,
-        # num_features=model.num_warp_features,
-        # metadata_encoder_type=model.warp_metadata_encoder_type,
         )
 
 

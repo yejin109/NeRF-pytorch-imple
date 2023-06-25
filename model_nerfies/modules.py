@@ -27,7 +27,7 @@ class MLP(nn.Module):
                 if i not in self.skips else 
                 nn.Linear(self.hidden_dim + self.in_feature, self.hidden_dim) 
                 for i in range(self.depth - 1)])
-        self.output_layer = nn.Linear(self.hidden_dim, self.out_feature)
+        self.output_layer = nn.Linear(self.hidden_dim, self.output_feature)
 
     def forward(self, x):
         inputs = x
@@ -35,7 +35,7 @@ class MLP(nn.Module):
             if i in self.skips:
                 x = torch.concat((x, inputs), dim =-1)
             x = layer(x)
-            x = self.hidden_activtation
+            x = self.hidden_activtation(x)
 
         if self.output_feature > 0:
             x = self.output_layer(x)

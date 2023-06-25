@@ -90,7 +90,7 @@ def parse_colmap_camera_params(camera):
         out["k2"] = 0.0
         out["p1"] = 0.0
         out["p2"] = 0.0
-        camera_model='OPENCV'
+        camera_model = 'OPENCV'
     elif camera.model == "RADIAL":
         # f, cx, cy, k1, k2
 
@@ -106,7 +106,7 @@ def parse_colmap_camera_params(camera):
         out["k2"] = float(camera_params[4])
         out["p1"] = 0.0
         out["p2"] = 0.0
-        camera_model='OPENCV'
+        camera_model = 'OPENCV'
     elif camera.model == "OPENCV":
         # fx, fy, cx, cy, k1, k2, p1, p2
 
@@ -123,7 +123,7 @@ def parse_colmap_camera_params(camera):
         out["k2"] = float(camera_params[5])
         out["p1"] = float(camera_params[6])
         out["p2"] = float(camera_params[7])
-        camera_model='OPENCV'
+        camera_model = 'OPENCV'
     elif camera.model == "OPENCV_FISHEYE":
         # fx, fy, cx, cy, k1, k2, k3, k4
 

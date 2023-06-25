@@ -59,7 +59,7 @@ class AnnealedSinusoidalEncoder(nn.Module):
         self.min_freq_log2 = min_freq_log2
         self.max_freq_log2 = get_value(max_freq_log2) # Optional
         self.scale = scale
-        self.use_identiy = use_identity
+        self.use_identity = use_identity
 
         self.base_encoder = SinusoidalEncoder(
             num_freqs=self.num_freqs,

@@ -133,8 +133,6 @@ class SE3Field(nn.Module):
             )
         if metadata_encoder_type == 'glo':
             self.metadata_encoder = GloEncoder(**glo_encoder_args)
-                # num_embeddings=self.num_embeddings,
-                # features=self.num_embedding_features
         elif metadata_encoder_type == 'time':
             self.metadata_encoder = TimeEncoder(**time_encoder_args)
         else:

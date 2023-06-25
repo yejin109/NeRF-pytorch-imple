@@ -1,11 +1,11 @@
 import torch
 import torch.nn as nn
-from model_hypernerf_torch import warping
-from model_hypernerf_torch import _utils as utils
-from model_hypernerf_torch.modules import HyperSheetMLP, NeRFMLP
-from model_hypernerf_torch.sampler import sample_along_rays
-from model_hypernerf_torch.rendering import render_samples
-from model_hypernerf_torch.embed import GloEmbed
+from model_hypernerf import warping
+from model_hypernerf import _utils as utils
+from model_hypernerf.modules import HyperSheetMLP, NeRFMLP
+from model_hypernerf.sampler import sample_along_rays
+from model_hypernerf.rendering import render_samples
+from model_hypernerf.embed import GloEmbed
 
 
 def get_model(model_cfg):
