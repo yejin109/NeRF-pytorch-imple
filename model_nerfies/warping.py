@@ -53,7 +53,6 @@ class TranslationField(nn.Module):
         assert self.mlp_output_dim == 3
         assert mlp_hidden_activation is None
         assert mlp_output_actvation is None
-        # TODO: in_feature?!
         self.mlp = MLP(
             in_feature=None,
             depth=mlp_depth,
@@ -131,6 +130,7 @@ class SE3Field(nn.Module):
         self.points_encoder = AnnealedSinusoidalEncoder(
             **points_encoder_args
             )
+        self.metadata_encoder_type = metadata_encoder_type
         if metadata_encoder_type == 'glo':
             self.metadata_encoder = GloEncoder(**glo_encoder_args)
         elif metadata_encoder_type == 'time':
@@ -142,8 +142,12 @@ class SE3Field(nn.Module):
             'w': MLP(**mlp_branch_w_args),
             'v': MLP(**mlp_branch_v_args)
         }
+
+        self.use_pivot = use_pivot
         if use_pivot:
             self.branches['p'] = MLP(**mlp_branch_p_args)
+
+        self.use_translation = use_translation
         if use_translation:
             self.branches['t'] = MLP(**mlp_branch_t_args)
     
@@ -175,7 +179,10 @@ class SE3Field(nn.Module):
             pivot = self.branches['p'](trunk_output)
             warped_points = warped_points + pivot
 
-        warped_points = from_homogenous(transform @ to_homogenous(warped_points))
+        # warped_points = from_homogenous(transform @ to_homogenous(warped_points))
+        # NOTE: Batch matmul for 4D
+        warped_points = (transform * to_homogenous(warped_points).unsqueeze(-2)).sum(dim=-1)
+        warped_points = from_homogenous(warped_points)
 
         if self.use_pivot:
             warped_points = warped_points - pivot
@@ -209,6 +216,7 @@ class SE3Field(nn.Module):
             metadata_embed = metadata
         else:
             metadata_embed = self.encode_metadata(metadata, extra.get('time_alpha'))
+            metadata_embed = metadata_embed.squeeze()
 
         out = {'warped_points': self.warp(points, metadata_embed, extra)}
 

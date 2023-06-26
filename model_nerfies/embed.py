@@ -19,14 +19,16 @@ class SinusoidalEncoder(nn.Module):
             max_freq_log2 = self.max_freq_log2
         self.freq_bands = 2.0 ** torch.linspace(self.min_freq_log2, max_freq_log2, int(self.num_freqs))
 
-        self.freqs = torch.reshape(self.freq_bands, (self.num_freqs, 1))
+        self.freqs = torch.reshape(self.freq_bands, (1, self.num_freqs))
 
-    def forward(self, x, alpha):
-        """A vectorized sinusoidal encoding.
+    def forward(self, x):
+        """
+        A vectorized sinusoidal encoding.
+        기존 구현은 batch size를 고려하지 않았어서 이를 반영한 형태로 변경
+        
 
         Args:
           x: the input features to encode.
-          alpha: a dummy argument for API compatibility.
 
         Returns:
           A tensor containing the encoded features.
@@ -34,21 +36,26 @@ class SinusoidalEncoder(nn.Module):
         if self.num_freqs == 0:
             return x
 
-        x_expanded = torch.unsqueeze(x, -1)  # (1, C).
-        # Will be broadcasted to shape (F, C).
+        # x = torch.reshape(x, (x.size(0), -1))
+        x_expanded = torch.unsqueeze(x, dim=-1) # (C, 1).
+        # x_expanded = torch.reshape(x, (1, -1))
+        # Will be broadcasted to shape (C, F).
         angles = self.scale * x_expanded * self.freqs
 
         # The shape of the features is (F, 2, C) so that when we reshape it
         # it matches the ordering of the original NeRF code.
         # Vectorize the computation of the high-frequency (sin, cos) terms.
         # We use the trigonometric identity: cos(x) = sin(x + pi/2)
-        features = torch.stack((angles, angles + torch.pi / 2), dim=-2)
-        features = features.flatten()
+        features = torch.stack((angles, angles + torch.pi / 2), dim=-1)
+        features = features.flatten(start_dim=len(x.size())-1)
         features = torch.sin(features)
 
         # Prepend the original signal for the identity.
         if self.use_identity:
             features = torch.concat([x, features], dim=-1)
+
+        # TODO: size 불확실
+        # features = torch.reshape(features, list(tuple(org_size)[:-2]) + [-1, x.size(-1)])
         return features
 
 
@@ -96,23 +103,25 @@ class AnnealedSinusoidalEncoder(nn.Module):
         if self.num_freqs == 0:
             return x
 
+        batch_shape = x.shape[:-1]
         num_channels = x.shape[-1]
 
         features = self.base_encoder(x)
 
         if self.use_identity:
-            identity, features = torch.split(features, [x.size(-1), ], dim=-1)
+            identity, features = torch.split(features, [x.size(-1), features.size(-1)-x.size(-1)], dim=-1)
 
         # Apply the window by broadcasting to save on memory.
-        features = torch.reshape(features, (-1, 2, num_channels))
+        # features = torch.reshape(features, (-1, 2, num_channels))
         window = self.cosine_easing_window(self.min_freq_log2, self.max_freq_log2, self.num_freqs, alpha)
-        window = torch.reshape(window, (-1, 1, 1))
-        features = window * features
+        # NOTE 일단 내가 수정
+        features = window[None, None, :].repeat(1, 1, features.size(-1) // window.size(0)) * features
 
+        features = torch.reshape(features, list(batch_shape) + [-1])
         if self.use_identity:
-            return torch.concat([identity, features.flatten()], dim=-1)
+            return torch.concat([identity, features], dim=-1)
         else:
-            return features.flatten()
+            return features
 
 
 class GloEncoder(nn.Module):

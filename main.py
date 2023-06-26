@@ -33,7 +33,8 @@ def get_configs(_data, _model_architecture):
     model_cfg = setting['model']
     rendering_cfg = setting['render']
     log_cfg = setting['log']
-    return embedding_cfg, dataset_cfg, model_cfg, rendering_cfg, log_cfg
+    run_cfg = setting['run']
+    return embedding_cfg, dataset_cfg, model_cfg, rendering_cfg, log_cfg, run_cfg
 
 
 def nerf_pipeline():
@@ -48,7 +49,7 @@ def nerf_pipeline():
 
     # Step 2: Load Model
     model_config = dict(model_config, **rendering_config)
-    model_config['embed_cfg'] = embedding_config
+    # model_config['embed_cfg'] = embedding_config
     models, params, embedder_ray, embedder_view = model_nerf.get_model(**model_config)
 
     model_nerf.run(model_config, rendering_config, dataset_config, dset, params, models, embedder_ray, embedder_view)
@@ -68,10 +69,12 @@ def neus_pipeline():
 
 def nerfies_pipeline():
     # Step 1 : Load Dataset
-    dset = dataset.NerfiesDataSet(**dataset_config)
+    dset = dataset.NerfiesDataSet.get_dataset(dataset_config, model_config)
 
     # Step 2: Load Model
-    nerfies = model_nerfies.get_model(model_config, rendering_config, dset)
+    nerfies = model_nerfies.get_model(model_config, rendering_config, run_config, dset)
+
+    model_nerfies.run(nerfies, dset, run_config, rendering_config, model_config)
     print()
 
 
@@ -82,14 +85,14 @@ def hypernerf_pipeline():
 if __name__ == '__main__':
     args = parser.parse_args()
     torch.backends.cudnn.benchmark = True
-
+    torch.autograd.set_detect_anomaly(True)
     # model_architecture = args.model
     # data = args.data
     model_architecture = 'nerfies'
     data = 'broom'
 
-    embedding_config, dataset_config, model_config, rendering_config, log_config = get_configs(data, model_architecture)
-    print()
+    embedding_config, dataset_config, model_config, rendering_config, log_config, run_config = get_configs(data, model_architecture)
+    # dataset_config, model_config, rendering_config, log_config, run_config = get_configs(data, model_architecture)
     # model_architecture = 'nerf'
     # data = 'synthetic'
     # # data = 'llff'

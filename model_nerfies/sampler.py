@@ -31,7 +31,6 @@ def sample_along_rays(
     else:
         z_vals = 1. / (1. / near * (1. - t_vals) + 1. / far * t_vals)
 
-
     if use_stratified_sampling:
         mids = .5 * (z_vals[..., 1:] + z_vals[..., :-1])
         upper = torch.concat([mids, z_vals[..., -1:]], -1)
@@ -44,7 +43,8 @@ def sample_along_rays(
         #                         [batch_size, num_coarse_samples])
         z_vals = torch.reshape(z_vals, (batch_size, num_coarse_samples))
 
-    points = rays_o + z_vals * rays_d
+    # NOTE rays는 (batch size, 3) z vals은 (batch size, sample size)고 지금 계산할 것은 (batch size, sample size)가 되어야 해서 이렇게 한다.
+    points = rays_o[:, None, :] + z_vals[:, :, None] * rays_d[:, None, :]
     return z_vals, points
 
 
@@ -69,7 +69,7 @@ def sample_pdf(bins, weights, origins, directions, z_vals,
     """
     z_samples = piecewise_constant_pdf(bins, weights, num_coarse_samples, use_stratified_sampling)
     # Compute united z_vals and sample points
-    z_vals = torch.sort(torch.concatenate([z_vals, z_samples], dim=-1), dim=-1)
+    z_vals = torch.sort(torch.concatenate([z_vals, z_samples], dim=-1), dim=-1).values
     return z_vals, (origins[..., None, :] + z_vals[..., None] * directions[..., None, :])
 
 
@@ -87,40 +87,39 @@ def piecewise_constant_pdf(bins, weights, num_coarse_samples,
     Returns:
     z_samples: jnp.ndarray(float32), [batch_size, num_coarse_samples].
     """
-    eps = 1e-5
-
-    # Get pdf
-    weights += eps  # prevent nans
-    pdf = weights / weights.sum(dim=-1, keepdims=True)
-    cdf = torch.cumsum(pdf, dim=-1)
-    cdf = torch.concat([torch.zeros(list(cdf.shape[:-1]) + [1]), cdf], dim=-1)
-
-    # Take uniform samples
-    if use_stratified_sampling:
-        u = torch.rand(list(cdf.size()[:-1]) + [num_coarse_samples])
-    else:
-        u = torch.linspace(0., 1., num_coarse_samples)
-        u = torch.reshape(u, list(cdf.size()[:-1]) + [num_coarse_samples])
-
-    # Invert CDF. This takes advantage of the fact that `bins` is sorted.
-    mask = (u[..., None, :] >= cdf[..., :, None])
-
-    bins_g0, bins_g1 = minmax(bins, mask)
-    cdf_g0, cdf_g1 = minmax(cdf, mask)
-
-    denom = (cdf_g1 - cdf_g0)
-    denom = torch.where(denom < eps, 1., denom)
-    t = (u - cdf_g0) / denom
-    z_samples = bins_g0 + t * (bins_g1 - bins_g0)
-
     # TODO Prevent gradient from backprop-ing through samples
-    # torch.stop_gradient(z_samples)
+    with torch.no_grad():
+        eps = 1e-5
+
+        # Get pdf
+        weights += eps  # prevent nans
+        pdf = weights / weights.sum(dim=-1, keepdims=True)
+        cdf = torch.cumsum(pdf, dim=-1)
+        cdf = torch.concat([torch.zeros(list(cdf.shape[:-1]) + [1]), cdf], dim=-1)
+
+        # Take uniform samples
+        if use_stratified_sampling:
+            u = torch.rand(list(cdf.size()[:-1]) + [num_coarse_samples])
+        else:
+            u = torch.linspace(0., 1., num_coarse_samples)
+            u = torch.reshape(u, list(cdf.size()[:-1]) + [num_coarse_samples])
+
+        # Invert CDF. This takes advantage of the fact that `bins` is sorted.
+        mask = (u[..., None, :] >= cdf[..., :, None])
+
+        bins_g0, bins_g1 = minmax(bins, mask)
+        cdf_g0, cdf_g1 = minmax(cdf, mask)
+
+        denom = (cdf_g1 - cdf_g0)
+        denom = torch.where(denom < eps, 1., denom)
+        t = (u - cdf_g0) / denom
+        z_samples = bins_g0 + t * (bins_g1 - bins_g0)
     return z_samples
 
 
 def minmax(x, mask):
-    x0 = torch.max(torch.where(mask, x[..., None], x[..., :1, None]), -2)
-    x1 = torch.min(torch.where(~mask, x[..., None], x[..., -1:, None]), -2)
+    x0 = torch.max(torch.where(mask, x[..., None], x[..., :1, None]), -2).values
+    x1 = torch.min(torch.where(~mask, x[..., None], x[..., -1:, None]), -2).values
     x0 = torch.minimum(x0, x[..., -2:-1])
     x1 = torch.maximum(x1, x[..., 1:2])
     return x0, x1

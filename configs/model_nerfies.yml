@@ -1,3 +1,5 @@
+embed :
+
 data:
   broom:
     data_type: nerfies_vrig
@@ -6,12 +8,66 @@ data:
     image_scale: 8
     shuffle_pixels: False
     test_camera_trajectory: orbit-extreme
-    use_appearance_id : False
+
+    use_appearance_id : True
     use_camera_id : False
+    use_depth: False
 
 
-embed:
+run:
+  N_iters : 100000
+  batch_size : 2
+  background_points_batch_size : 2
 
+  is_metadata_encoded : False
+  return_points : False
+  return_weights: True # When you use fine model, you MUST use True
+
+  use_elastic_loss : False # TODO Elastic loss require jacobian operation
+  elastic_reduce_method : median # candidates : median(default), weight
+
+  use_background_loss : True
+  background_loss_weight : 1.0
+  use_warp_reg_loss : False
+  background_noise_std : 0.001
+
+  # schedule configuration
+  lr_schedule:
+    type: exponential
+    initial_value: 0.001
+    final_value: 0.0001
+    num_steps: 1000000
+
+  warp_alpha_schedule:
+    - type: linear
+    - intial_value: 0.0
+    - final_value: 8.0
+    - num_steps: 80000
+
+  annealed_warp_alpha_schedule:
+    - type: linear
+    - initial_value: 0.0
+    - final_value: 8 # ssynch with num_warp_freqs
+    - num_steps: 80000
+
+  constant_warp_alpha_schedule:
+    type: constant
+    value: 8 # ssynch with num_warp_freqs
+
+  constant_warp_time_alpha_schedule:
+    type: constant
+    value: 0 # ssynch with num_warp_freqs
+
+  constant_elastic_loss_schedule:
+    type: constant
+    value: 0.01 # synch with elastic_init_weight
+
+  decaying_elastic_loss_schedule:
+    type: piecewise
+    schedule:
+      - 50000
+      - constant
+      - 0.01
 
 render:
   use_fine_samples: True
@@ -26,9 +82,6 @@ render:
 
 
 model:
-  N_iters : 100000
-  batch_size : 16
-
   use_viewdirs : True
 
   num_nerf_point_freqs: 10 # The number of positional encodings for points.
@@ -37,13 +90,13 @@ model:
   warp_metadata_encoder_type: 'glo'
 
   use_trunk_condition: False # Whether to condition the entire NeRF MLP.
-  use_rgb_condition: False # Whether to condition the RGB of the template NeRF.
+  use_rgb_condition: True # Whether to condition the RGB of the template NeRF.
   use_alpha_condition: False # Whether to condition the density of the template NeRF.
 
-  use_appearance_metadata: True # Whether to use the appearance metadata for the conditional branch.
+#  use_appearance_metadata: True # Whether to use the appearance metadata for the conditional branch.
   appearance_metadata_dims: 8 # The number of dimensions for the appearance metadata.
 
-  use_camera_metadata: False # Whether to use the camera metadata for the conditional branch.
+#  use_camera_metadata: False # Whether to use the camera metadata for the conditional branch.
   camera_metadata_dims: 2 # The number of dimensions for the camera metadata.
 
   use_elastic_loss: True
@@ -59,6 +112,9 @@ model:
     nerf_skips: # Adds a skip connection every N layers.
       - 4
 
+    rgb_channels: 3 # rgb_channels: int, the number of rgb_channelss.
+    alpha_channels: 1 # alpha_channels: int, the number of alpha_channelss.
+
     encoder_args:
       scale: 1.0
       min_freq_log2: 0
@@ -67,7 +123,7 @@ model:
 
     trunk:
       depth: 8 # The depth of the NeRF.
-      in_feature : 1 # TODO
+      in_feature : 63
       hidden_dim: 256 # The width of the NeRF.
       output_feature: 0 # The number of trunk output channels. For 0, it does not pass output layer. See modules.py
       output_activation: None
@@ -77,7 +133,7 @@ model:
 
     rgb:
       depth: 1 # The depth of the conditional part of the MLP.
-      in_feature : 1 # TODO
+      in_feature : 283
       hidden_dim: 128 # The width of the conditional part of the MLP.
       output_feature: 3 # The number of RGB output channels.
       output_activation: None
@@ -87,6 +143,7 @@ model:
 
     alpha:
       depth: 0
+      in_feature : 256
       hidden_dim: 128
       output_feature: 1 # The number of alpha output channels.
       output_activation: None
@@ -95,7 +152,6 @@ model:
         - 4
 
   warp:
-    use_warp_jacobian: False # if True the model computes and returns the Jacobian of the warped points.
     use_warp: True
     warp_field_type: se3
     num_warp_features: 8
@@ -127,63 +183,36 @@ model:
         hidden_dim: 64
         output_feature: 10
 
+    mlp_trunk_args:
+      in_feature : 59 # points embed 51, metadata embed 8
+
     mlp_branch_w_args:
+      in_feature : 128 # trunk output width which is hidden dim
       depth: 0
       output_feature: 3
       skips:
         -  # None
 
     mlp_branch_v_args:
+      in_feature : 128 # trunk output width which is hidden dim
       depth: 0
       output_feature: 3
       skips:
         - # None
 
     mlp_branch_p_args:
+      in_feature : 128 # trunk output width which is hidden dim
       depth: 0
       output_feature: 3
       skips:
         - # None
 
     mlp_branch_t_args:
+      in_feature : 128 # trunk output width which is hidden dim
       depth: 0
       output_feature: 3
       skips:
         - # None
-
-  # schedule configuration
-  lr_schedule :
-    - type: exponential
-    - initial_value : 0.001
-    - final_value : 0.0001
-    - num_steps : 1000000
-
-  warp_alpha_schedule:
-    - type: linear
-    - intial_value: 0.0
-    - final_value : 8.0
-    - num_steps: 80000
-
-  annealed_warp_alpha_schedule :
-    - type : linear
-    - initial_value : 0.0
-    - final_value : 8 # ssynch with num_warp_freqs
-    - num_steps : 80000
-
-  constant_warp_alpha_schedule :
-    - type : constant
-    - value : 8 # ssynch with num_warp_freqs
-
-  constant_elastic_loss_schedule :
-    - type : constant
-    - value : 0.01 # synch with elastic_init_weight
-
-  decaying_elastic_loss_schedule :
-    - type : piecewise
-    - schedule :
-      - 50000
-      - constant
-      - 0.01
 
 
 log:
@@ -202,8 +231,7 @@ log:
 #activation: the activation function used in the MLP.
 #sigma_activation: the activation function applied to the sigma density.
 #nerf_skips: which layers to add skip layers in the NeRF model.
-#alpha_channels: int, the number of alpha_channelss.
-#rgb_channels: int, the number of rgb_channelss.
+
 #use_stratified_sampling: use stratified sampling.
 #use_white_background: composite rendering on to a white background.
 #num_nerf_point_freqs: degree of positional encoding for positions.
@@ -251,18 +279,7 @@ log:
 #num_warp_features: int
 #num_warp_freqs: int
 #
-#activation: types.Activation = nn.relu
-#sigma_activation: types.Activation = nn.relu
-#use_white_background: bool = False
-#use_linear_disparity: bool = False
-#use_sample_at_infinity: bool = True
-#
-#warp_field_type: str = 'se3'
-#
-#use_appearance_metadata: bool = False
-#use_camera_metadata: bool = False
-#use_warp: bool = False
-#
+
 #use_weights: bool = False
 #use_alpha_condition: bool = False
 #use_rgb_condition: bool = False

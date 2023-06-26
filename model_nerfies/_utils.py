@@ -53,10 +53,11 @@ def exponential_se3(S, theta):
             a_X_b: (4, 4) The homogeneous transformation matrix attained by integrating
             motion of magnitude theta about S for one second.
     """
-    w, v = torch.split(S, 2)
+    theta = theta[..., None, None]
+    w, v = torch.split(S, [3, 3], dim=-1)
     W = skew(w)
     R = exp_so3(w, theta)
-    p = (theta * torch.eye(3) + (1.0 - torch.cos(theta)) * W +(theta - torch.sin(theta)) * W @ W) @ v
+    p = (theta * torch.eye(3)[None, None, ...] + (1.0 - torch.cos(theta)) * W + (theta - torch.sin(theta)) * W @ W) @ v[..., None]
     return rp_to_se3(R, p)
 
 
@@ -75,10 +76,10 @@ def exp_so3(w, theta: float):
             magnitude theta about axis w.
     """
     W = skew(w)
-    return torch.eye(3) + torch.sin(theta) * W + (1.0 - torch.cos(theta)) * W @ W
+    return torch.eye(3)[None, None, :] + torch.sin(theta) * W + (1.0 - torch.cos(theta)) * W @ W
 
 
-def skew(w):
+def skew(_w):
     """
         Build a skew matrix ("cross product matrix") for vector w.
 
@@ -90,8 +91,19 @@ def skew(w):
         Returns:
             W: (3, 3) A skew matrix such that W @ v == w x v
     """
-    w = torch.reshape(w, (3))
-    return torch.array([[0.0, -w[2], w[1]], [w[2], 0.0, -w[0]], [-w[1], w[0], 0.0]])
+    if len(_w.shape) == 2:
+        _w = _w.unsqueeze(1)
+    w = _w.clone().detach()
+    res = torch.zeros(list(tuple(w.size()[:2]))+[3, 3])
+
+    res[:, :, 0, 1] = -w[:, :, 2]
+    res[:, :, 0, 2] = w[:, :, 1]
+    res[:, :, 1, 0] = -w[:, :, 2]
+    res[:, :, 1, 2] = w[:, :, 0]
+    res[:, :, 2, 0] = -w[:, :, 1]
+    res[:, :, 2, 1] = w[:, :, 0]
+    return res
+
 
 def rp_to_se3(R, p):
     """
@@ -105,8 +117,11 @@ def rp_to_se3(R, p):
         X: (4, 4) The homogeneous transformation matrix described by rotating by R
             and translating by p.
     """
-    p = torch.reshape(p, (3, 1))
-    return torch.block_diag([[R, p], [torch([[0.0, 0.0, 0.0, 1.0]])]])
+    # p = torch.reshape(p, (3, 1))
+    RT = torch.concat((R, p), dim=-1)
+    homogeneous = torch.Tensor([[0.0, 0.0, 0.0, 1.0]]).repeat((R.size(0), R.size(1),1, 1))
+    return torch.concat((RT, homogeneous), dim=-2)
+
 
 def from_homogenous(v):
     return v[..., :3] / v[..., -1:]
@@ -114,3 +129,26 @@ def from_homogenous(v):
 
 def to_homogenous(v):
     return torch.concat([v, torch.ones_like(v[..., :1])], dim=-1)
+
+
+def compute_opaqueness_mask(weights, depth_threshold=0.5):
+    """Computes a mask which will be 1.0 at the depth point.
+
+    Args:
+        weights: the density weights from NeRF.
+        depth_threshold: the accumulation threshold which will be used as the depth
+        termination point.
+
+    Returns:
+        A tensor containing a mask with the same size as weights that has one
+        element long the sample dimension that is 1.0. This element is the point
+        where the 'surface' is.
+    """
+    cumulative_contribution = torch.cumsum(weights, dim=-1)
+    depth_threshold = torch.Tensor([depth_threshold])
+    opaqueness = cumulative_contribution >= depth_threshold
+    false_padding = torch.zeros_like(opaqueness[..., :1])
+    padded_opaqueness = torch.concat([false_padding, opaqueness[..., :-1]], dim=-1)
+    opaqueness_mask = torch.logical_xor(opaqueness, padded_opaqueness)
+    opaqueness_mask = opaqueness_mask.to(dtype=weights.dtype)
+    return opaqueness_mask

@@ -23,8 +23,8 @@ class MLP(nn.Module):
 
         self.layers = nn.ModuleList(
             [nn.Linear(self.in_feature, self.hidden_dim)] +[
-                nn.Linear(self.hidden_dim, self.hidden_dim) 
-                if i not in self.skips else 
+                nn.Linear(self.hidden_dim, self.hidden_dim)
+                if i+1 not in self.skips else # i+1로 해야 index가 맞는듯
                 nn.Linear(self.hidden_dim + self.in_feature, self.hidden_dim) 
                 for i in range(self.depth - 1)])
         self.output_layer = nn.Linear(self.hidden_dim, self.output_feature)
@@ -33,7 +33,7 @@ class MLP(nn.Module):
         inputs = x
         for i, layer in enumerate(self.layers):
             if i in self.skips:
-                x = torch.concat((x, inputs), dim =-1)
+                x = torch.concat((x, inputs), dim=-1)
             x = layer(x)
             x = self.hidden_activtation(x)
 
@@ -62,24 +62,21 @@ class NeRFMLP(nn.Module):
             alpha_condition: a condition array provided to the alpha branch.
             rgb_condition: a condition array provided in the RGB branch.
     """
-    def __init__(self, mlp_trunk_args,  mlp_rgb_args, mlp_alpha_args, use_alpha_condition, use_rgb_condition, **kwargs):
+    def __init__(self, mlp_trunk_args,  mlp_rgb_args, mlp_alpha_args, use_alpha_condition, use_rgb_condition,
+                 rgb_channels, alpha_channels,
+                 **kwargs):
         super(NeRFMLP, self).__init__()
 
-        self.trunk_mlp = None
-        if mlp_trunk_args['depth'] > 0:
-            self.trunk_mlp = MLP(**mlp_trunk_args)
+        self.trunk_mlp = MLP(**mlp_trunk_args)
         
-        self.rgb_mlp = None
-        if mlp_rgb_args['depth'] > 0:
-            self.rgb_mlp = MLP(**mlp_rgb_args)
+        self.rgb_mlp = MLP(**mlp_rgb_args)
         
-        self.alpha_mlp = None
-        if mlp_alpha_args['depth'] > 0:
-            self.alpha_mlp = MLP(**mlp_alpha_args)
+        self.alpha_mlp = MLP(**mlp_alpha_args)
 
-        self.bottleneck = None
+        self.rgb_channels = rgb_channels
+        self.alpha_channels = alpha_channels
+
         if use_alpha_condition or use_rgb_condition:
-            # TODO: exact infeatures?
             self.bottleneck = nn.Linear(mlp_trunk_args['hidden_dim'], mlp_trunk_args['hidden_dim'])
 
     def forward(self, x, trunk_condition, alpha_condition, rgb_condition):
@@ -98,8 +95,8 @@ class NeRFMLP(nn.Module):
         feature_dim = x.shape[-1]
         num_samples = x.shape[1]
         x = x.reshape([-1, feature_dim])
-        if self.trunk_mlp is not None:
-            trunk_condition = broadcast_condition(trunk_condition)
+        if trunk_condition is not None:
+            trunk_condition = broadcast_condition(trunk_condition, num_samples)
             trunk_input = torch.concat((x, trunk_condition), dim=-1)
         else:
             trunk_input = x

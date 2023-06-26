@@ -8,16 +8,9 @@ from model_nerfies.embed import SinusoidalEncoder, GloEncoder
 from dataset import NerfiesDataSet
 
 
-def get_model(model_cfg, render_cfg, dataset: NerfiesDataSet):
+def get_model(model_cfg, render_cfg, run_cfg, dataset: NerfiesDataSet):
     backbone_cfg = model_cfg['backbone']
     warp_cfg = model_cfg['warp']
-    mlp_args = {
-        'mlp_trunk_args': backbone_cfg['trunk'],
-        'mlp_rgb_args': backbone_cfg['rgb'],
-        'mlp_alpha_args': backbone_cfg['alpha'],
-        'use_rgb_condition': model_cfg['use_rgb_condition'],
-        'use_alpha_condition': model_cfg['use_alpha_condition']
-    }
 
     time_encoder_args = dict(warp_cfg['encoder_args'], ** {
         'scale': warp_cfg['time_encoder_args']['scale'],
@@ -29,7 +22,7 @@ def get_model(model_cfg, render_cfg, dataset: NerfiesDataSet):
         'glo_encoder_args': {'num_embeddings': dataset.num_appearance_embeddings,
                              'embedding_dim': warp_cfg['num_warp_features']},
         'time_encoder_args': time_encoder_args,
-        'mlp_trunk_args': warp_cfg['mlp_args'],
+        'mlp_trunk_args': dict(warp_cfg['mlp_args'], **warp_cfg['mlp_trunk_args']),
         'mlp_branch_w_args': dict(warp_cfg['mlp_args'], **warp_cfg['mlp_branch_w_args']),
         'mlp_branch_v_args': dict(warp_cfg['mlp_args'], **warp_cfg['mlp_branch_v_args']),
         'use_pivot': False,
@@ -44,21 +37,32 @@ def get_model(model_cfg, render_cfg, dataset: NerfiesDataSet):
         'num_batch_dims': 0,
     }
 
+    nerfmlp_args = {
+        'mlp_trunk_args': backbone_cfg['trunk'],
+        'mlp_rgb_args': backbone_cfg['rgb'],
+        'mlp_alpha_args': backbone_cfg['alpha'],
+        'use_rgb_condition': model_cfg['use_rgb_condition'],
+        'use_alpha_condition': model_cfg['use_alpha_condition'],
+        'rgb_channels': backbone_cfg['rgb_channels'],
+        'alpha_channels': backbone_cfg['alpha_channels'],
+    }
+
     _cfg = {
         "use_viewdirs": model_cfg['use_viewdirs'],
         "use_fine_samples": render_cfg['use_fine_samples'],
-        "coarse_args": mlp_args,
-        "fine_args": mlp_args,
+        "coarse_args": nerfmlp_args,
+        "fine_args": nerfmlp_args,
 
         "use_warp": model_cfg['warp']['use_warp'],
         "warp_field_args": warp_field_args,
-        "use_warp_jacobian": model_cfg['warp']['use_warp_jacobian'],
+        "use_warp_jacobian": run_cfg['use_elastic_loss'],
+        'warp_metadata_encoder_type': model_cfg['warp_metadata_encoder_type'],
 
-        "use_appearance_metadata": model_cfg['use_appearance_metadata'],
+        "use_appearance_metadata": dataset.use_appearance_id,
         "appearance_encoder_args": {'num_embeddings': dataset.num_appearance_embeddings,
                                     'embedding_dim': model_cfg['appearance_metadata_dims']},
 
-        "use_camera_metadata": model_cfg['use_camera_metadata'],
+        "use_camera_metadata": dataset.use_camera_id,
         "camera_encoder_args": {'num_embeddings': dataset.num_camera_embeddings,
                                 'embedding_dim': model_cfg['camera_metadata_dims']},
 
@@ -75,7 +79,7 @@ def get_model(model_cfg, render_cfg, dataset: NerfiesDataSet):
 class Nerfies(nn.Module):
     def __init__(self, use_viewdirs,
                  use_fine_samples, coarse_args, fine_args,
-                 use_warp, warp_field_args, use_warp_jacobian,
+                 use_warp, warp_field_args, use_warp_jacobian, warp_metadata_encoder_type,
                  use_appearance_metadata, appearance_encoder_args,
                  use_camera_metadata, camera_encoder_args,
                  use_trunk_condition, use_alpha_condition,
@@ -87,6 +91,7 @@ class Nerfies(nn.Module):
 
         self.use_warp = use_warp
         self.use_warp_jacobian = use_warp_jacobian
+        self.warp_metadata_encoder_type = warp_metadata_encoder_type
         self.warp_field = None
         if use_warp:
             self.warp_field = create_warp_field(**warp_field_args)
@@ -97,15 +102,18 @@ class Nerfies(nn.Module):
         self.use_alpha_condition = use_alpha_condition        
         
         self.appearance_encoder = None
+        self.use_appearance_metadata = use_appearance_metadata
         if use_appearance_metadata:
             self.appearance_encoder = GloEncoder(**appearance_encoder_args)
         
         self.camera_encoder = None
+        self.use_camera_metadata = use_camera_metadata
         if use_camera_metadata:
             self.camera_encoder = GloEncoder(**camera_encoder_args)
         
         self.mlps = {'coarse': NeRFMLP(**coarse_args)}
 
+        self.use_fine_samples = use_fine_samples
         if use_fine_samples:
             self.mlps['fine'] = NeRFMLP(**fine_args)
 
@@ -150,9 +158,12 @@ class Nerfies(nn.Module):
     def forward(self, 
                 rays_o, rays_d, viewdirs, metadata,
                 warp_params, is_metadata_encoded,
-                return_points, return_weights, return_warp_jacobian,
-                deterministic,
-                ray_sampling_args, rendering_args,           
+                return_points, return_weights,
+                # return_warp_jacobian,
+                # deterministic,
+                ray_sampling_args, rendering_args,
+                num_coarse_samples, num_fine_samples,
+                **kwargs
                 ):
         if viewdirs is None:
             viewdirs = rays_d
@@ -160,7 +171,7 @@ class Nerfies(nn.Module):
         out = {}
 
         # Ray Sampling : Coarse
-        ray_sampling_args = dict(ray_sampling_args, **{'rays_o': rays_o, 'rays_d': rays_d})
+        ray_sampling_args = dict(ray_sampling_args, **{'rays_o': rays_o, 'rays_d': rays_d, 'num_coarse_samples': num_coarse_samples})
         z_vals, points = sample_along_rays(**ray_sampling_args)
         if return_points:
             out['points'] = points
@@ -170,10 +181,8 @@ class Nerfies(nn.Module):
         # Warp rays
         if self.use_warp:
             metadata_channels = self.num_warp_features if is_metadata_encoded else 1
-            warp_metadata = (
-                metadata['time']
-                if self.warp_metadata_encoder_type == 'time' else metadata['warp'])
-            warp_metadata = torch.reshape(warp_metadata, (points.size()[:2], metadata_channels))
+            warp_metadata = (metadata['time'] if self.warp_metadata_encoder_type == 'time' else metadata['warp'])
+            warp_metadata = torch.broadcast_to(warp_metadata[:, None, :], (points.size()[0], points.size()[1], metadata_channels))
             warp_out = self.warp_field(
                 points,
                 warp_metadata,
@@ -197,13 +206,37 @@ class Nerfies(nn.Module):
         )
         out['coarse'] = coarse_ret
 
-        if self.num_fine_samples > 0:
+        fine_ret = None
+        if self.use_fine_samples:
             z_vals_mid = .5 * (z_vals[..., 1:] + z_vals[..., :-1])
             # Ray Sampling : Fine --> Hierarchical sampling
             z_vals, points = sample_pdf(z_vals_mid, coarse_ret['weights'][..., 1:-1],
-                                        rays_o, rays_d, z_vals, self.num_fine_samples,
+                                        rays_o, rays_d, z_vals, num_fine_samples,
                                         rendering_args['use_stratified_sampling'])
-            
+
+            trunk_conditions, alpha_conditions, rgb_conditions = self.get_condition(viewdirs, metadata,
+                                                                                    is_metadata_encoded)
+
+            # Warp rays
+            if self.use_warp:
+                metadata_channels = self.num_warp_features if is_metadata_encoded else 1
+                warp_metadata = (metadata['time'] if self.warp_metadata_encoder_type == 'time' else metadata['warp'])
+                warp_metadata = torch.broadcast_to(warp_metadata[:, None, :],
+                                                   (points.size()[0], points.size()[1], metadata_channels))
+                warp_out = self.warp_field(
+                    points,
+                    warp_metadata,
+                    warp_params,
+                    self.use_warp_jacobian,
+                    is_metadata_encoded)
+                points = warp_out['warped_points']
+                if 'jacobian' in warp_out:
+                    out['warp_jacobian'] = warp_out['jacobian']
+                if return_points:
+                    out['warped_points'] = warp_out['warped_points']
+
+            points_embed = self.point_encoder(points)
+
             # Ray Colorization : Fine
             fine_ret = render_samples(
                 self.mlps['fine'],
@@ -212,9 +245,7 @@ class Nerfies(nn.Module):
                 **rendering_args
             )
 
-            return coarse_ret, fine_ret
-        
-        return coarse_ret
+        return coarse_ret, fine_ret
 
 
 def create_warp_field(field_type, field_args, num_batch_dims, **kwargs):
