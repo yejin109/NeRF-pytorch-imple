@@ -38,7 +38,7 @@ python train.py --config configs/lego.txt --ckpt path/to/your/checkpoint --rende
 
 ## Pipeline
 ### models
-`sh.py` spherical harmonics function
-`tensorBase.py` mlp function, sampleing ray 
-`tensoRF.py` VM, CP model 
+`sh.py` spherical harmonics function  
+`tensorBase.py` mlp function, sampleing ray   
+`tensoRF.py` VM, CP model   
 ### 
