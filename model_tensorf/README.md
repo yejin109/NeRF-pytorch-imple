@@ -30,7 +30,7 @@ pip install tqdm scikit-image opencv-python configargparse lpips imageio-ffmpeg 
 python run.py --config configs/lego.txt
 ```
 
-## Rendering
+### Rendering
 
 ```
 python train.py --config configs/lego.txt --ckpt path/to/your/checkpoint --render_only 1 --render_test 1 
