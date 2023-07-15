@@ -1,5 +1,5 @@
 # TensoRF
-## [Reference](https://github.com/apchenstu/TensoRF) 
+### [Reference](https://github.com/apchenstu/TensoRF) 
 
 
 ## Installation
