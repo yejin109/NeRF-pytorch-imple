@@ -26,23 +26,15 @@ The models are trained using following hardware:
 |Rendering speed|21s/img|60s/img|-|-|
 
 ### NeRF
-<img src="./assets/readme/nerf_fern.png" width="250" height="250">
-<img src="./assets/readme/nerf_lego.png" width="250" height="250">
-
-% ![img](./assets/readme/nerf_fern.png| width=250)
-% ![img](./assets/readme/nerf_lego.png| width=250)
+<img src="./assets/readme/nerf_fern.png" width="250" height="250"> <img src="./assets/readme/nerf_lego.png" width="250" height="250">
 
 ### TensoRF
-![img](./assets/readme/tensorf_lego.gif=250x250)
-![depth](./assets/readme/tensorf_lego_depth.gif=250x250)
+<img src="./assets/readme/tensorf_lego.gif" width="250" height="250"> <img src="./assets/readme/tensorf_lego_depth.gif" width="250" height="250">
 
-![img](./assets/readme/tensorf_wineholder.gif=250x250)
-![depth](./assets/readme/tensorf_wineholder_depth.gif=250x250)
-
+<img src="./assets/readme/tensorf_wineholder" width="250" height="250"> <img src="./assets/readme/tensorf_wineholder_depth" width="250" height="250">
 
 ### NeuS
-![img](./assets/readme/neus_thin_structure.png| width=250)
-![norm](./assets/readme/neus_thin_structure_norm.png| width=250)
+<img src="./assets/readme/neus_thin_structure.png" width="250" height="500"> <img src="./assets/readme/neus_thin_structure_norm.png" width="250" height="500">
 
 
 ## Pipeline benchmark : NerfStudio
