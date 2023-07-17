@@ -1,8 +1,6 @@
 # PyTorch-implemented nerf-based models
----
 
 ## Models
----
 This repo provides PyTorch code for models that use the "NeRF" method to generate 3D images of objects. Currently, it supports 4 different models:
 
 - [NeRF](https://arxiv.org/abs/2003.08934)
@@ -11,7 +9,6 @@ This repo provides PyTorch code for models that use the "NeRF" method to generat
 - [Nerfies](https://arxiv.org/abs/2011.12948)
 
 ## Hardware
----
 
 The models are trained using following hardware:
 
@@ -20,7 +17,6 @@ The models are trained using following hardware:
 - CPU: Ryzen 7 5700X
 
 ## Result
----
 
 - Performance
 
@@ -30,20 +26,20 @@ The models are trained using following hardware:
 |Rendering speed|21s/img|60s/img|-|-|
 
 ### NeRF
-![img](./assets/readme/nerf_fern.png)
-![img](./assets/readme/nerf_lego.png)
+![img](./assets/readme/nerf_fern.png){: width="50%" height="40%"}{: .align-center}
+![img](./assets/readme/nerf_lego.png){: width="50%" height="40%"}{: .align-center}
 
 ### TensoRF
-![img](./assets/readme/tensorf_lego.gif)
-![depth](./assets/readme/tensorf_lego_depth.gif)
+![img](./assets/readme/tensorf_lego.gif){: width="50%" height="40%"}{: .align-center}
+![depth](./assets/readme/tensorf_lego_depth.gif){: width="50%" height="40%"}{: .align-center}
 
-![img](./assets/readme/tensorf_wineholder.gif)
-![depth](./assets/readme/tensorf_wineholder_depth.gif)
+![img](./assets/readme/tensorf_wineholder.gif){: width="50%" height="40%"}{: .align-center}
+![depth](./assets/readme/tensorf_wineholder_depth.gif){: width="50%" height="40%"}{: .align-center}
 
 
 ### NeuS
-![img](./assets/readme/neus_thin_structure.png)
-![norm](./assets/readme/nerf_thin_structure_norm.png)
+![img](./assets/readme/neus_thin_structure.png){: width="50%" height="40%"}{: .align-center}
+![norm](./assets/readme/neus_thin_structure_norm.png){: width="50%" height="40%"}{: .align-center}
 
 
 
@@ -58,7 +54,7 @@ The models are trained using following hardware:
     - RayGT objects, however, are needed only during training to calculate the losses in the Loss Dict.
         - information like pixel ground truths, whic are used in loss computation
 
-
+---
 # References
 1. pytorch repo : [link](https://github.com/yenchenlin/nerf-pytorch/tree/1f064835d2cca26e4df2d7d130daa39a8cee1795)
 2. volumetric rendering in NeRF [link](https://keras.io/examples/vision/nerf/)
