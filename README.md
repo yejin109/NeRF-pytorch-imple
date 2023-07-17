@@ -22,7 +22,7 @@ The models are trained using following hardware:
 
 | NeRF | NeUS | Nerfies | TensoRF |
 |:---:|:---:|:---:|:---:|
-|Training speed|4it/s|5it/s|4it/s|-|
+|Training speed|4it/s|5it/s|4it/s|51.6it/s|
 |Rendering speed|21s/img|60s/img|-|-|
 
 ### NeRF
