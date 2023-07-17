@@ -26,8 +26,11 @@ The models are trained using following hardware:
 |Rendering speed|21s/img|60s/img|-|-|
 
 ### NeRF
-![img](./assets/readme/nerf_fern.png| width=250)
-![img](./assets/readme/nerf_lego.png| width=250)
+<img src="./assets/readme/nerf_fern.png" width="250" height="250">
+<img src="./assets/readme/nerf_lego.png" width="250" height="250">
+
+% ![img](./assets/readme/nerf_fern.png| width=250)
+% ![img](./assets/readme/nerf_lego.png| width=250)
 
 ### TensoRF
 ![img](./assets/readme/tensorf_lego.gif=250x250)
