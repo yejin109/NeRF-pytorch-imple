@@ -18,9 +18,9 @@ def total_grad_norm(parameters, norm_type=2):
     return total_norm
 
 
-def log_train(*args):
+def log_train(train_log):
     # iter_i, loss, psnr, grad_norm
-    log = [str(i.item()) if type(i)==torch.Tensor else str(i) for i in args ]
+    log = [str(i.item()) if type(i) == torch.Tensor else str(i) for i in train_log]
     with open(f'{os.environ["LOG_DIR"]}/loss.txt', 'a') as f:
         f.write(f'{",".join(log)}\n')
     f.close()

@@ -27,7 +27,11 @@ class MLP(nn.Module):
                 if i+1 not in self.skips else # i+1로 해야 index가 맞는듯
                 nn.Linear(self.hidden_dim + self.in_feature, self.hidden_dim) 
                 for i in range(self.depth - 1)])
+        for layer in self.layers:
+            nn.init.xavier_uniform(layer.weight)
+
         self.output_layer = nn.Linear(self.hidden_dim, self.output_feature)
+        nn.init.xavier_uniform(self.output_layer.weight)
 
     def forward(self, x):
         inputs = x
@@ -68,7 +72,7 @@ class NeRFMLP(nn.Module):
         super(NeRFMLP, self).__init__()
 
         self.trunk_mlp = MLP(**mlp_trunk_args)
-        
+
         self.rgb_mlp = MLP(**mlp_rgb_args)
         
         self.alpha_mlp = MLP(**mlp_alpha_args)

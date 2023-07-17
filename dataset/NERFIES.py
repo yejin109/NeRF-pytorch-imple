@@ -9,6 +9,7 @@ from ._dataset import Dataset
 from itertools import permutations
 from ._camera import NerfiesCamera
 from collections import defaultdict
+from functionals import log_internal
 
 
 class NerfiesDataSet(Dataset):
@@ -40,6 +41,7 @@ class NerfiesDataSet(Dataset):
         self.n_images = None
         self.W = None
         self.H = None
+        log_internal("[Dataset] Loaded")
 
     @classmethod
     def get_dataset(cls, dataset_cfg, model_cfg):
@@ -148,6 +150,13 @@ class NerfiesDataSet(Dataset):
     def num_appearance_embeddings(self):
         if self.use_appearance_id:
             return max(self.appearance_id) + 1
+        else:
+            return 1
+
+    @property
+    def num_warp_embeddings(self):
+        if self.use_warp_id:
+            return max(self.warp_id) + 1
         else:
             return 1
 

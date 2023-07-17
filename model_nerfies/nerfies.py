@@ -6,6 +6,7 @@ from model_nerfies.sampler import sample_along_rays, sample_pdf
 from model_nerfies.rendering import render_samples
 from model_nerfies.embed import SinusoidalEncoder, GloEncoder
 from dataset import NerfiesDataSet
+from functionals import log_internal
 
 
 def get_model(model_cfg, render_cfg, run_cfg, dataset: NerfiesDataSet):
@@ -19,7 +20,8 @@ def get_model(model_cfg, render_cfg, run_cfg, dataset: NerfiesDataSet):
     field_args = {
         'points_encoder_args': dict(warp_cfg['points_encoder_args'], **warp_cfg['encoder_args']),
         'metadata_encoder_type': model_cfg['warp_metadata_encoder_type'],
-        'glo_encoder_args': {'num_embeddings': dataset.num_appearance_embeddings,
+        # NOTE : appearance인지 camera인지 구분해야 한다.
+        'glo_encoder_args': {'num_embeddings': dataset.num_warp_embeddings,
                              'embedding_dim': warp_cfg['num_warp_features']},
         'time_encoder_args': time_encoder_args,
         'mlp_trunk_args': dict(warp_cfg['mlp_args'], **warp_cfg['mlp_trunk_args']),
@@ -92,10 +94,16 @@ class Nerfies(nn.Module):
         self.use_warp = use_warp
         self.use_warp_jacobian = use_warp_jacobian
         self.warp_metadata_encoder_type = warp_metadata_encoder_type
+        # self.warp_field_coarse = None
+        # self.warp_field_fine = None
         self.warp_field = None
         if use_warp:
+            # self.warp_field_coarse = create_warp_field(**warp_field_args)
+            # self.warp_field_fine = create_warp_field(**warp_field_args)
             self.warp_field = create_warp_field(**warp_field_args)
 
+        # self.point_encoder_coarse = SinusoidalEncoder(**point_encoder_args)
+        # self.point_encoder_fine = SinusoidalEncoder(**point_encoder_args)
         self.point_encoder = SinusoidalEncoder(**point_encoder_args)
         self.viewdir_encoder = SinusoidalEncoder(**viewdir_encoder_args)
         self.use_trunk_condition = use_trunk_condition
@@ -116,6 +124,17 @@ class Nerfies(nn.Module):
         self.use_fine_samples = use_fine_samples
         if use_fine_samples:
             self.mlps['fine'] = NeRFMLP(**fine_args)
+
+        log_internal("[Model] Loaded")
+
+    def get_params(self):
+        params = list(self.parameters())
+        if self.use_warp:
+            for warp_mlp in self.warp_field.branches.values():
+                params += list(warp_mlp.parameters())
+        for nerfies_mlp in self.mlps.values():
+            params += list(nerfies_mlp.parameters())
+        return params
 
     def get_condition(self, viewdirs, metadata, is_metadata_encoded):
         """Create the condition inputs for the NeRF template."""
@@ -144,7 +163,9 @@ class Nerfies(nn.Module):
             if is_metadata_encoded:
                 camera_code = metadata['camera']
             else:
-                camera_code = self.camera_encoder(metadata['camera'])
+                # NOTE: torch에서 Embedding은 마지막 layer가 추가가 되는 것이다.
+                # camera_code = self.camera_encoder(metadata['camera'])
+                camera_code = self.camera_encoder(metadata['camera'].squeeze(-1))
             rgb_conditions.append(camera_code)
 
         # The condition inputs have a shape of (B, C) now rather than (B, S, C)
@@ -159,8 +180,7 @@ class Nerfies(nn.Module):
                 rays_o, rays_d, viewdirs, metadata,
                 warp_params, is_metadata_encoded,
                 return_points, return_weights,
-                # return_warp_jacobian,
-                # deterministic,
+                return_warp_jacobian,
                 ray_sampling_args, rendering_args,
                 num_coarse_samples, num_fine_samples,
                 **kwargs
@@ -169,7 +189,8 @@ class Nerfies(nn.Module):
             viewdirs = rays_d
 
         out = {}
-
+        coarse_ret = {}
+        fine_ret = {}
         # Ray Sampling : Coarse
         ray_sampling_args = dict(ray_sampling_args, **{'rays_o': rays_o, 'rays_d': rays_d, 'num_coarse_samples': num_coarse_samples})
         z_vals, points = sample_along_rays(**ray_sampling_args)
@@ -180,37 +201,45 @@ class Nerfies(nn.Module):
 
         # Warp rays
         if self.use_warp:
-            metadata_channels = self.num_warp_features if is_metadata_encoded else 1
-            warp_metadata = (metadata['time'] if self.warp_metadata_encoder_type == 'time' else metadata['warp'])
-            warp_metadata = torch.broadcast_to(warp_metadata[:, None, :], (points.size()[0], points.size()[1], metadata_channels))
+            # metadata_channels = self.num_warp_features if is_metadata_encoded else None
+            # warp_metadata = (metadata['time'] if self.warp_metadata_encoder_type == 'time' else metadata['warp'])
+            # warp_metadata = torch.broadcast_to(warp_metadata[:, None, :], (points.size()[0], points.size()[1], metadata_channels))
+            if is_metadata_encoded:
+                metadata_channels = self.num_warp_features
+                warp_metadata = metadata['time'] if self.warp_metadata_encoder_type == 'time' else metadata['warp']
+                warp_metadata = torch.broadcast_to(warp_metadata[:, None, :],
+                                                   (points.size()[0], points.size()[1], metadata_channels))
+            else:
+                warp_metadata = (metadata['time'] if self.warp_metadata_encoder_type == 'time' else metadata['warp'])
+                warp_metadata = torch.broadcast_to(warp_metadata[:, :], (points.size()[0], points.size()[1]))
             warp_out = self.warp_field(
                 points,
                 warp_metadata,
                 warp_params,
-                self.use_warp_jacobian,
+                return_warp_jacobian,
                 is_metadata_encoded)
             points = warp_out['warped_points']
             if 'jacobian' in warp_out:
-                out['warp_jacobian'] = warp_out['jacobian']
+                coarse_ret['warp_jacobian'] = warp_out['jacobian']
             if return_points:
-                out['warped_points'] = warp_out['warped_points']
+                coarse_ret['warped_points'] = warp_out['warped_points']
         
         points_embed = self.point_encoder(points)
 
         # Ray Colorization : Coarse
-        coarse_ret = render_samples(
-            self.mlps['coarse'], 
+        coarse_ret.update(render_samples(
+            self.mlps['coarse'],
             points_embed, trunk_conditions, alpha_conditions, rgb_conditions,
             z_vals, rays_d, return_weights,
             **rendering_args
-        )
+        ))
         out['coarse'] = coarse_ret
 
-        fine_ret = None
         if self.use_fine_samples:
             z_vals_mid = .5 * (z_vals[..., 1:] + z_vals[..., :-1])
             # Ray Sampling : Fine --> Hierarchical sampling
-            z_vals, points = sample_pdf(z_vals_mid, coarse_ret['weights'][..., 1:-1],
+            # NOTE: 여기에서 clone을 안해서 생겼던 문제였다....
+            z_vals, points = sample_pdf(z_vals_mid, torch.tensor(coarse_ret['weights'][..., 1:-1]),
                                         rays_o, rays_d, z_vals, num_fine_samples,
                                         rendering_args['use_stratified_sampling'])
 
@@ -219,32 +248,35 @@ class Nerfies(nn.Module):
 
             # Warp rays
             if self.use_warp:
-                metadata_channels = self.num_warp_features if is_metadata_encoded else 1
-                warp_metadata = (metadata['time'] if self.warp_metadata_encoder_type == 'time' else metadata['warp'])
-                warp_metadata = torch.broadcast_to(warp_metadata[:, None, :],
-                                                   (points.size()[0], points.size()[1], metadata_channels))
+                if is_metadata_encoded:
+                    metadata_channels = self.num_warp_features
+                    warp_metadata = metadata['time'] if self.warp_metadata_encoder_type == 'time' else metadata['warp']
+                    warp_metadata = torch.broadcast_to(warp_metadata[:, None, :],
+                                                       (points.size()[0], points.size()[1], metadata_channels))
+                else:
+                    warp_metadata = (metadata['time'] if self.warp_metadata_encoder_type == 'time' else metadata['warp'])
+                    warp_metadata = torch.broadcast_to(warp_metadata[:, :], (points.size()[0], points.size()[1]))
                 warp_out = self.warp_field(
                     points,
                     warp_metadata,
                     warp_params,
-                    self.use_warp_jacobian,
+                    return_warp_jacobian,
                     is_metadata_encoded)
                 points = warp_out['warped_points']
                 if 'jacobian' in warp_out:
-                    out['warp_jacobian'] = warp_out['jacobian']
+                    fine_ret['warp_jacobian'] = warp_out['jacobian']
                 if return_points:
-                    out['warped_points'] = warp_out['warped_points']
+                    fine_ret['warped_points'] = warp_out['warped_points']
 
             points_embed = self.point_encoder(points)
 
             # Ray Colorization : Fine
-            fine_ret = render_samples(
+            fine_ret.update(render_samples(
                 self.mlps['fine'],
                 points_embed, trunk_conditions, alpha_conditions, rgb_conditions,
                 z_vals, rays_d, return_weights,
                 **rendering_args
-            )
-
+            ))
         return coarse_ret, fine_ret
 
 

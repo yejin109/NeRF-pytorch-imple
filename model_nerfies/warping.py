@@ -3,6 +3,7 @@ import torch.nn as nn
 from model_nerfies.modules import MLP
 from model_nerfies.embed import AnnealedSinusoidalEncoder, GloEncoder, TimeEncoder
 from model_nerfies._utils import exponential_se3, from_homogenous, to_homogenous, get_value
+from functorch import jacfwd, vmap
 
 
 def create_warp_field(field_type, field_args, num_batch_dims):
@@ -28,24 +29,15 @@ class TranslationField(nn.Module):
         super(TranslationField, self).__init__()
 
         self.points_encoder = AnnealedSinusoidalEncoder(
-            # {'num_freqs': num_freqs, 'min_freq_log2':min_freq_log2, 'max_freq_log2': max_freq_log2, 'scale': scale, 'use_identity': use_identity}
             **points_encoder_args
             )
         if metadata_encoder_type == 'glo':
             self.metadata_encoder = GloEncoder(**glo_encoder_args)
-                # num_embeddings=self.num_embeddings,
-                # features=self.num_embedding_features
         elif metadata_encoder_type == 'time':
             self.metadata_encoder = TimeEncoder(**time_encoder_args)
-                # num_freqs=self.metadata_encoder_num_freqs,
-                # features=self.num_embedding_features)
         elif metadata_encoder_type == 'blend':
             self.glo_encoder = GloEncoder(**glo_encoder_args)
-                # num_embeddings=self.num_embeddings,
-                # features=self.num_embedding_features)
             self.time_encoder = TimeEncoder(**time_encoder_args)
-                # num_freqs=self.metadata_encoder_num_freqs,
-                # features=self.num_embedding_features)
         else:
             raise ValueError(f'Unknown metadata encoder type {self.metadata_encoder_type}')
 
@@ -126,7 +118,7 @@ class SE3Field(nn.Module):
                  use_translation, mlp_branch_t_args
                  ):
         super(SE3Field, self).__init__()
-
+        self.init_scale = 1e-4
         self.points_encoder = AnnealedSinusoidalEncoder(
             **points_encoder_args
             )
@@ -137,20 +129,25 @@ class SE3Field(nn.Module):
             self.metadata_encoder = TimeEncoder(**time_encoder_args)
         else:
             raise ValueError(f'Unknown metadata encoder type {self.metadata_encoder_type}')
-        self.trunk = MLP(**mlp_trunk_args)        
+        self.trunk = MLP(**mlp_trunk_args)
+
         self.branches = {
             'w': MLP(**mlp_branch_w_args),
             'v': MLP(**mlp_branch_v_args)
         }
+        nn.init.uniform(self.branches['w'].output_layer.weight, a=self.init_scale)
+        nn.init.uniform(self.branches['v'].output_layer.weight, a=self.init_scale)
 
         self.use_pivot = use_pivot
         if use_pivot:
             self.branches['p'] = MLP(**mlp_branch_p_args)
+            nn.init.uniform(self.branches['p'].output_layer.weight, a=self.init_scale)
 
         self.use_translation = use_translation
         if use_translation:
             self.branches['t'] = MLP(**mlp_branch_t_args)
-    
+            nn.init.uniform(self.branches['t'].output_layer.weight, a=self.init_scale)
+
     def encode_metadata(self, metadata, time_alpha):
         if self.metadata_encoder_type == 'time':
             metadata_embed = self.metadata_encoder(metadata, time_alpha)
@@ -216,15 +213,13 @@ class SE3Field(nn.Module):
             metadata_embed = metadata
         else:
             metadata_embed = self.encode_metadata(metadata, extra.get('time_alpha'))
-            metadata_embed = metadata_embed.squeeze()
 
         out = {'warped_points': self.warp(points, metadata_embed, extra)}
 
         if return_jacobian:
             # TODO : 현재 jax에서는 jacobian을 구하고 torch에서도 autograd모듈에서 지원하긴 한다. 다만 구현을 확인해야 함
-            assert False, "Cannot support jacobian "                
-            # jac_fn = jax.jacfwd(self.warp, argnums=0)
-            # out['jacobian'] = jac_fn(points, metadata_embed, extra)
+            jac_fn = jacfwd(self.warp, argnums=0)
+            out['jacobian'] = jac_fn(points, metadata_embed, extra)[:, :, :]
 
         return out
 

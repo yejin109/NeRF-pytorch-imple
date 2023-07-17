@@ -74,8 +74,7 @@ def nerfies_pipeline():
     # Step 2: Load Model
     nerfies = model_nerfies.get_model(model_config, rendering_config, run_config, dset)
 
-    model_nerfies.run(nerfies, dset, run_config, rendering_config, model_config)
-    print()
+    model_nerfies.run(nerfies, dset, run_config, rendering_config, model_config, log_config)
 
 
 def hypernerf_pipeline():
@@ -84,8 +83,6 @@ def hypernerf_pipeline():
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    torch.backends.cudnn.benchmark = True
-    torch.autograd.set_detect_anomaly(True)
     # model_architecture = args.model
     # data = args.data
     model_architecture = 'nerfies'

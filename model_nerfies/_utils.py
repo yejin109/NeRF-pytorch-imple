@@ -20,6 +20,10 @@ def get_value(val):
     return val
 
 
+def to_cpu(tensor):
+    return tensor.detach().cpu().numpy()
+
+
 def noise_regularize(raw, noise_std, use_stratified_sampling):
     """
     Regularize the density prediction by adding gaussian noise.
@@ -35,7 +39,7 @@ def noise_regularize(raw, noise_std, use_stratified_sampling):
     """
     if (noise_std is not None) and noise_std > 0.0 and use_stratified_sampling:
         noise = torch.rand(raw[..., 3:4].shape) * noise_std
-        raw = torch.concat([raw[..., :3], raw[..., 3:4] + noise], axis=-1)
+        raw = torch.concat([raw[..., :3], raw[..., 3:4] + noise], dim=-1)
     return raw
 
 
@@ -54,10 +58,10 @@ def exponential_se3(S, theta):
             motion of magnitude theta about S for one second.
     """
     theta = theta[..., None, None]
-    w, v = torch.split(S, [3, 3], dim=-1)
-    W = skew(w)
-    R = exp_so3(w, theta)
-    p = (theta * torch.eye(3)[None, None, ...] + (1.0 - torch.cos(theta)) * W + (theta - torch.sin(theta)) * W @ W) @ v[..., None]
+    w, v = torch.split(S, [3, 3], dim=-1) # w : # (Batch size, sample size, 3), v : # (Batch size, sample size, 3)
+    W = skew(w) # (Batch size, sample size, 3, 3)
+    R = exp_so3(w, theta) # (Batch size, sample size, 3, 3)
+    p = (theta * torch.eye(3)[None, None, ...] + (1.0 - torch.cos(theta)) * W + (theta - torch.sin(theta)) * W @ W) @ v[..., None] # w : # (Batch size, sample size, 3, 1)
     return rp_to_se3(R, p)
 
 
@@ -110,16 +114,16 @@ def rp_to_se3(R, p):
         Rotation and translation to homogeneous transform.
 
         Args:
-        R: (3, 3) An orthonormal rotation matrix.
-        p: (3,) A 3-vector representing an offset.
+        R: (Batch size, sample size, 3, 3) An orthonormal rotation matrix.
+        p: (Batch size, sample size,  3, 1) A 3-vector representing an offset.
 
         Returns:
         X: (4, 4) The homogeneous transformation matrix described by rotating by R
             and translating by p.
     """
     # p = torch.reshape(p, (3, 1))
-    RT = torch.concat((R, p), dim=-1)
-    homogeneous = torch.Tensor([[0.0, 0.0, 0.0, 1.0]]).repeat((R.size(0), R.size(1),1, 1))
+    RT = torch.concat((R, p), dim=-1) # (Batch size, sample size, 3, 4)
+    homogeneous = torch.Tensor([[0.0, 0.0, 0.0, 1.0]]).repeat((R.size(0), R.size(1), 1, 1)) # (Batch size, sample size, 1, 4)
     return torch.concat((RT, homogeneous), dim=-2)
 
 
@@ -152,3 +156,81 @@ def compute_opaqueness_mask(weights, depth_threshold=0.5):
     opaqueness_mask = torch.logical_xor(opaqueness, padded_opaqueness)
     opaqueness_mask = opaqueness_mask.to(dtype=weights.dtype)
     return opaqueness_mask
+
+
+def general_loss_with_squared_residual(squared_x, alpha, scale, eps=1e-6):
+    r"""The general loss that takes a squared residual.
+
+    This fuses the sqrt operation done to compute many residuals while preserving
+    the square in the loss formulation.
+
+    This implements the rho(x, \alpha, c) function described in "A General and
+    Adaptive Robust Loss Function", Jonathan T. Barron,
+    https://arxiv.org/abs/1701.03077.
+
+    Args:
+    squared_x: The residual for which the loss is being computed. x can have
+      any shape, and alpha and scale will be broadcasted to match x's shape if
+      necessary.
+    alpha: The shape parameter of the loss (\alpha in the paper), where more
+      negative values produce a loss with more robust behavior (outliers "cost"
+      less), and more positive values produce a loss with less robust behavior
+      (outliers are penalized more heavily). Alpha can be any value in
+      [-infinity, infinity], but the gradient of the loss with respect to alpha
+      is 0 at -infinity, infinity, 0, and 2. Varying alpha allows for smooth
+      interpolation between several discrete robust losses:
+        alpha=-Infinity: Welsch/Leclerc Loss.
+        alpha=-2: Geman-McClure loss.
+        alpha=0: Cauchy/Lortentzian loss.
+        alpha=1: Charbonnier/pseudo-Huber loss.
+        alpha=2: L2 loss.
+    scale: The scale parameter of the loss. When |x| < scale, the loss is an
+      L2-like quadratic bowl, and when |x| > scale the loss function takes on a
+      different shape according to alpha.
+
+    Returns:
+    The losses for each element of x, in the same shape as x.
+    """
+
+    # This will be used repeatedly.
+    squared_scaled_x = squared_x / (scale ** 2)
+
+    # The loss when alpha == 2.
+    loss_two = 0.5 * squared_scaled_x
+    # The loss when alpha == 0.
+    loss_zero = torch.log1p(torch.min(0.5 * squared_scaled_x, torch.tensor([3e37])))
+    # The loss when alpha == -infinity.
+    loss_neginf = -torch.expm1(-0.5 * squared_scaled_x)
+    # The loss when alpha == +infinity.
+    loss_posinf = torch.expm1(torch.min(0.5 * squared_scaled_x, torch.Tensor([87.5])))
+
+    # The loss when not in one of the above special cases.
+    # Clamp |2-alpha| to be >= machine epsilon so that it's safe to divide by.
+    beta_safe = torch.max(torch.Tensor([eps]), torch.abs(torch.Tensor([alpha - 2.])))
+    # Clamp |alpha| to be >= machine epsilon so that it's safe to divide by.
+    alpha_safe = torch.where(
+      torch.greater_equal(torch.Tensor([alpha]), torch.Tensor([0.])), torch.ones_like(torch.Tensor([alpha])),
+      -torch.ones_like(torch.Tensor([alpha]))) * torch.max(torch.Tensor([eps]), torch.abs(torch.Tensor([alpha])))
+    loss_otherwise = (beta_safe / alpha_safe) * (
+            torch.pow(squared_scaled_x / beta_safe + 1., 0.5 * alpha) - 1.)
+
+    # Select which of the cases of the loss to return.
+    if alpha == -torch.inf:
+        loss =  loss_neginf
+    elif alpha == 0 :
+        loss = loss_zero
+    elif alpha == 2:
+        loss = loss_two
+    else:
+        loss = loss_otherwise
+    # loss = torch.where(
+    #   alpha == -torch.inf, loss_neginf,
+    #   torch.where(
+    #       alpha == 0, loss_zero,
+    #       torch.where(
+    #           alpha == 2, loss_two,
+    #           torch.where(alpha == torch.inf, loss_posinf, loss_otherwise)
+    #       )
+    #   ))
+
+    return scale * loss

@@ -39,9 +39,7 @@ def sample_along_rays(
         z_vals = lower + (upper - lower) * t_rand
     else:
         # Broadcast z_vals to make the returned shape consistent.
-        # z_vals = jnp.broadcast_to(z_vals[None, ...],
-        #                         [batch_size, num_coarse_samples])
-        z_vals = torch.reshape(z_vals, (batch_size, num_coarse_samples))
+        z_vals = torch.broadcast_to(z_vals[None, ...], (batch_size, num_coarse_samples))
 
     # NOTE rays는 (batch size, 3) z vals은 (batch size, sample size)고 지금 계산할 것은 (batch size, sample size)가 되어야 해서 이렇게 한다.
     points = rays_o[:, None, :] + z_vals[:, :, None] * rays_d[:, None, :]
@@ -102,7 +100,7 @@ def piecewise_constant_pdf(bins, weights, num_coarse_samples,
             u = torch.rand(list(cdf.size()[:-1]) + [num_coarse_samples])
         else:
             u = torch.linspace(0., 1., num_coarse_samples)
-            u = torch.reshape(u, list(cdf.size()[:-1]) + [num_coarse_samples])
+            u = torch.broadcast_to(u, list(cdf.size()[:-1]) + [num_coarse_samples])
 
         # Invert CDF. This takes advantage of the fact that `bins` is sorted.
         mask = (u[..., None, :] >= cdf[..., :, None])

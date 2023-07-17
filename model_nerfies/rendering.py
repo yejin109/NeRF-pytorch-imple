@@ -14,8 +14,8 @@ def render_samples(mlp,
     raw = mlp(points_embed, trunk_conditions, alpha_conditions, rgb_conditions)
     raw = noise_regularize(raw, noise_std, use_stratified_sampling)
     rgb = nn.functional.sigmoid(raw['rgb'])
-    # TODO: inappropriate naming
-    sigma = nn.functional.relu(raw['alpha'].squeeze(-1))
+    sigma = nn.functional.softplus(raw['alpha'])
+    sigma = sigma.squeeze(-1)
 
     out = volumetric_rendering(rgb, sigma, z_vals, rays_d, use_white_background, sample_at_infinity, return_weights)
     return out
@@ -45,21 +45,22 @@ def volumetric_rendering(rgb, sigma, z_vals, dirs, use_white_background, sample_
     last_sample_z = 1e10 if sample_at_infinity else 1e-19
     last_sample_z = torch.Tensor([last_sample_z])
     dists = torch.concat([z_vals[..., 1:] - z_vals[..., :-1], torch.broadcast_to(last_sample_z, z_vals[..., :1].size())], dim=-1)
-    dists = dists * torch.linalg.norm(dirs[..., None, :], dim=-1)
+    dists = dists * torch.norm(dirs[..., None, :], dim=-1)
+    # dists = dists * torch.linalg.norm(dirs[..., None, :], dim=-1)
     alpha = 1.0 - torch.exp(-sigma * dists)
     # Prepend a 1.0 to make this an 'exclusive' cumprod as in `tf.math.cumprod`.
-    accum_prod = torch.concat([torch.ones_like(alpha[..., :1]), torch.cumprod(1.0 - alpha[..., :-1] + eps, dim=-1)], dim=-1)
+    accum_prod = torch.concat([torch.ones_like(alpha[..., :1]), torch.cumprod(1.0 - alpha[..., :-1] + eps, dim=-1)], dim =-1)
     weights = alpha * accum_prod
 
-    rgb = (weights[..., None] * rgb).sum(axis=-2)
-    exp_depth = (weights * z_vals).sum(axis=-1)
+    rgb = (weights[..., None] * rgb).sum(dim=-2)
+    exp_depth = (weights * z_vals).sum(dim=-1)
     med_depth = compute_depth_map(weights, z_vals)
-    acc = weights.sum(axis=-1)
+    acc = weights.sum(dim=-1)
     if use_white_background:
         rgb = rgb + (1. - acc[..., None])
 
     if sample_at_infinity:
-        acc = weights[..., :-1].sum(axis=-1)
+        acc = weights[..., :-1].sum(dim=-1)
 
     out = {
         'rgb': rgb,
