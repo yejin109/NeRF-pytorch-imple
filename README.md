@@ -31,14 +31,14 @@ The models are trained using following hardware:
 ### TensoRF
 <img src="./assets/readme/tensorf_lego.gif" width="250" height="250"> <img src="./assets/readme/tensorf_lego_depth.gif" width="250" height="250">
 
-<img src="./assets/readme/tensorf_wineholder" width="250" height="250"> <img src="./assets/readme/tensorf_wineholder_depth" width="250" height="250">
+<img src="./assets/readme/tensorf_wineholder.gif" width="250" height="250"> <img src="./assets/readme/tensorf_wineholder_depth.gif" width="250" height="250">
 
 ### NeuS
 <img src="./assets/readme/neus_thin_structure.png" width="250" height="500"> <img src="./assets/readme/neus_thin_structure_norm.png" width="250" height="500">
 
 
 ## Pipeline benchmark : NerfStudio
-![pipeline](./assets/nerfstudio_pipeline.JPG)
+<img src="./assets/nerfstudio_pipeline.JPG" width="500" height="250">
 - Target: DataManager, Model pipeline is customized upon our environment
     - NOTE! RayGT and RayOutputs are currently dictionaries. In the future, they will be typed objects.
 - Component
