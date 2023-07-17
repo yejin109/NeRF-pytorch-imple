@@ -1,0 +1,270 @@
+log:
+  i_print: 10
+  i_img: 500 # frequency of tensorboard image logging, default 5000
+  i_weights: 10000 # frequency of weight ckpt saving, 10000
+  i_testset: 5000 # frequency of testset saving, 5000
+  i_video: 20000 # frequency of render_poses video saving, 20000
+
+
+embed :
+
+data:
+  broom:
+    data_type: nerfies_vrig
+    dataset: broom
+
+    image_scale: 8
+    shuffle_pixels: False
+    test_camera_trajectory: orbit-extreme
+
+    use_appearance_id : False # default True, for vrig False
+    use_camera_id : True # default False, for vrig True
+    use_depth: False
+
+
+run:
+  N_iters : 60000 # default 100000, for vrig 250000
+  eval_batch_size: 16
+  batch_size : 512 # for vrig 1024 but for now, use 512 for OOM
+  background_points_batch_size : 2048
+
+  is_metadata_encoded : False
+  return_points : False
+  return_weights: True # When you use fine model, you MUST use True
+
+  use_elastic_loss : False # TODO Elastic loss require jacobian operation
+  elastic_reduce_method : weight # candidates : median(default), weight
+  elastic_loss_weight : 0.001 # default 0.01, for vrig, 0.001
+
+  use_background_loss : True
+  background_loss_weight : 1.0
+  use_warp_reg_loss : False
+  background_noise_std : 0.001
+
+  # schedule configuration
+  lr_schedule:
+    type: exponential
+    initial_value: 0.001 # default 0.001
+    final_value: 0.0001
+    num_steps: 1000000
+
+  warp_alpha_schedule:
+    type: linear
+    initial_value: 0.0
+    final_value: 8 # sync with num_warp_freqs
+    num_steps: 80000
+
+  constant_warp_time_alpha_schedule:
+    type: constant
+    value: 0 # sync with num_warp_freqs
+
+  constant_elastic_loss_schedule:
+    type: constant
+    value: 0.01 # sync with elastic_init_weight
+
+render:
+  use_fine_samples: True
+  num_coarse_samples:  64 # The number of coarse samples along each ray.
+  num_fine_samples:  64 # The number of fine samples along each ray.
+
+  use_linear_disparity: False # Sample linearly in disparity rather than depth.
+  use_white_background: False # Use white as the default background.
+  use_stratified_sampling: False # Use stratified sampling. default : True, for vrig False
+  use_sample_at_infinity: False # Use the sample at infinity., default: True
+  noise_std: None # The standard deviation of the alpha noise.
+
+
+model:
+  use_viewdirs : True
+
+  num_nerf_point_freqs: 8 # The number of positional encodings for points. default 10, for vrig 8
+  num_nerf_viewdir_freqs: 4 # The number of positional encodings for viewdirs.
+
+  warp_metadata_encoder_type: 'glo'
+
+  use_trunk_condition: False # Whether to condition the entire NeRF MLP.
+  use_rgb_condition: True # Whether to condition the RGB of the template NeRF.
+  use_alpha_condition: False # Whether to condition the density of the template NeRF.
+
+#  use_appearance_metadata: True # Whether to use the appearance metadata for the conditional branch.
+  appearance_metadata_dims: 8 # The number of dimensions for the appearance metadata.
+
+#  use_camera_metadata: False # Whether to use the camera metadata for the conditional branch.
+  camera_metadata_dims: 2 # The number of dimensions for the camera metadata.
+
+  use_elastic_loss: True
+  elastic_init_weight: 0.01
+  elastic_reduce_method: 'weight'
+
+  use_background_loss: True
+
+  sigma_activation: relu # The sigma activation for the NeRF.
+
+  backbone:
+    activation: relu # The intermediate activation for the NeRF.
+    nerf_skips: # Adds a skip connection every N layers.
+      - 4
+
+    rgb_channels: 3 # rgb_channels: int, the number of rgb_channelss.
+    alpha_channels: 1 # alpha_channels: int, the number of alpha_channelss.
+
+    encoder_args:
+      scale: 1.0
+      min_freq_log2: 0
+      max_freq_log2: None
+      use_identity: True
+
+    trunk:
+      depth: 8 # The depth of the NeRF.
+      in_feature : 51 # For vrig, 51(points_embed dimension), for warp default 63
+      hidden_dim: 128 # The width of the NeRF. default 256, for vrig 128
+      output_feature: 0 # The number of trunk output channels. For 0, it does not pass output layer. See modules.py
+      output_activation: None
+      hidden_activation: relu
+      skips:
+        - 4
+
+    rgb:
+      depth: 1 # The depth of the conditional part of the MLP.
+      in_feature : 157 # For vrig 157, for warp default 283
+      hidden_dim: 128 # The width of the conditional part of the MLP.
+      output_feature: 3 # The number of RGB output channels.
+      output_activation: None
+      hidden_activation: relu
+      skips:
+        - 4
+
+    alpha:
+      depth: 0
+      in_feature : 128 # For vrig, 128, for warp default, 256
+      hidden_dim: 128
+      output_feature: 1 # The number of alpha output channels.
+      output_activation: None
+      hidden_activation: relu
+      skips:
+        - 4
+
+  warp:
+    use_warp: True
+    warp_field_type: se3
+    num_warp_features: 8
+
+    # Common setup
+    encoder_args:
+      num_freqs: 8
+      min_freq_log2: 0
+      max_freq_log2: None
+      use_identity: True
+
+    # Common setup
+    mlp_args:
+      depth: 6
+      in_feature: 1 # TODO not exact
+      hidden_dim: 128
+      hidden_activation: relu
+      output_feature: 0
+      output_activation: identity
+      skips:
+        - 4
+
+    points_encoder_args:
+      scale : 1
+
+    time_encoder_args:
+      scale: 1
+      time_mlp_args:
+        hidden_dim: 64
+        output_feature: 10
+
+    mlp_trunk_args:
+      in_feature : 59 #  points embed(51) + warp embedding dim(8)
+
+    mlp_branch_w_args:
+      in_feature : 128 # trunk output width which is hidden dim
+      depth: 0
+      output_feature: 3
+      skips:
+        -  # None
+
+    mlp_branch_v_args:
+      in_feature : 128 # trunk output width which is hidden dim
+      depth: 0
+      output_feature: 3
+      skips:
+        - # None
+
+    mlp_branch_p_args:
+      in_feature : 128 # trunk output width which is hidden dim
+      depth: 0
+      output_feature: 3
+      skips:
+        - # None
+
+    mlp_branch_t_args:
+      in_feature : 128 # trunk output width which is hidden dim
+      depth: 0
+      output_feature: 3
+      skips:
+        - # None
+
+#noise_std: # float, std dev of noise added to regularize sigma output.
+#nerf_rgb_branch_depth: # int, the depth of the second part of MLP.
+#nerf_rgb_branch_width: int, the width of the second part of MLP.
+#activation: the activation function used in the MLP.
+#sigma_activation: the activation function applied to the sigma density.
+#nerf_skips: which layers to add skip layers in the NeRF model.
+
+#use_stratified_sampling: use stratified sampling.
+#use_white_background: composite rendering on to a white background.
+#num_nerf_point_freqs: degree of positional encoding for positions.
+#num_nerf_viewdir_freqs: degree of positional encoding for viewdirs.
+#use_linear_disparity: sample linearly in disparity rather than depth.
+#num_appearance_embeddings: the number of appearance exemplars.
+#num_appearance_features: the dimension size for the appearance code.
+#num_camera_embeddings: the number of camera exemplars.
+#num_camera_features: the dimension size for the camera code.
+#
+#
+#
+#use_appearance_metadata: if True use the appearance metadata.
+#use_camera_metadata: True # if True use the camera metadata.
+#use_warp_jacobian:
+#use_weights: if True return the density weights.
+#use_alpha_condition: whether to feed the appearance metadata to the alpha
+#  branch.
+#use_rgb_condition: whether to feed the appearance metadata to the rgb
+#  branch.
+#warp_kwargs: extra keyword arguments for the warp field.
+#
+#lr_delay_steps : 2500
+#lr_delay_mult : 0.01
+#
+#
+#
+#"""
+## From model
+#near: float
+#far: float
+#nerf_rgb_branch_width: int
+#alpha_channels: int
+#rgb_channels: int
+#use_stratified_sampling: bool
+#num_nerf_point_freqs: int
+#num_nerf_viewdir_freqs: int
+#
+#appearance_ids: Sequence[int]
+#camera_ids: Sequence[int]
+#warp_ids: Sequence[int]
+#
+#num_appearance_features: int
+#num_camera_features: int
+#num_warp_features: int
+#num_warp_freqs: int
+#
+
+#use_weights: bool = False
+#use_alpha_condition: bool = False
+#use_rgb_condition: bool = False
+#warp_kwargs: Mapping[str, Any] = immutabledict.immutabledict()
+#
+#metadata_encoded: bool = False

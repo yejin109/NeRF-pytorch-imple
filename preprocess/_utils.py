@@ -9,8 +9,8 @@ def get_parent_dir(path):
 
 def run_cmd(line):
     out = subprocess.run(line, capture_output=True, shell=True, check=False)
-    log = f'\n Out : {out.stdout.decode("cp949")} \n Err : {out.stderr.decode("cp949")}'
-    return log
+    res = f'\n Out : {out.stdout.decode("cp949")} \n Err : {out.stderr.decode("cp949")}'
+    return res
 
 
 def log(txt, add_time=True):
