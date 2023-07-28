@@ -1,3 +1,6 @@
+import argparse
+
+
 from preprocess import video_to_png, img_to_colmap, colmap_to_json, resize
 from preprocess._utils import log
 

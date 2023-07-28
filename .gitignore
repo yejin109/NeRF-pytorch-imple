@@ -9,6 +9,12 @@ dataset/custom/cat/img_2
 dataset/custom/cat/img_4
 dataset/custom/cat/img_8
 
+dataset/custom/cat/images
+dataset/custom/cat/images_1
+dataset/custom/cat/images_2
+dataset/custom/cat/images_4
+dataset/custom/cat/images_8
+
 
 src/__pycache__/
 logs/export

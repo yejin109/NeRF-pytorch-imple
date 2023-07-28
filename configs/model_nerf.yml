@@ -1,4 +1,6 @@
 data:
+    default: llff
+
     synthetic:
         data_type: nerf_synthetic
         dataset: lego # options : chair, drums, ficus, hotdog, lego, materials, mic, ship

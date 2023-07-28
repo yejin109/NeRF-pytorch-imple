@@ -22,7 +22,7 @@ def video_to_png(dataset_path, video_name, max_scale=1.0, fps=-1, target_num_fra
     log("="*100, add_time=False)
     log(f"Video to Image Conversion started")
 
-    output_dir = 'img'
+    output_dir = 'images'
     video_path = f"{dataset_path}/{video_name}"
     os.makedirs(f"{dataset_path}/{output_dir}", exist_ok=True)
 

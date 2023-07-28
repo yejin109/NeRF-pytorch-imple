@@ -30,7 +30,7 @@ def img_to_colmap(dataset_dir, camera_model, colmap_version,
 
     log("="*100, add_time=False)
     log(f"Image to Colmap Conversion started")
-    img_dir = f"{dataset_dir}/img"
+    img_dir = f"{dataset_dir}/images"
     colmap_dir = f"{dataset_dir}/colmap"
     os.makedirs(colmap_dir, exist_ok=True)
 
@@ -127,7 +127,7 @@ def colmap_to_json(recon_dir, output_dir, camera_mask_path=None, image_id_to_dep
         name = im_data.name
         if image_rename_map is not None:
             name = image_rename_map[name]
-        name = f"./{output_dir}/img/{name}"
+        name = f"./{output_dir}/images/{name}"
 
         frame = {
             "file_path": name,
@@ -226,7 +226,7 @@ def read_next_bytes(fid, num_bytes, format_char_sequence, endian_character="<"):
 
 
 def resize(dataset_dir, image_scales):
-    img_dir = f"{dataset_dir}/img"
+    img_dir = f"{dataset_dir}/images"
     for image_path in tqdm.tqdm(glob(f"{img_dir}/*.png"), desc=f'Resize Image of {",".join([str(i) for i in image_scales])}'):
         image_path = image_path.replace('\\', '/')
         image = make_divisible(imageio.imread(image_path), max(image_scales))
