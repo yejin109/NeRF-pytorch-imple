@@ -139,6 +139,7 @@ def colmap_to_json(recon_dir, output_dir, camera_mask_path=None, image_id_to_dep
         if image_id_to_depth_path is not None:
             depth_path = image_id_to_depth_path[im_id]
             frame["depth_file_path"] = str(depth_path)
+
         frames.append(frame)
 
     if set(cam_id_to_camera.keys()) != {1}:
@@ -155,6 +156,16 @@ def colmap_to_json(recon_dir, output_dir, camera_mask_path=None, image_id_to_dep
         json.dump(out, f, indent=4)
 
     return len(frames)
+
+
+def save_pose_npy(frames, camera):
+    # TODO: test
+    # Reference : https://github.com/Fyusion/LLFF/blob/master/llff/poses/pose_utils.py#L8
+    poses = np.array(list(map(lambda x: x['transform_matrix'], frames)))
+    poses = poses[:, :3, :4].transpose([1, 2, 0])
+    h, w, f = camera.height, camera.width, camera.params[0]
+    hwf = np.array([h, w, f]).reshape([3, 1])
+    poses = np.concatenate([poses, np.tile(hwf[..., np.newaxis], [1, 1, poses.shape[-1]])], 1)
 
 
 def read_cameras_binary(path_to_model_file):
