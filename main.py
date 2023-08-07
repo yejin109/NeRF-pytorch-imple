@@ -83,22 +83,23 @@ def hypernerf_pipeline():
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    # model_architecture = args.model
-    # data = args.data
-    model_architecture = 'nerfies'
-    data = 'broom'
+    model_arch = args.model
+    data = args.data
 
-    embedding_config, dataset_config, model_config, rendering_config, log_config, run_config = get_configs(data, model_architecture)
+    embedding_config, dataset_config, model_config, rendering_config, log_config, run_config = get_configs(data, model_arch)
     # dataset_config, model_config, rendering_config, log_config, run_config = get_configs(data, model_architecture)
-    # model_architecture = 'nerf'
-    # data = 'synthetic'
-    # # data = 'llff'
-    # nerf_pipeline()
 
-    # model_architecture = 'neus'
-    # data = 'thin_structure'
-    # neus_pipeline(args.model, args.data)
+    if model_arch == 'nerf':
+        # model_architecture = 'nerf'
+        # data = 'synthetic'
+        # # data = 'llff'
+        nerf_pipeline()
+    elif model_arch == 'neus':
+        # model_architecture = 'neus'
+        # data = 'thin_structure'
+        neus_pipeline()
+    elif model_arch == 'nerfies':
+        nerfies_pipeline()
+# hypernerf_pipeline(args.model, args.data)
 
-    # hypernerf_pipeline(args.model, args.data)
-    nerfies_pipeline()
 

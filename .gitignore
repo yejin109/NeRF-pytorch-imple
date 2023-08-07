@@ -2,18 +2,20 @@ dataset/nerf_*
 dataset/neus_*
 dataset/nerfies_*
 
-dataset/custom/cup/colmap
-dataset/custom/cat/colmap
-dataset/custom/cat/img_1
-dataset/custom/cat/img_2
-dataset/custom/cat/img_4
-dataset/custom/cat/img_8
+dataset/custom/cat/nerf/colmap
 
-dataset/custom/cat/images
-dataset/custom/cat/images_1
-dataset/custom/cat/images_2
-dataset/custom/cat/images_4
-dataset/custom/cat/images_8
+dataset/custom/cat/neus/colmap
+dataset/custom/cat/neus/*.ply
+dataset/custom/cat/neus/*.npy
+
+dataset/custom/cat/nerfies/colmap
+dataset/custom/cat/nerfies/images-raw
+dataset/custom/cat/nerfies/camera-paths
+
+
+
+dataset/custom/cup/colmap
+
 
 
 src/__pycache__/

@@ -6,17 +6,18 @@ import numpy as np
 from glob import glob
 import skimage.transform
 
-from preprocess.interface_colmap.colmap_wrapper import run_colmap
+from pathlib import Path
+from preprocess.interface_img import img_to_colmap
 import preprocess.interface_colmap.colmap_read_model as read_model
 
 
-def preprocess_neus(file_directory, match_type='exhaustive_matcher'):
+def preprocess_neus(file_directory: Path, colmap_version, match_type='exhaustive_matcher'):
     """
-
     :param file_directory: directory of image files
     :param match_type: type of matcher used.
         exhaustive_matcher sequential_matcher.
         Other matchers not supported at this time
+    :param colmap_version
     :return:
     """
 
@@ -44,32 +45,6 @@ def preprocess_neus(file_directory, match_type='exhaustive_matcher'):
         poses = np.moveaxis(poses, -1, 0)
         poses = poses[perm]
         np.save(os.path.join(basedir, 'poses.npy'), poses)
-
-    def gen_poses(basedir, match_type, factors=None):
-        files_needed = ['{}.bin'.format(f) for f in ['cameras', 'images', 'points3D']]
-        if os.path.exists(os.path.join(basedir, 'sparse/0')):
-            files_had = os.listdir(os.path.join(basedir, 'sparse/0'))
-        else:
-            files_had = []
-        if not all([f in files_had for f in files_needed]):
-            print('Need to run COLMAP')
-            run_colmap(basedir, match_type)
-        else:
-            print('Don\'t need to run COLMAP')
-
-        print('Post-colmap')
-
-        poses, pts3d, perm = load_colmap_data(basedir)
-
-        save_poses(basedir, poses, pts3d, perm)
-
-        if factors is not None:
-            print('Factors:', factors)
-            minify(basedir, factors)
-
-        print('Done with imgs2poses')
-
-        return True
 
     def gen_cameras(work_dir):
         poses_hwf = np.load(os.path.join(work_dir, 'poses.npy'))  # n_images, 3, 5
@@ -113,7 +88,9 @@ def preprocess_neus(file_directory, match_type='exhaustive_matcher'):
             cam_dict['world_mat_{}'.format(i)] = world_mat
             cam_dict['world_mat_inv_{}'.format(i)] = np.linalg.inv(world_mat)
 
-        pcd = trimesh.load(os.path.join(work_dir, 'sparse_points_interest.ply'))
+        # TODO [NeuS Err 1] 현재 manual 처리를 지원하지 않고 사용
+        # pcd = trimesh.load(os.path.join(work_dir, 'sparse_points_interest.ply'))
+        pcd = trimesh.load(os.path.join(work_dir, 'sparse_points.ply'))
         vertices = pcd.vertices
         bbox_max = np.max(vertices, axis=0)
         bbox_min = np.min(vertices, axis=0)
@@ -126,12 +103,13 @@ def preprocess_neus(file_directory, match_type='exhaustive_matcher'):
             cam_dict['scale_mat_{}'.format(i)] = scale_mat
             cam_dict['scale_mat_inv_{}'.format(i)] = np.linalg.inv(scale_mat)
 
-        out_dir = os.path.join(work_dir, 'preprocessed')
+        out_dir = os.path.join(work_dir)
         os.makedirs(out_dir, exist_ok=True)
         os.makedirs(os.path.join(out_dir, 'image'), exist_ok=True)
         os.makedirs(os.path.join(out_dir, 'mask'), exist_ok=True)
 
-        image_list = glob(os.path.join(work_dir, 'images/*.png'))
+        img_path = work_dir.parent
+        image_list = glob(os.path.join(img_path, 'images/*.png'))
         image_list.sort()
 
         for i, image_path in enumerate(image_list):
@@ -142,11 +120,18 @@ def preprocess_neus(file_directory, match_type='exhaustive_matcher'):
         np.savez(os.path.join(out_dir, 'cameras_sphere.npz'), **cam_dict)
         print('Process done!')
 
-    gen_poses(file_directory, match_type)
-    gen_cameras(f"{file_directory}/preprocessed")
+    directory = Path(file_directory) / 'neus'
+    os.makedirs(directory, exist_ok=True)
+
+    # TODO : [NeuS Err 1] 현재 데이터 처리상 manually bounding box를 처리해야 하는데 일단 처리하지 않고 사용하도록
+    if not (directory / 'sparse_points.ply').is_file():
+        gen_poses(directory, match_type, save_poses, colmap_version)
+        gen_cameras(directory)
+    else:
+        gen_cameras(directory)
 
 
-def preprocess_nerf(file_directory, match_type='exhaustive_matcher'):
+def preprocess_nerf(file_directory, colmap_version, match_type='exhaustive_matcher'):
     def save_poses(basedir, poses, pts3d, perm):
         pts_arr = []
         vis_arr = []
@@ -181,37 +166,49 @@ def preprocess_nerf(file_directory, match_type='exhaustive_matcher'):
 
         np.save(os.path.join(basedir, 'poses_bounds.npy'), save_arr)
 
-    def gen_poses(basedir, match_type, factors=None):
-        files_needed = ['{}.bin'.format(f) for f in ['cameras', 'images', 'points3D']]
-        if os.path.exists(os.path.join(basedir, 'sparse/0')):
-            files_had = os.listdir(os.path.join(basedir, 'sparse/0'))
-        else:
-            files_had = []
-        if not all([f in files_had for f in files_needed]):
-            print('Need to run COLMAP')
-            run_colmap(basedir, match_type)
-        else:
-            print('Don\'t need to run COLMAP')
-
-        print('Post-colmap')
-
-        poses, pts3d, perm = load_colmap_data(basedir)
-
-        save_poses(basedir, poses, pts3d, perm)
-
-        if factors is not None:
-            print('Factors:', factors)
-            minify(basedir, factors)
-
-        print('Done with imgs2poses')
-
-        return True
-    gen_poses(file_directory, match_type)
+    directory = Path(file_directory) / 'nerf'
+    os.makedirs(directory, exist_ok=True)
+    gen_poses(directory, match_type, save_poses, colmap_version)
 
 
-def load_colmap_data(realdir):
-    camerasfile = os.path.join(realdir, 'sparse/0/cameras.bin')
-    camdata = read_model.read_cameras_binary(camerasfile)
+def gen_poses(basedir, match_type, save_poses: callable, colmap_version, factors=None):
+    files_needed = ['{}.bin'.format(f) for f in ['cameras', 'images', 'points3D']]
+    if os.path.exists(os.path.join(basedir, 'sparse/0')):
+        files_had = os.listdir(os.path.join(basedir, 'sparse/0'))
+    else:
+        files_had = []
+    if not all([f in files_had for f in files_needed]):
+        print('Need to run COLMAP')
+        img_to_colmap(basedir, colmap_version, matching_method=match_type)
+        # Deprecated
+        # run_colmap(basedir, match_type)
+    else:
+        print('Don\'t need to run COLMAP')
+
+    print('Post-colmap')
+
+    poses, pts3d, perm = load_colmap_data(basedir)
+
+    save_poses(basedir, poses, pts3d, perm)
+
+    if factors is not None:
+        print('Factors:', factors)
+        minify(basedir, factors)
+
+    print('Done with imgs2poses')
+
+    return True
+
+
+def load_colmap_data(realdir: Path):
+    colmap_path = realdir.parent / 'colmap'
+
+    camera_path = colmap_path / 'sparse/0/cameras.bin'
+    img_path = colmap_path / 'sparse/0/images.bin'
+    point3d_path = colmap_path / 'sparse/0/points3D.bin'
+
+    # camerasfile = os.path.join(realdir, 'colmap/sparse/0/cameras.bin')
+    camdata = read_model.read_cameras_binary(camera_path)
 
     # cam = camdata[camdata.keys()[0]]
     list_of_keys = list(camdata.keys())
@@ -222,8 +219,9 @@ def load_colmap_data(realdir):
     # w, h, f = factor * w, factor * h, factor * f
     hwf = np.array([h, w, f]).reshape([3, 1])
 
-    imagesfile = os.path.join(realdir, 'sparse/0/images.bin')
-    imdata = read_model.read_images_binary(imagesfile)
+    # imagesfile = os.path.join(realdir, 'colmap/sparse/0/images.bin')
+    # imdata = read_model.read_images_binary(imagesfile)
+    imdata = read_model.read_images_binary(img_path)
 
     w2c_mats = []
     bottom = np.array([0, 0, 0, 1.]).reshape([1, 4])
@@ -244,8 +242,9 @@ def load_colmap_data(realdir):
     poses = c2w_mats[:, :3, :4].transpose([1, 2, 0])
     poses = np.concatenate([poses, np.tile(hwf[..., np.newaxis], [1, 1, poses.shape[-1]])], 1)
 
-    points3dfile = os.path.join(realdir, 'sparse/0/points3D.bin')
-    pts3d = read_model.read_points3d_binary(points3dfile)
+    # points3dfile = os.path.join(realdir, 'colmap/sparse/0/points3D.bin')
+    # pts3d = read_model.read_points3d_binary(points3dfile)
+    pts3d = read_model.read_points3d_binary(point3d_path)
 
     # must switch to [-u, r, -t] from [r, -u, t], NOT [r, u, -t]
     poses = np.concatenate([poses[:, 1:2, :], poses[:, 0:1, :], -poses[:, 2:3, :], poses[:, 3:4, :], poses[:, 4:5, :]],

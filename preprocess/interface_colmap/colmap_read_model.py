@@ -34,6 +34,7 @@ import sys
 import collections
 import numpy as np
 import struct
+from pathlib import Path
 
 
 CameraModel = collections.namedtuple(
@@ -44,6 +45,7 @@ BaseImage = collections.namedtuple(
     "Image", ["id", "qvec", "tvec", "camera_id", "name", "xys", "point3D_ids"])
 Point3D = collections.namedtuple(
     "Point3D", ["id", "xyz", "rgb", "error", "image_ids", "point2D_idxs"])
+
 
 class Image(BaseImage):
     def qvec2rotmat(self):
@@ -105,7 +107,7 @@ def read_cameras_text(path):
     return cameras
 
 
-def read_cameras_binary(path_to_model_file):
+def read_cameras_binary(path_to_model_file: Path):
     """
     see: src/base/reconstruction.cc
         void Reconstruction::WriteCamerasBinary(const std::string& path)

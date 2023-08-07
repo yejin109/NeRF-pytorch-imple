@@ -13,7 +13,7 @@ from preprocess.image import Image
 from PIL import Image as PIL_Image
 
 
-def img_to_colmap(dataset_dir, camera_model, colmap_version,
+def img_to_colmap(dataset_dir, colmap_version, camera_model=None,
                   vocab_tree_filename=None, matching_method='vocab_tree', gpu=False):
     """
     :param gpu
@@ -39,9 +39,11 @@ def img_to_colmap(dataset_dir, camera_model, colmap_version,
         f"--database_path {colmap_dir}/database.db",
         f"--image_path {img_dir}",
         "--ImageReader.single_camera 1",
-        f"--ImageReader.camera_model {camera_model}",
         f"--SiftExtraction.use_gpu {int(gpu)}",
     ]
+    if camera_model is not None:
+        feature_extractor_cmd.append(f"--ImageReader.camera_model {camera_model}",)
+
     feature_extractor_cmd = " ".join(feature_extractor_cmd)
     out = run_cmd(feature_extractor_cmd)
     log(f"Feature extractor cmd : {feature_extractor_cmd}")
