@@ -60,7 +60,15 @@ def train(params_to_train, learning_rate, N_iters, dataset, white_bkgd, batch_si
         # Logging
         cdf = (cdf_fine[:, :1] * mask).sum() / mask_sum
         weight_max = (weight_max * mask).sum() / mask_sum
-        log_train(loss, color_fine_loss, eikonal_loss, s_val.mean(), cdf, weight_max, psnr, total_grad_norm(params_to_train))
+
+        train_log = {
+            "Loss": loss, "PSNR": psnr, "Color_fine": color_fine_loss, "Eikonal": eikonal_loss,
+            "S_val": s_val.mean(), "cdf": cdf, "Weight_max": weight_max,
+            "L2_Grad_Norm": total_grad_norm(params_to_train),
+        }
+        if iter_step == 0:
+            log_train(tuple(train_log.keys()))
+        log_train(tuple(train_log.values()))
 
         if (iter_step+1) % i_print == 0:
             # log_internal('[Train] ')
@@ -253,7 +261,7 @@ def interpolate_view(img_idx_0, img_idx_1, iter_step):
     log_internal(f'[Rendering] {iter_step+1}th Video Done')
 
 
-def run(model_config, rendering_config, dataset_config, log_config, params, renderer, dataset):
+def run(run_config, model_config, rendering_config, dataset_config, log_config, params, renderer, dataset):
     # Iteration :
     # - Step 3
     # - Step 4
@@ -263,6 +271,7 @@ def run(model_config, rendering_config, dataset_config, log_config, params, rend
         'renderer': renderer,
         'dataset': dataset
     }
+    run_arguments.update(run_config)
 
     train_args = dict(rendering_config, **dict(dataset_config, **dict(run_arguments, **dict(model_config, **log_config))))
     train(**train_args)

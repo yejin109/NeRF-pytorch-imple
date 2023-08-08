@@ -21,6 +21,29 @@ data:
     use_camera_id : True # default False, for vrig True
     use_depth: False
 
+  custom/cat:
+    data_type: custom
+    dataset: cat
+
+    image_scale: 8
+    shuffle_pixels: False
+    test_camera_trajectory: orbit-extreme
+
+    use_appearance_id: False # default True, for vrig False
+    use_camera_id: True # default False, for vrig True
+    use_depth: False
+
+  custom/sunset:
+    data_type: custom
+    dataset: sunset
+
+    image_scale: 8
+    shuffle_pixels: False
+    test_camera_trajectory: orbit-extreme
+
+    use_appearance_id: False # default True, for vrig False
+    use_camera_id: True # default False, for vrig True
+    use_depth: False
 
 run:
   N_iters : 60000 # default 100000, for vrig 250000

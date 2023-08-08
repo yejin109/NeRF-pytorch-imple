@@ -1,0 +1,472 @@
+{
+  "000002": {
+    "warp_id": 0,
+    "appearance_id": 0,
+    "camera_id": 0
+  },
+  "000003": {
+    "warp_id": 1,
+    "appearance_id": 1,
+    "camera_id": 0
+  },
+  "000004": {
+    "warp_id": 2,
+    "appearance_id": 2,
+    "camera_id": 0
+  },
+  "000005": {
+    "warp_id": 3,
+    "appearance_id": 3,
+    "camera_id": 0
+  },
+  "000006": {
+    "warp_id": 4,
+    "appearance_id": 4,
+    "camera_id": 0
+  },
+  "000007": {
+    "warp_id": 5,
+    "appearance_id": 5,
+    "camera_id": 0
+  },
+  "000008": {
+    "warp_id": 6,
+    "appearance_id": 6,
+    "camera_id": 0
+  },
+  "000009": {
+    "warp_id": 7,
+    "appearance_id": 7,
+    "camera_id": 0
+  },
+  "000010": {
+    "warp_id": 8,
+    "appearance_id": 8,
+    "camera_id": 0
+  },
+  "000011": {
+    "warp_id": 9,
+    "appearance_id": 9,
+    "camera_id": 0
+  },
+  "000012": {
+    "warp_id": 10,
+    "appearance_id": 10,
+    "camera_id": 0
+  },
+  "000013": {
+    "warp_id": 11,
+    "appearance_id": 11,
+    "camera_id": 0
+  },
+  "000014": {
+    "warp_id": 12,
+    "appearance_id": 12,
+    "camera_id": 0
+  },
+  "000015": {
+    "warp_id": 13,
+    "appearance_id": 13,
+    "camera_id": 0
+  },
+  "000016": {
+    "warp_id": 14,
+    "appearance_id": 14,
+    "camera_id": 0
+  },
+  "000017": {
+    "warp_id": 15,
+    "appearance_id": 15,
+    "camera_id": 0
+  },
+  "000018": {
+    "warp_id": 16,
+    "appearance_id": 16,
+    "camera_id": 0
+  },
+  "000019": {
+    "warp_id": 17,
+    "appearance_id": 17,
+    "camera_id": 0
+  },
+  "000020": {
+    "warp_id": 18,
+    "appearance_id": 18,
+    "camera_id": 0
+  },
+  "000022": {
+    "warp_id": 19,
+    "appearance_id": 19,
+    "camera_id": 0
+  },
+  "000023": {
+    "warp_id": 20,
+    "appearance_id": 20,
+    "camera_id": 0
+  },
+  "000024": {
+    "warp_id": 21,
+    "appearance_id": 21,
+    "camera_id": 0
+  },
+  "000025": {
+    "warp_id": 22,
+    "appearance_id": 22,
+    "camera_id": 0
+  },
+  "000026": {
+    "warp_id": 23,
+    "appearance_id": 23,
+    "camera_id": 0
+  },
+  "000027": {
+    "warp_id": 24,
+    "appearance_id": 24,
+    "camera_id": 0
+  },
+  "000028": {
+    "warp_id": 25,
+    "appearance_id": 25,
+    "camera_id": 0
+  },
+  "000029": {
+    "warp_id": 26,
+    "appearance_id": 26,
+    "camera_id": 0
+  },
+  "000030": {
+    "warp_id": 27,
+    "appearance_id": 27,
+    "camera_id": 0
+  },
+  "000031": {
+    "warp_id": 28,
+    "appearance_id": 28,
+    "camera_id": 0
+  },
+  "000032": {
+    "warp_id": 29,
+    "appearance_id": 29,
+    "camera_id": 0
+  },
+  "000033": {
+    "warp_id": 30,
+    "appearance_id": 30,
+    "camera_id": 0
+  },
+  "000034": {
+    "warp_id": 31,
+    "appearance_id": 31,
+    "camera_id": 0
+  },
+  "000035": {
+    "warp_id": 32,
+    "appearance_id": 32,
+    "camera_id": 0
+  },
+  "000036": {
+    "warp_id": 33,
+    "appearance_id": 33,
+    "camera_id": 0
+  },
+  "000037": {
+    "warp_id": 34,
+    "appearance_id": 34,
+    "camera_id": 0
+  },
+  "000038": {
+    "warp_id": 35,
+    "appearance_id": 35,
+    "camera_id": 0
+  },
+  "000039": {
+    "warp_id": 36,
+    "appearance_id": 36,
+    "camera_id": 0
+  },
+  "000040": {
+    "warp_id": 37,
+    "appearance_id": 37,
+    "camera_id": 0
+  },
+  "000042": {
+    "warp_id": 38,
+    "appearance_id": 38,
+    "camera_id": 0
+  },
+  "000043": {
+    "warp_id": 39,
+    "appearance_id": 39,
+    "camera_id": 0
+  },
+  "000044": {
+    "warp_id": 40,
+    "appearance_id": 40,
+    "camera_id": 0
+  },
+  "000045": {
+    "warp_id": 41,
+    "appearance_id": 41,
+    "camera_id": 0
+  },
+  "000046": {
+    "warp_id": 42,
+    "appearance_id": 42,
+    "camera_id": 0
+  },
+  "000047": {
+    "warp_id": 43,
+    "appearance_id": 43,
+    "camera_id": 0
+  },
+  "000048": {
+    "warp_id": 44,
+    "appearance_id": 44,
+    "camera_id": 0
+  },
+  "000049": {
+    "warp_id": 45,
+    "appearance_id": 45,
+    "camera_id": 0
+  },
+  "000050": {
+    "warp_id": 46,
+    "appearance_id": 46,
+    "camera_id": 0
+  },
+  "000051": {
+    "warp_id": 47,
+    "appearance_id": 47,
+    "camera_id": 0
+  },
+  "000052": {
+    "warp_id": 48,
+    "appearance_id": 48,
+    "camera_id": 0
+  },
+  "000053": {
+    "warp_id": 49,
+    "appearance_id": 49,
+    "camera_id": 0
+  },
+  "000054": {
+    "warp_id": 50,
+    "appearance_id": 50,
+    "camera_id": 0
+  },
+  "000055": {
+    "warp_id": 51,
+    "appearance_id": 51,
+    "camera_id": 0
+  },
+  "000056": {
+    "warp_id": 52,
+    "appearance_id": 52,
+    "camera_id": 0
+  },
+  "000057": {
+    "warp_id": 53,
+    "appearance_id": 53,
+    "camera_id": 0
+  },
+  "000058": {
+    "warp_id": 54,
+    "appearance_id": 54,
+    "camera_id": 0
+  },
+  "000059": {
+    "warp_id": 55,
+    "appearance_id": 55,
+    "camera_id": 0
+  },
+  "000060": {
+    "warp_id": 56,
+    "appearance_id": 56,
+    "camera_id": 0
+  },
+  "000062": {
+    "warp_id": 57,
+    "appearance_id": 57,
+    "camera_id": 0
+  },
+  "000065": {
+    "warp_id": 58,
+    "appearance_id": 58,
+    "camera_id": 0
+  },
+  "000066": {
+    "warp_id": 59,
+    "appearance_id": 59,
+    "camera_id": 0
+  },
+  "000067": {
+    "warp_id": 60,
+    "appearance_id": 60,
+    "camera_id": 0
+  },
+  "000068": {
+    "warp_id": 61,
+    "appearance_id": 61,
+    "camera_id": 0
+  },
+  "000069": {
+    "warp_id": 62,
+    "appearance_id": 62,
+    "camera_id": 0
+  },
+  "000070": {
+    "warp_id": 63,
+    "appearance_id": 63,
+    "camera_id": 0
+  },
+  "000071": {
+    "warp_id": 64,
+    "appearance_id": 64,
+    "camera_id": 0
+  },
+  "000072": {
+    "warp_id": 65,
+    "appearance_id": 65,
+    "camera_id": 0
+  },
+  "000073": {
+    "warp_id": 66,
+    "appearance_id": 66,
+    "camera_id": 0
+  },
+  "000074": {
+    "warp_id": 67,
+    "appearance_id": 67,
+    "camera_id": 0
+  },
+  "000075": {
+    "warp_id": 68,
+    "appearance_id": 68,
+    "camera_id": 0
+  },
+  "000076": {
+    "warp_id": 69,
+    "appearance_id": 69,
+    "camera_id": 0
+  },
+  "000077": {
+    "warp_id": 70,
+    "appearance_id": 70,
+    "camera_id": 0
+  },
+  "000080": {
+    "warp_id": 71,
+    "appearance_id": 71,
+    "camera_id": 0
+  },
+  "000081": {
+    "warp_id": 72,
+    "appearance_id": 72,
+    "camera_id": 0
+  },
+  "000082": {
+    "warp_id": 73,
+    "appearance_id": 73,
+    "camera_id": 0
+  },
+  "000083": {
+    "warp_id": 74,
+    "appearance_id": 74,
+    "camera_id": 0
+  },
+  "000084": {
+    "warp_id": 75,
+    "appearance_id": 75,
+    "camera_id": 0
+  },
+  "000086": {
+    "warp_id": 76,
+    "appearance_id": 76,
+    "camera_id": 0
+  },
+  "000088": {
+    "warp_id": 77,
+    "appearance_id": 77,
+    "camera_id": 0
+  },
+  "000089": {
+    "warp_id": 78,
+    "appearance_id": 78,
+    "camera_id": 0
+  },
+  "000090": {
+    "warp_id": 79,
+    "appearance_id": 79,
+    "camera_id": 0
+  },
+  "000091": {
+    "warp_id": 80,
+    "appearance_id": 80,
+    "camera_id": 0
+  },
+  "000092": {
+    "warp_id": 81,
+    "appearance_id": 81,
+    "camera_id": 0
+  },
+  "000093": {
+    "warp_id": 82,
+    "appearance_id": 82,
+    "camera_id": 0
+  },
+  "000094": {
+    "warp_id": 83,
+    "appearance_id": 83,
+    "camera_id": 0
+  },
+  "000095": {
+    "warp_id": 84,
+    "appearance_id": 84,
+    "camera_id": 0
+  },
+  "000096": {
+    "warp_id": 85,
+    "appearance_id": 85,
+    "camera_id": 0
+  },
+  "000097": {
+    "warp_id": 86,
+    "appearance_id": 86,
+    "camera_id": 0
+  },
+  "000098": {
+    "warp_id": 87,
+    "appearance_id": 87,
+    "camera_id": 0
+  },
+  "000099": {
+    "warp_id": 88,
+    "appearance_id": 88,
+    "camera_id": 0
+  },
+  "000001": {
+    "warp_id": 0,
+    "appearance_id": 0,
+    "camera_id": 0
+  },
+  "000021": {
+    "warp_id": 19,
+    "appearance_id": 19,
+    "camera_id": 0
+  },
+  "000041": {
+    "warp_id": 38,
+    "appearance_id": 38,
+    "camera_id": 0
+  },
+  "000061": {
+    "warp_id": 57,
+    "appearance_id": 57,
+    "camera_id": 0
+  },
+  "000085": {
+    "warp_id": 76,
+    "appearance_id": 76,
+    "camera_id": 0
+  }
+}

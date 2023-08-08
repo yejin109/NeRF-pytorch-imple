@@ -15,7 +15,9 @@ dataset/custom/cat/nerfies/camera-paths
 
 
 dataset/custom/cup/colmap
-
+dataset/custom/cup/nerfies/colmap
+dataset/custom/cup/nerfies/images-raw
+dataset/custom/cup/nerfies/camera-paths
 
 
 src/__pycache__/

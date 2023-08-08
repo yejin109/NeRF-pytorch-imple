@@ -15,7 +15,7 @@ from functionals import log_internal
 class NerfiesDataSet(Dataset):
     def __init__(self, data_type, dataset, image_scale, shuffle_pixels, test_camera_trajectory,
                  use_appearance_id, use_camera_id, use_warp_id, use_time, use_depth, **kwargs):
-        super(NerfiesDataSet, self).__init__(data_type, dataset)
+        super(NerfiesDataSet, self).__init__(data_type, dataset, 'nerfies')
         self.train_ids, self.val_ids = _load_dataset_ids(self.data_dir)
         self.use_appearance_id = use_appearance_id
         self.use_camera_id = use_camera_id
@@ -28,8 +28,8 @@ class NerfiesDataSet(Dataset):
         self.image_scale = image_scale
         self.shuffle_pixels = shuffle_pixels
 
-        self.rgb_dir = os.path.join(self.data_dir, 'rgb', f'{image_scale}x')
-        self.depth_dir = os.path.join(self.data_dir, 'depth', f'{image_scale}x')
+        self.rgb_dir = os.path.join(self.data_dir, f'images_{image_scale}x')
+        # self.depth_dir = os.path.join(self.data_dir, 'depth', f'{image_scale}x')
         self.camera_dir = os.path.join(self.data_dir, 'camera')
 
         metadata_path = f"{self.data_dir}/metadata.json"

@@ -8,7 +8,7 @@ data:
 
         white_bkgd: False
 
-    custom:
+    custom/cat:
         data_type: custom
         dataset: cat
 
