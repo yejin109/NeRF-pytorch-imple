@@ -10,11 +10,11 @@ from functionals import log_cfg, log_internal
 
 class LLFFDataset(Dataset):
     def __init__(self, data_type, run_type, dataset, path_zflat, llffhold, factor=None, bd_factor=None, **kwargs):
-        super(LLFFDataset, self).__init__(data_type, dataset, run_type, path_zflat, factor, bd_factor)
+        super(LLFFDataset, self).__init__(data_type, dataset, 'nerf', run_type, path_zflat, factor, bd_factor)
         # 0. Setup
         sfx = ""
         if self.factor is not None:
-            sfx = '_{}'.format(self.factor)
+            sfx = f'_{self.factor}x'
         self.img_dir = os.path.join(self.data_dir, 'images'+sfx)
         self.img_paths = [os.path.join(self.img_dir, f) for f in sorted(os.listdir(self.img_dir)) if
                           f.endswith('JPG') or f.endswith('jpg') or f.endswith('png')]

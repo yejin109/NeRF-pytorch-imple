@@ -8,23 +8,16 @@ data:
 
         white_bkgd: False
 
-embed:
-    include_input: True
-    input_dims: 3
-    log_sampling: True
+    custom/cat:
+        data_type: custom
+        dataset: cat
 
+        camera_outside_sphere: True
+        scale_mat_scale: 1.1
 
-render:
-    n_samples: 64 # The number of samples in z axis
-    n_importance: 64 # Determine whether to up sampling or not
-    n_outside: 0 # default with mask. without mask, use 32
-    up_sample_steps: 4     # 1 for simple coarse-to-fine sampling. The number of updating z_vals
-    perturb: 1.0 # positive value -> perturbation on samples of z values.
+        white_bkgd: False
 
-    render_pose_num: 1
-
-
-model: # with mask configuration
+run:
     learning_rate: 5.0E-4
     learning_rate_alpha: 0.05
     N_iters: 300000
@@ -42,6 +35,25 @@ model: # with mask configuration
 
     layer_num: 8
     hidden_dim: 256
+
+embed:
+    include_input: True
+    input_dims: 3
+    log_sampling: True
+
+
+render:
+    n_samples: 64 # The number of samples in z axis
+    n_importance: 64 # Determine whether to up sampling or not
+    n_outside: 0 # default with mask. without mask, use 32
+    up_sample_steps: 4     # 1 for simple coarse-to-fine sampling. The number of updating z_vals
+    perturb: 1.0 # positive value -> perturbation on samples of z values.
+
+    render_pose_num: 1
+
+
+model: # with mask configuration
+
 
     backbone:
         D: 8
@@ -81,7 +93,6 @@ model: # with mask configuration
         weight_norm: True
         multires_view: 4
         squeeze_out: True
-
 
 log:
     i_print: 200

@@ -69,32 +69,32 @@ def train(rendering_cfg, dataset_cfg, run_args, model_config):
 
     optimizer = Adam(run_args["params"], lr=run_args["lrate"], betas=(0.9, 0.999))
     epoch_args = dict(run_args, **{'render_args_train': render_args_train})
-    for iter_i in tqdm.tqdm(range(model_config['N_iters'])):
+    for iter_step in tqdm.tqdm(range(model_config['N_iters'])):
         # Step 4 : Ray Generation
         # - Pre process : Batch sampling or Random sampling
         if not model_config['no_batching']:
             rays_rgb, batch_rays, target_s, i_batch = model_nerf.ray.sample_ray_batch(rays_rgb, i_batch, model_config['batch_size'])
         else:
-            target_s, batch_rays = model_nerf.ray_generation(**dict(ray_cfg, **{'iter_i': iter_i}))
+            target_s, batch_rays = model_nerf.ray_generation(**dict(ray_cfg, **{'iter_i': iter_step}))
         # - Post process : Update rays w.r.t ndc, use_viewdirs and etc.
         rays = model_nerf.ray.ray_post_processing(ray_cfg['H'], ray_cfg['W'], ray_cfg['focal'], batch_rays, **render_args_train)
 
         # Forward
-        loss_epoch, psnr_epoch = run_epoch(**dict(epoch_args, **{'iter_i': iter_i, 'rays': rays, "optimizer": optimizer,
+        loss_epoch, psnr_epoch = run_epoch(**dict(epoch_args, **{'iter_i': iter_step, 'rays': rays, "optimizer": optimizer,
                                                                  "target_s": target_s}))
 
         # Logging
-        if (iter_i+1) % 100 == 0:
-            log_internal(f"[Train] Iteration {iter_i + 1} / {model_config['N_iters']} DONE, Loss : {loss_epoch:.4f}, PSNR: {psnr_epoch:.4f}")
+        if (iter_step+1) % 100 == 0:
+            log_internal(f"[Train] Iteration {iter_step + 1} / {model_config['N_iters']} DONE, Loss : {loss_epoch:.4f}, PSNR: {psnr_epoch:.4f}")
 
         # Image Visualization
-        if (iter_i+1) % 300 == 0:
-            render_cfg = dict(test_cfg, **{'iter_i': iter_i})
+        if (iter_step+1) % 300 == 0:
+            render_cfg = dict(test_cfg, **{'iter_i': iter_step})
             with torch.no_grad():
                 model_nerf.rendering.render_image(**render_cfg)
         
-        if (iter_i + 1) % 2000 == 0:
-            path = os.path.join(os.environ['LOG_DIR'], f'params_{iter_i}.pt')
+        if (iter_step + 1) % 2000 == 0:
+            path = os.path.join(os.environ['LOG_DIR'], f'params_{iter_step}.pt')
             torch.save({
                 'model_coarse' : run_args['models']['model'],
                 'model_fine' : run_args['models']['model_fine'],
@@ -102,7 +102,11 @@ def train(rendering_cfg, dataset_cfg, run_args, model_config):
             }, path)
 
         grad_norm_epoch = total_grad_norm(run_args['params'])
-        log_train(iter_i, loss_epoch, psnr_epoch, grad_norm_epoch)
+
+        train_log = {"Loss": loss_epoch, "PSNR": psnr_epoch, "L2_Grad_Norm": grad_norm_epoch}
+        if iter_step == 0:
+            log_train(tuple(train_log.keys()))
+        log_train(tuple(train_log.values()))
 
 
 def run_epoch(models, lrate, lrate_decay, chunk, iter_i, render_args_train, batch_size,

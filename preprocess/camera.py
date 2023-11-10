@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class CameraModel:
     def __init__(self, name, param_num):
         self.name = name
@@ -61,6 +64,7 @@ def parse_colmap_camera_params(camera):
         out["p1"] = 0.0
         out["p2"] = 0.0
         camera_model = 'OPENCV'
+
     elif camera.model == "PINHOLE":
         # f, cx, cy, k
 
@@ -75,6 +79,8 @@ def parse_colmap_camera_params(camera):
         out["p1"] = 0.0
         out["p2"] = 0.0
         camera_model = 'OPENCV'
+
+
     elif camera.model == "SIMPLE_RADIAL":
         # f, cx, cy, k
 
@@ -230,6 +236,9 @@ def parse_colmap_camera_params(camera):
     else:
         # THIN_PRISM_FISHEYE not supported!
         raise NotImplementedError(f"{camera.model} camera model is not supported yet!")
+
+    # NOTE: Field of view computation
+    out['camera_angle_x'] = np.arctan(1 / (out['fl_x'] * 2 / out['w'])) * 2
 
     out["camera_model"] = camera_model
     return out

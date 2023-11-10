@@ -19,3 +19,5 @@ def log(txt, add_time=True):
     with open("./logs/debug/[pkg]preprocess.txt", 'a') as f:
         f.write(f"{txt}\n")
     f.close()
+
+

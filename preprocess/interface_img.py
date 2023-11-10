@@ -13,7 +13,7 @@ from preprocess.image import Image
 from PIL import Image as PIL_Image
 
 
-def img_to_colmap(dataset_dir, camera_model, colmap_version,
+def img_to_colmap(dataset_dir, colmap_version, camera_model=None,
                   vocab_tree_filename=None, matching_method='vocab_tree', gpu=False):
     """
     :param gpu
@@ -30,7 +30,7 @@ def img_to_colmap(dataset_dir, camera_model, colmap_version,
 
     log("="*100, add_time=False)
     log(f"Image to Colmap Conversion started")
-    img_dir = f"{dataset_dir}/img"
+    img_dir = f"{dataset_dir}/images"
     colmap_dir = f"{dataset_dir}/colmap"
     os.makedirs(colmap_dir, exist_ok=True)
 
@@ -39,9 +39,11 @@ def img_to_colmap(dataset_dir, camera_model, colmap_version,
         f"--database_path {colmap_dir}/database.db",
         f"--image_path {img_dir}",
         "--ImageReader.single_camera 1",
-        f"--ImageReader.camera_model {camera_model}",
         f"--SiftExtraction.use_gpu {int(gpu)}",
     ]
+    if camera_model is not None:
+        feature_extractor_cmd.append(f"--ImageReader.camera_model {camera_model}",)
+
     feature_extractor_cmd = " ".join(feature_extractor_cmd)
     out = run_cmd(feature_extractor_cmd)
     log(f"Feature extractor cmd : {feature_extractor_cmd}")
@@ -127,7 +129,7 @@ def colmap_to_json(recon_dir, output_dir, camera_mask_path=None, image_id_to_dep
         name = im_data.name
         if image_rename_map is not None:
             name = image_rename_map[name]
-        name = f"./{output_dir}/img/{name}"
+        name = f"./{output_dir}/images/{name}"
 
         frame = {
             "file_path": name,
@@ -139,6 +141,7 @@ def colmap_to_json(recon_dir, output_dir, camera_mask_path=None, image_id_to_dep
         if image_id_to_depth_path is not None:
             depth_path = image_id_to_depth_path[im_id]
             frame["depth_file_path"] = str(depth_path)
+
         frames.append(frame)
 
     if set(cam_id_to_camera.keys()) != {1}:
@@ -155,6 +158,16 @@ def colmap_to_json(recon_dir, output_dir, camera_mask_path=None, image_id_to_dep
         json.dump(out, f, indent=4)
 
     return len(frames)
+
+
+def save_pose_npy(frames, camera):
+    # TODO: test
+    # Reference : https://github.com/Fyusion/LLFF/blob/master/llff/poses/pose_utils.py#L8
+    poses = np.array(list(map(lambda x: x['transform_matrix'], frames)))
+    poses = poses[:, :3, :4].transpose([1, 2, 0])
+    h, w, f = camera.height, camera.width, camera.params[0]
+    hwf = np.array([h, w, f]).reshape([3, 1])
+    poses = np.concatenate([poses, np.tile(hwf[..., np.newaxis], [1, 1, poses.shape[-1]])], 1)
 
 
 def read_cameras_binary(path_to_model_file):
@@ -226,7 +239,7 @@ def read_next_bytes(fid, num_bytes, format_char_sequence, endian_character="<"):
 
 
 def resize(dataset_dir, image_scales):
-    img_dir = f"{dataset_dir}/img"
+    img_dir = f"{dataset_dir}/images"
     for image_path in tqdm.tqdm(glob(f"{img_dir}/*.png"), desc=f'Resize Image of {",".join([str(i) for i in image_scales])}'):
         image_path = image_path.replace('\\', '/')
         image = make_divisible(imageio.imread(image_path), max(image_scales))

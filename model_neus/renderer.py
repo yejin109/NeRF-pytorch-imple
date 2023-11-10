@@ -313,7 +313,7 @@ class NeuSRenderer:
             z_vals_outside = torch.linspace(1e-3, 1.0 - 1.0 / (self.n_outside + 1.0), self.n_outside)
 
         n_samples = self.n_samples
-        perturb = self.perturb(0)
+        perturb = self.perturb
 
         if perturb_overwrite >= 0:
             perturb = perturb_overwrite

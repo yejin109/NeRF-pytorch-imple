@@ -22,8 +22,8 @@ import model_nerfies
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--model', default='nerf')
-parser.add_argument('--data', default='llff')
+parser.add_argument('--model', default='nerfies')
+parser.add_argument('--data', default='custom/sunset')
 
 
 def get_configs(_data, _model_architecture):
@@ -42,14 +42,16 @@ def nerf_pipeline():
     global data
 
     # Step 1 : Load Dataset
-    if data == 'llff':
+    if 'llff' in [data, dataset_config['dataset_type']]:
+    # if (data == 'llff') or (dataset_config['dataset_type'] == 'llff'):
         dset = dataset.LLFFDataset(**dict(dataset_config, **{'render_pose_num': rendering_config['render_pose_num'], 'N_rots': rendering_config['N_rots'], 'zrate': rendering_config['zrate']}))
     else:
         dset = dataset.SyntheticDataset(**dict(dataset_config, **{'render_pose_num': rendering_config['render_pose_num']}))
 
     # Step 2: Load Model
     model_config = dict(model_config, **rendering_config)
-    # model_config['embed_cfg'] = embedding_config
+    model_config['embed_cfg'] = embedding_config
+
     models, params, embedder_ray, embedder_view = model_nerf.get_model(**model_config)
 
     model_nerf.run(model_config, rendering_config, dataset_config, dset, params, models, embedder_ray, embedder_view)
@@ -64,7 +66,7 @@ def neus_pipeline():
 
     renderer = model_neus.NeuSRenderer(nerf_outside, sdf_network, deviation_network, color_network, **rendering_config)
 
-    model_neus.run(model_config, rendering_config, dataset_config, log_config, params_to_train, renderer, dset)
+    model_neus.run(run_config, model_config, rendering_config, dataset_config, log_config, params_to_train, renderer, dset)
 
 
 def nerfies_pipeline():
@@ -83,22 +85,25 @@ def hypernerf_pipeline():
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    # model_architecture = args.model
-    # data = args.data
-    model_architecture = 'nerfies'
-    data = 'broom'
+    model_arch = args.model
+    data = args.data
 
-    embedding_config, dataset_config, model_config, rendering_config, log_config, run_config = get_configs(data, model_architecture)
+    embedding_config, dataset_config, model_config, rendering_config, log_config, run_config = get_configs(data, model_arch)
     # dataset_config, model_config, rendering_config, log_config, run_config = get_configs(data, model_architecture)
-    # model_architecture = 'nerf'
-    # data = 'synthetic'
-    # # data = 'llff'
-    # nerf_pipeline()
 
-    # model_architecture = 'neus'
-    # data = 'thin_structure'
-    # neus_pipeline(args.model, args.data)
+    if model_arch == 'nerf':
+        # model_architecture = 'nerf'
+        # data = 'synthetic'
+        # # data = 'llff'
+        nerf_pipeline()
+    elif model_arch == 'neus':
+        # model_architecture = 'neus'
+        # data = 'thin_structure'
+        neus_pipeline()
+    elif model_arch == 'nerfies':
+        nerfies_pipeline()
+    else:
+        raise AssertionError(f"Cannot support {model_arch}")
+# hypernerf_pipeline(args.model, args.data)
 
-    # hypernerf_pipeline(args.model, args.data)
-    nerfies_pipeline()
 

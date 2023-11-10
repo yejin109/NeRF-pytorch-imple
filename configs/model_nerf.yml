@@ -1,4 +1,6 @@
 data:
+    default: llff
+
     synthetic:
         data_type: nerf_synthetic
         dataset: lego # options : chair, drums, ficus, hotdog, lego, materials, mic, ship
@@ -31,6 +33,22 @@ data:
         recenter : True
         llffhold: 8 # will take every 1/N images as LLFF test set, paper uses 8
 
+    custom/cat:
+        dataset_type : llff
+        data_type: custom
+        dataset: cat
+        run_type: train # options : train, val ,test
+
+        factor: 8
+        no_ndc: False # 'do not use normalized device coordinates (set for non-forward facing scenes)
+        lindisp: False # sampling linearly in disparity rather than depth
+        spherify: False # Should be synchronized with Image source camera position distribution
+
+        path_zflat: False # regarding render_poses(poses for test img), choose spiral or path
+        bd_factor: .75
+        recenter: True
+        llffhold: 8 # will take every 1/N images as LLFF test set, paper uses 8
+
 embed:
     include_input: True
     input_dims : 3
@@ -59,6 +77,8 @@ render:
 
     # For deeepvoxel
     shape: greek # options, armchair/ cube/ greek/ vase
+
+run:
 
 model:
     layer_num: 8 # Original netdepth: 8 # layers in network

@@ -168,7 +168,7 @@ def render_path_spiral(poses, bds, path_zflat, N_rots=2, render_pose_num=120, zr
 def _minify(basedir, factors=[], resolutions=[]):
     needtoload = False
     for r in factors:
-        imgdir = os.path.join(basedir, 'images_{}'.format(r))
+        imgdir = os.path.join(basedir, f'images_{r}x')
         if not os.path.exists(imgdir):
             needtoload = True
     for r in resolutions:
@@ -190,7 +190,7 @@ def _minify(basedir, factors=[], resolutions=[]):
 
     for r in factors + resolutions:
         if isinstance(r, int):
-            name = 'images_{}'.format(r)
+            name = f'images_{r}'
             resizearg = '{}%'.format(100. / r)
         else:
             name = 'images_{}x{}'.format(r[1], r[0])

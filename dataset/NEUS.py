@@ -12,7 +12,7 @@ from functionals import log_internal
 
 class NeusDataset(Dataset):
     def __init__(self, data_type, dataset, camera_outside_sphere, scale_mat_scale, **kwargs):
-        super(NeusDataset, self).__init__(data_type, dataset)
+        super(NeusDataset, self).__init__(data_type, dataset, 'neus')
         self.camera_outside_sphere = camera_outside_sphere
         self.scale_mat_scale = scale_mat_scale
         self.imgs_cv, self.imgs_np, self.imgs, self.masks_cv, self.masks_np, self.masks = self.load_imgs()
